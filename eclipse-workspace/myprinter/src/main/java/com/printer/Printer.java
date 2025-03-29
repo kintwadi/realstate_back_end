@@ -1,4 +1,4 @@
-package myprinter.message;
+package com.printer;
 
 public class Printer {
 	
