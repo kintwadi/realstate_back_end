@@ -365,6 +365,7 @@ code {
           : 'default'
     });
   </script>
+<p>ctr+ shift + p --&gt; pdf</p>
 <h1 id="real-estate-listing-and-management-system---api-documentation---part1">Real Estate Listing and Management System - API Documentation - part1</h1>
 <h2 id="class-diagram">Class Diagram</h2>
 <pre><code class="language-mermaid"><div class="mermaid">classDiagram
@@ -862,6 +863,715 @@ code {
     
     Note right of API: Validation includes:<br>1. File type check<br>2. Size verification<br>3. Virus scan
 
+</div></code></pre>
+<h1 id="subscription-module-documentation">Subscription Module Documentation</h1>
+<h2 id="overview">Overview</h2>
+<p>The subscription module provides flexible, configurable pricing plans for property management system users. Each feature can be independently configured per plan, allowing administrators to customize offerings without code changes.</p>
+<h2 id="class-diagram">Class Diagram</h2>
+<pre><code class="language-mermaid"><div class="mermaid">classDiagram
+    class SubscriptionPlan {
+        +id: String
+        +name: String
+        +description: String
+        +basePrice: Number
+        +billingCycle: Enum(monthly,yearly)
+        +isActive: Boolean
+        +features: Feature[]
+        +createPlan()
+        +updatePlan()
+        +deactivatePlan()
+    }
+
+    class Feature {
+        +id: String
+        +key: String
+        +name: String
+        +description: String
+        +valueType: Enum(boolean,number,string)
+        +defaultValue: Mixed
+        +constraints: Object
+        +isModifiable: Boolean
+    }
+
+    class PlanFeature {
+        +planId: String
+        +featureId: String
+        +value: Mixed
+        +setValue()
+    }
+
+    class UserSubscription {
+        +userId: String
+        +planId: String
+        +startDate: DateTime
+        +endDate: DateTime
+        +status: Enum(active,inactive,paused)
+        +renewSubscription()
+        +upgradePlan()
+        +cancelSubscription()
+    }
+
+    SubscriptionPlan "1" -- "*" PlanFeature: contains
+    Feature "1" -- "*" PlanFeature: configures
+    User "1" -- "*" UserSubscription: has
+
+</div></code></pre>
+<h2 id="available-subscription-plans--features">Available Subscription Plans &amp; Features</h2>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Free (Basic)</th>
+<th>Basic ($10/month)</th>
+<th>Extended ($20/month)</th>
+<th>Premium ($40/month)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Property Listings</strong></td>
+<td>1 property</td>
+<td>20 properties</td>
+<td>Unlimited</td>
+<td>Unlimited</td>
+</tr>
+<tr>
+<td><strong>Built-in Chat</strong></td>
+<td>❌ Not available</td>
+<td>❌ Not available</td>
+<td>✔️ Enabled</td>
+<td>✔️ Enabled</td>
+</tr>
+<tr>
+<td><strong>Email Integration</strong></td>
+<td>Basic forwarding</td>
+<td>Basic forwarding</td>
+<td>Dedicated inbox</td>
+<td>Dedicated inbox</td>
+</tr>
+<tr>
+<td><strong>Availability Duration</strong></td>
+<td>30 days</td>
+<td>50 days</td>
+<td>100 days</td>
+<td>Lifetime</td>
+</tr>
+<tr>
+<td><strong>Customer Support</strong></td>
+<td>❌ No support</td>
+<td>❌ No support</td>
+<td>📞 Business hours</td>
+<td>🕒 24/7 support</td>
+</tr>
+<tr>
+<td><strong>Featured Listings</strong></td>
+<td>❌ Normal ranking</td>
+<td>❌ Normal ranking</td>
+<td>❌ Normal ranking</td>
+<td>⭐ Featured boost</td>
+</tr>
+<tr>
+<td><strong>Analytics Dashboard</strong></td>
+<td>❌ Not available</td>
+<td>❌ Not available</td>
+<td>📊 Basic metrics</td>
+<td>📈 Advanced analytics</td>
+</tr>
+<tr>
+<td><strong>Mobile App Access</strong></td>
+<td>❌ Web only</td>
+<td>❌ Web only</td>
+<td>✔️ Basic app</td>
+<td>✔️ Full app</td>
+</tr>
+<tr>
+<td><strong>API Access</strong></td>
+<td>❌ Not available</td>
+<td>100 calls/day</td>
+<td>500 calls/day</td>
+<td>Unlimited calls</td>
+</tr>
+<tr>
+<td><strong>File Storage</strong></td>
+<td>100 MB</td>
+<td>1 GB</td>
+<td>5 GB</td>
+<td>20 GB</td>
+</tr>
+</tbody>
+</table>
+<h3 id="key-differences">Key Differences</h3>
+<p><strong>Free Plan:</strong></p>
+<ul>
+<li>Ideal for individual landlords testing the platform</li>
+<li>Limited to 1 active property listing</li>
+<li>Basic contact management only</li>
+</ul>
+<p><strong>Basic Plan ($10):</strong></p>
+<ul>
+<li>Suitable for small property managers</li>
+<li>20 active listings</li>
+<li>No chat or premium support</li>
+</ul>
+<p><strong>Extended Plan ($20):</strong></p>
+<ul>
+<li>Best for growing agencies</li>
+<li>Unlimited listings</li>
+<li>Business hours support</li>
+<li>Basic analytics</li>
+</ul>
+<p><strong>Premium Plan ($40):</strong></p>
+<ul>
+<li>Enterprise-grade features</li>
+<li>24/7 priority support</li>
+<li>Featured listing placement</li>
+<li>Advanced reporting tools</li>
+</ul>
+<h3 id="upgrade-paths">Upgrade Paths</h3>
+<pre><code class="language-mermaid"><div class="mermaid">flowchart LR
+    A[Free] --> B[Basic]
+    B --> C[Extended]
+    C --> D[Premium]
+    B --> D
+    A --> C
+</div></code></pre>
+<h2 id="business-rules">Business Rules</h2>
+<p>Feature Access Flow</p>
+<pre><code class="language-mermaid"><div class="mermaid">    sequenceDiagram
+    participant User
+    participant System
+    participant FeatureToggle
+    
+    User->>System: Attempt to list 21st property
+    System->>FeatureToggle: Check listing_limit
+    FeatureToggle-->>System: Max 20 (Basic plan)
+    System-->>User: Return "Limit exceeded" error + upgrade prompt
+</div></code></pre>
+<pre><code class="language-mermaid"><div class="mermaid">   flowchart TD
+    A[Start Upgrade] --> B{Valid Payment?}
+    B -->|Yes| C[Prorate Charges]
+    C --> D[Apply New Features]
+    D --> E[Confirm Upgrade]
+    B -->|No| F[Show Payment Error]
+
+</div></code></pre>
+<h2 id="subscription-api-endpoints-reference">Subscription API Endpoints Reference</h2>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Description</th>
+<th>Requires Auth</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/subscriptions/plans</code></td>
+<td>List all available subscription plans</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/subscriptions/plans/:id</code></td>
+<td>Get details of a specific plan</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/subscriptions/plans</code></td>
+<td>Create a new subscription plan (Admin)</td>
+<td>Yes (Admin)</td>
+</tr>
+<tr>
+<td><code>PUT</code></td>
+<td><code>/api/subscriptions/plans/:id</code></td>
+<td>Update a subscription plan (Admin)</td>
+<td>Yes (Admin)</td>
+</tr>
+<tr>
+<td><code>DELETE</code></td>
+<td><code>/api/subscriptions/plans/:id</code></td>
+<td>Deactivate a plan (Admin)</td>
+<td>Yes (Admin)</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/subscriptions/features</code></td>
+<td>List all available features</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>PATCH</code></td>
+<td><code>/api/subscriptions/plans/:id/features</code></td>
+<td>Update features for a plan (Admin)</td>
+<td>Yes (Admin)</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/subscriptions/user/:userId</code></td>
+<td>Get user's current subscription</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/subscriptions/user</code></td>
+<td>Create new subscription for user</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/subscriptions/user/upgrade</code></td>
+<td>Upgrade user's subscription plan</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/subscriptions/user/downgrade</code></td>
+<td>Downgrade user's subscription plan</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/subscriptions/user/cancel</code></td>
+<td>Cancel user's subscription</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/subscriptions/user/:userId/invoices</code></td>
+<td>Get user's payment history</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/subscriptions/user/:userId/usage</code></td>
+<td>Get feature usage statistics</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/subscriptions/webhook/payment</code></td>
+<td>Payment gateway webhook endpoint</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/subscriptions/trial</code></td>
+<td>Start free trial (if available)</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/subscriptions/coupons/:code</code></td>
+<td>Validate discount coupon</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/subscriptions/renew</code></td>
+<td>Manual subscription renewal</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<p>Authentication:</p>
+<p>Yes - Requires valid JWT token</p>
+<p>Yes (Admin) - Requires admin privileges</p>
+<p>No - Publicly accessible</p>
+<p>This table provides a comprehensive overview of all subscription-related API endpoints while keeping the documentation clean and focused on the essential routing information.</p>
+<p>The actual request/response schemas will be documented separately in an API specification document.</p>
+<h2 id="modeule---policy">Modeule - Policy</h2>
+<h1 id="policy-module---role-based-access-control-rbac-with-groups">Policy Module - Role-Based Access Control (RBAC) with Groups</h1>
+<h2 id="class-diagram">Class Diagram</h2>
+<pre><code class="language-mermaid"><div class="mermaid">classDiagram
+    class User {
+        +id: String
+        +username: String
+        +email: String
+        +groups: Group[]
+        +hasPermission()
+        +addToGroup()
+    }
+
+    class Group {
+        +id: String
+        +name: String
+        +description: String
+        +roles: Role[]
+        +users: User[]
+        +addRole()
+        +removeRole()
+    }
+
+    class Role {
+        +id: String
+        +name: String
+        +permissions: Permission[]
+        +addPermission()
+    }
+
+    class Permission {
+        +id: String
+        +resource: String
+        +action: String (create|read|update|delete|manage)
+        +constraints: JSON
+    }
+
+    User "n" -- "m" Group: belongs to
+    Group "1" -- "n" Role: contains
+    Role "1" -- "n" Permission: has
+
+
+</div></code></pre>
+<h1 id="policy-module---core-components">Policy Module - Core Components</h1>
+<h2 id="1-permission-structure">1. Permission Structure</h2>
+<h3 id="permission-object">Permission Object</h3>
+<pre class="hljs"><code><div>{
+  <span class="hljs-attr">"id"</span>: <span class="hljs-string">"perm_property_delete"</span>,
+  <span class="hljs-attr">"resource"</span>: <span class="hljs-string">"property"</span>,
+  <span class="hljs-attr">"action"</span>: <span class="hljs-string">"delete"</span>,
+  <span class="hljs-attr">"constraints"</span>: {
+    <span class="hljs-attr">"scope"</span>: <span class="hljs-string">"group"</span>,
+    <span class="hljs-attr">"conditions"</span>: {
+      <span class="hljs-attr">"status"</span>: [<span class="hljs-string">"active"</span>, <span class="hljs-string">"pending"</span>],
+      <span class="hljs-attr">"max_value"</span>: <span class="hljs-number">500000</span>
+    }
+  }
+}
+</div></code></pre>
+<h5 id="note-custom-roles-can-override-inherited-permissions-but-cannot-exceed-parent-role-privileges">Note: Custom roles can override inherited permissions but cannot exceed parent role privileges.</h5>
+<h1 id="policy-management-api-endpoints">Policy Management API Endpoints</h1>
+<h2 id="role-management">Role Management</h2>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Description</th>
+<th>Required Permissions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/policy/roles</code></td>
+<td>Create new role</td>
+<td><code>policy:roles:create</code></td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/policy/roles</code></td>
+<td>List all roles</td>
+<td><code>policy:roles:read</code></td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/policy/roles/:roleId</code></td>
+<td>Get role details</td>
+<td><code>policy:roles:read</code></td>
+</tr>
+<tr>
+<td><code>PUT</code></td>
+<td><code>/api/policy/roles/:roleId</code></td>
+<td>Update role</td>
+<td><code>policy:roles:update</code></td>
+</tr>
+<tr>
+<td><code>DELETE</code></td>
+<td><code>/api/policy/roles/:roleId</code></td>
+<td>Delete role</td>
+<td><code>policy:roles:delete</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="permission-management">Permission Management</h2>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Description</th>
+<th>Required Permissions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/policy/roles/:roleId/permissions</code></td>
+<td>Add permission to role</td>
+<td><code>policy:permissions:create</code></td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/policy/roles/:roleId/permissions</code></td>
+<td>List role permissions</td>
+<td><code>policy:permissions:read</code></td>
+</tr>
+<tr>
+<td><code>DELETE</code></td>
+<td><code>/api/policy/roles/:roleId/permissions/:permissionId</code></td>
+<td>Remove permission</td>
+<td><code>policy:permissions:delete</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="group-management">Group Management</h2>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Description</th>
+<th>Required Permissions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/policy/groups</code></td>
+<td>Create new group</td>
+<td><code>policy:groups:create</code></td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/policy/groups</code></td>
+<td>List all groups</td>
+<td><code>policy:groups:read</code></td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/policy/groups/:groupId</code></td>
+<td>Get group details</td>
+<td><code>policy:groups:read</code></td>
+</tr>
+<tr>
+<td><code>PUT</code></td>
+<td><code>/api/policy/groups/:groupId</code></td>
+<td>Update group</td>
+<td><code>policy:groups:update</code></td>
+</tr>
+<tr>
+<td><code>DELETE</code></td>
+<td><code>/api/policy/groups/:groupId</code></td>
+<td>Delete group</td>
+<td><code>policy:groups:delete</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="user-assignment">User Assignment</h2>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Description</th>
+<th>Required Permissions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/policy/groups/:groupId/users</code></td>
+<td>Add user to group</td>
+<td><code>policy:assignments:create</code></td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/policy/groups/:groupId/users</code></td>
+<td>List group users</td>
+<td><code>policy:assignments:read</code></td>
+</tr>
+<tr>
+<td><code>DELETE</code></td>
+<td><code>/api/policy/groups/:groupId/users/:userId</code></td>
+<td>Remove user from group</td>
+<td><code>policy:assignments:delete</code></td>
+</tr>
+<tr>
+<td><code>PUT</code></td>
+<td><code>/api/policy/users/:userId/roles</code></td>
+<td>Set user's roles</td>
+<td><code>policy:assignments:update</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="policy-evaluation">Policy Evaluation</h2>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Description</th>
+<th>Required Permissions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/policy/evaluate</code></td>
+<td>Check permissions</td>
+<td><code>policy:evaluate</code></td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/policy/users/:userId/permissions</code></td>
+<td>List user's effective permissions</td>
+<td><code>policy:permissions:read</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="audit-logs">Audit Logs</h2>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Description</th>
+<th>Required Permissions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/policy/audit</code></td>
+<td>Query policy changes</td>
+<td><code>policy:audit:read</code></td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/policy/audit/:userId</code></td>
+<td>Get user's policy history</td>
+<td><code>policy:audit:read</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="notes">Notes:</h2>
+<ol>
+<li><strong>Base Path</strong>: All endpoints are prefixed with <code>/v1</code></li>
+<li><strong>Authentication</strong>: Requires valid JWT with appropriate permissions</li>
+<li><strong>Rate Limiting</strong>:
+<ul>
+<li>60 requests/minute for read operations</li>
+<li>30 requests/minute for write operations</li>
+</ul>
+</li>
+<li><strong>Response Format</strong>: All endpoints return JSON</li>
+<li><strong>Error Codes</strong>:
+<ul>
+<li><code>403 Forbidden</code> - Insufficient permissions</li>
+<li><code>404 Not Found</code> - Resource doesn't exist</li>
+<li><code>409 Conflict</code> - Invalid state change</li>
+</ul>
+</li>
+</ol>
+<pre><code class="language-mermaid"><div class="mermaid">flowchart LR
+    A[Roles] --> B[Permissions]
+    C[Groups] --> D[Users]
+    B --> E[Policy Evaluation]
+    D --> E
+</div></code></pre>
+<h1 id="predefined-roles-reference">Predefined Roles Reference</h1>
+<h2 id="core-system-roles">Core System Roles</h2>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Key Permissions</th>
+<th>Constraints</th>
+<th>Group Inheritance</th>
+<th>Ideal For</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Super Admin</strong><br><em>(system:admin)</em></td>
+<td><code>*:*</code> (All permissions)</td>
+<td>None</td>
+<td>Applies to all groups</td>
+<td>System administrators</td>
+</tr>
+<tr>
+<td><strong>Group Owner</strong><br><em>(group:owner)</em></td>
+<td><ul><li><code>users:manage</code></li><li><code>roles:assign</code></li><li><code>properties:manage</code></li></ul></td>
+<td><ul><li>Scope: Own group</li><li>Max 5 role creations</li></ul></td>
+<td>Inheritable by subgroups</td>
+<td>Team leads, Office managers</td>
+</tr>
+<tr>
+<td><strong>Property Manager</strong><br><em>(property:manager)</em></td>
+<td><ul><li><code>properties:crud</code></li><li><code>contracts:read</code></li><li><code>tenants:manage</code></li></ul></td>
+<td><ul><li>Scope: Assigned properties</li><li>Max 50 properties</li></ul></td>
+<td>Inherits group member permissions</td>
+<td>Leasing agents, Brokers</td>
+</tr>
+<tr>
+<td><strong>Agent</strong><br><em>(property:agent)</em></td>
+<td><ul><li><code>properties:read</code></li><li><code>contacts:create</code></li><li><code>showings:manage</code></li></ul></td>
+<td><ul><li>Scope: Own listings</li><li>No deletion rights</li></ul></td>
+<td>Inherits basic permissions</td>
+<td>Sales agents, Showing staff</td>
+</tr>
+<tr>
+<td><strong>Guest</strong><br><em>(system:guest)</em></td>
+<td><ul><li><code>properties:read</code></li><li><code>analytics:read</code></li></ul></td>
+<td><ul><li>No write actions</li><li>API rate-limited</li></ul></td>
+<td>No inheritance</td>
+<td>Prospective clients, Auditors</td>
+</tr>
+</tbody>
+</table>
+<h2 id="specialized-roles">Specialized Roles</h2>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Key Permissions</th>
+<th>Constraints</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Finance</strong><br><em>(finance:analyst)</em></td>
+<td><ul><li><code>invoices:crud</code></li><li><code>reports:generate</code></li></ul></td>
+<td><ul><li>Time: Business hours</li><li>Amount limit: $10k</li></ul></td>
+<td>Accounting teams</td>
+</tr>
+<tr>
+<td><strong>Maintenance</strong><br><em>(property:tech)</em></td>
+<td><ul><li><code>workorders:crud</code></li><li><code>properties:read</code></li></ul></td>
+<td><ul><li>Scope: Assigned locations</li><li>No financial data</li></ul></td>
+<td>Facility management</td>
+</tr>
+<tr>
+<td><strong>Marketing</strong><br><em>(marketing:specialist)</em></td>
+<td><ul><li><code>listings:feature</code></li><li><code>content:publish</code></li></ul></td>
+<td><ul><li>Approval required</li><li>Brand guidelines</li></ul></td>
+<td>Marketing teams</td>
+</tr>
+</tbody>
+</table>
+<h2 id="permission-legend">Permission Legend</h2>
+<ul>
+<li><strong>CRUD</strong>: Create, Read, Update, Delete</li>
+<li><strong>Scope Types</strong>:
+<ul>
+<li><code>own</code>: Only user-created resources</li>
+<li><code>group</code>: Resources within user's group(s)</li>
+<li><code>all</code>: System-wide access</li>
+</ul>
+</li>
+</ul>
+<h2 id="role-inheritance-example">Role Inheritance Example</h2>
+<pre><code class="language-mermaid"><div class="mermaid">flowchart TD
+    A[Super Admin] --> B[Group Owner]
+    B --> C[Property Manager]
+    C --> D[Agent]
+    D --> E[Guest]
+    B --> F[Finance]
+    B --> G[Maintenance]
 </div></code></pre>
 
 </body>
