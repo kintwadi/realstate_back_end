@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>booking.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h2 id="booking-module-design">Booking Module Design</h2>
+<h2 id="class-diagram">Class Diagram</h2>
+<pre><code class="language-mermaid"><div class="mermaid">classDiagram
+    class Property {
+        +id: String
+        +title: String
+        +owner: User
+        +availability: AvailabilityRule[]
+        +bookings: Booking[]
+    }
+
+    class Booking {
+        +id: String
+        +property: Property
+        +guest: User
+        +startDate: Date
+        +endDate: Date
+        +status: Enum(pending,confirmed,cancelled)
+        +totalPrice: Number
+        +createdAt: DateTime
+    }
+
+    class AvailabilityRule {
+        +id: String
+        +property: Property
+        +startDate: Date
+        +endDate: Date
+        +recurring: Boolean
+        +weekdays: Number[]
+        +priceModifier: Number
+    }
+
+    class User {
+        +id: String
+        +bookings: Booking[]
+    }
+
+    Property "1" -- "*" Booking : has
+    Property "1" -- "*" AvailabilityRule : has
+    User "1" -- "*" Booking : makes
+</div></code></pre>
+<p>Core Data Structures
+Booking Object</p>
+<pre class="hljs"><code><div><span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">Booking</span> </span>{
+  id: string;
+  propertyId: string;
+  guestId: string;
+  startDate: ISODateString;
+  endDate: ISODateString;
+  status: <span class="hljs-string">'pending'</span> | <span class="hljs-string">'confirmed'</span> | <span class="hljs-string">'cancelled'</span> | <span class="hljs-string">'completed'</span>;
+  guests: number;
+  totalPrice: number;
+  paymentStatus: <span class="hljs-string">'pending'</span> | <span class="hljs-string">'paid'</span> | <span class="hljs-string">'refunded'</span>;
+  specialRequests?: string;
+  cancellationReason?: string;
+  createdAt: ISODateString;
+  updatedAt: ISODateString;
+}
+</div></code></pre>
+<p>Availability Rule</p>
+<pre class="hljs"><code><div><span class="hljs-class"><span class="hljs-keyword">interface</span> <span class="hljs-title">AvailabilityRule</span> </span>{
+  id: string;
+  propertyId: string;
+  startDate?: ISODateString; <span class="hljs-comment">// Null means open-ended</span>
+  endDate?: ISODateString;   <span class="hljs-comment">// Null means open-ended</span>
+  recurring: <span class="hljs-keyword">boolean</span>;
+  weekdays?: number[]; <span class="hljs-comment">// 0-6 (Sun-Sat)</span>
+  blocked: <span class="hljs-keyword">boolean</span>;
+  minNights: number;
+  priceModifier: number; <span class="hljs-comment">// Percentage or fixed amount</span>
+}
+</div></code></pre>
+<h1 id="booking-api-endpoints">Booking API Endpoints</h1>
+<h2 id="property-availability">Property Availability</h2>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Description</th>
+<th>Parameters</th>
+<th>Required Permissions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/properties/:id/availability</code></td>
+<td>Check property availability</td>
+<td><code>start_date</code> (required)<br><code>end_date</code> (required)<br><code>guests</code> (optional)</td>
+<td><code>public</code> or <code>properties:read</code></td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/properties/:id/availability-rules</code></td>
+<td>List all availability rules</td>
+<td>-</td>
+<td><code>properties:manage</code></td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/properties/:id/availability-rules</code></td>
+<td>Create new availability rule</td>
+<td><code>rule</code> (JSON)</td>
+<td><code>properties:manage</code></td>
+</tr>
+<tr>
+<td><code>DELETE</code></td>
+<td><code>/api/properties/:id/availability-rules/:ruleId</code></td>
+<td>Remove availability rule</td>
+<td>-</td>
+<td><code>properties:manage</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="booking-management">Booking Management</h2>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Description</th>
+<th>Request Body</th>
+<th>Required Permissions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/bookings</code></td>
+<td>Create new booking</td>
+<td><code>json&lt;br&gt;{&lt;br&gt;  &quot;property_id&quot;: &quot;string&quot;,&lt;br&gt;  &quot;start_date&quot;: &quot;YYYY-MM-DD&quot;,&lt;br&gt;  &quot;end_date&quot;: &quot;YYYY-MM-DD&quot;,&lt;br&gt;  &quot;guests&quot;: number,&lt;br&gt;  &quot;special_requests&quot;: &quot;string&quot;&lt;br&gt;}</code></td>
+<td><code>bookings:create</code></td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/bookings/:id</code></td>
+<td>Get booking details</td>
+<td>-</td>
+<td><code>bookings:read</code> (owner/admin)</td>
+</tr>
+<tr>
+<td><code>PUT</code></td>
+<td><code>/api/bookings/:id</code></td>
+<td>Update booking</td>
+<td><code>json&lt;br&gt;{&lt;br&gt;  &quot;start_date&quot;: &quot;YYYY-MM-DD&quot;,&lt;br&gt;  &quot;end_date&quot;: &quot;YYYY-MM-DD&quot;,&lt;br&gt;  &quot;special_requests&quot;: &quot;string&quot;&lt;br&gt;}</code></td>
+<td><code>bookings:update</code> (owner/admin)</td>
+</tr>
+<tr>
+<td><code>PATCH</code></td>
+<td><code>/api/bookings/:id/status</code></td>
+<td>Change booking status</td>
+<td><code>json&lt;br&gt;{&lt;br&gt;  &quot;status&quot;: &quot;confirmed\|cancelled&quot;&lt;br&gt;}</code></td>
+<td><code>bookings:manage</code> (owner/admin)</td>
+</tr>
+<tr>
+<td><code>DELETE</code></td>
+<td><code>/api/bookings/:id</code></td>
+<td>Cancel booking</td>
+<td><code>?reason=text</code></td>
+<td><code>bookings:cancel</code> (owner/admin)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="user-bookings">User Bookings</h2>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Description</th>
+<th>Query Parameters</th>
+<th>Permissions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/users/me/bookings</code></td>
+<td>List user's bookings</td>
+<td><code>status=pending\|confirmed\|cancelled</code><br><code>limit=10</code><br><code>offset=0</code></td>
+<td><code>bookings:read</code> (own)</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/users/:userId/bookings</code></td>
+<td>List bookings for user (admin)</td>
+<td><code>property_id=string</code><br><code>date_from=YYYY-MM-DD</code></td>
+<td><code>bookings:read:all</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="admin-endpoints">Admin Endpoints</h2>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Description</th>
+<th>Query Parameters</th>
+<th>Permissions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/admin/bookings</code></td>
+<td>List all bookings</td>
+<td><code>property_id=string</code><br><code>status=string</code><br><code>date_range=YYYY-MM-DD,YYYY-MM-DD</code></td>
+<td><code>admin:bookings</code></td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/admin/bookings/override</code></td>
+<td>Force create booking (bypass checks)</td>
+<td>Full booking object</td>
+<td><code>admin:bookings</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="webhooks">Webhooks</h2>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Description</th>
+<th>Headers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/webhooks/bookings/payment</code></td>
+<td>Payment gateway notifications</td>
+<td><code>X-Signature</code></td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/webhooks/bookings/calendar</code></td>
+<td>Calendar sync updates</td>
+<td><code>X-Provider</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="requestresponse-examples">Request/Response Examples</h2>
+<p><strong>Create Booking (201 Created)</strong></p>
+<pre class="hljs"><code><div>{
+  <span class="hljs-attr">"id"</span>: <span class="hljs-string">"book_123"</span>,
+  <span class="hljs-attr">"property_id"</span>: <span class="hljs-string">"prop_456"</span>,
+  <span class="hljs-attr">"start_date"</span>: <span class="hljs-string">"2023-12-15"</span>,
+  <span class="hljs-attr">"end_date"</span>: <span class="hljs-string">"2023-12-20"</span>,
+  <span class="hljs-attr">"total_price"</span>: <span class="hljs-number">1200.00</span>,
+  <span class="hljs-attr">"status"</span>: <span class="hljs-string">"pending_payment"</span>
+}
+
+</div></code></pre>
+<pre><code class="language-mermaid"><div class="mermaid">
+flowchart TD
+    A[Request Dates] --> B{Within Property Rules?}
+    B -->|Yes| C{Not Blocked?}
+    B -->|No| D[Not Available]
+    C -->|Yes| E{No Booking Conflicts?}
+    C -->|No| D
+    E -->|Yes| F[Available]
+    E -->|No| D
+</div></code></pre>
+<pre><code class="language-mermaid"><div class="mermaid">sequenceDiagram
+    participant Guest
+    participant System
+    participant Payment
+    
+    Guest->>System: Check availability
+    System-->>Guest: Return available dates/price
+    Guest->>System: Submit booking request
+    System->>Payment: Create payment intent
+    Payment-->>System: Payment confirmation
+    System->>System: Block dates in calendar
+    System-->>Guest: Send booking confirmation
+</div></code></pre>
+<h1 id="booking-policies">Booking Policies</h1>
+<h2 id="pricing-rules">Pricing Rules</h2>
+<table>
+<thead>
+<tr>
+<th>Rule Type</th>
+<th>Description</th>
+<th>Calculation Formula</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Base Rate</strong></td>
+<td>Default nightly price</td>
+<td><code>property.base_price</code></td>
+<td>$200/night</td>
+</tr>
+<tr>
+<td><strong>Seasonal Pricing</strong></td>
+<td>Date-range modifiers</td>
+<td><code>base_price * modifier</code></td>
+<td>Summer: +20% ($240)</td>
+</tr>
+<tr>
+<td><strong>Length-of-Stay Discount</strong></td>
+<td>Extended stay savings</td>
+<td><code>base_price - (discount% * nights)</code></td>
+<td>7+ nights: 10% off</td>
+</tr>
+<tr>
+<td><strong>Weekend Premium</strong></td>
+<td>Fri/Sat surcharge</td>
+<td><code>base_price + premium</code></td>
+<td>+$50/night</td>
+</tr>
+<tr>
+<td><strong>Last-Minute Deal</strong></td>
+<td>&lt;7 days booking</td>
+<td><code>base_price * 0.85</code></td>
+<td>15% discount</td>
+</tr>
+<tr>
+<td><strong>Early Bird</strong></td>
+<td>&gt;60 days advance</td>
+<td><code>base_price * 0.90</code></td>
+<td>10% discount</td>
+</tr>
+<tr>
+<td><strong>Cleaning Fee</strong></td>
+<td>Fixed post-stay charge</td>
+<td><code>fixed_amount</code></td>
+<td>$120 flat</td>
+</tr>
+<tr>
+<td><strong>Occupancy Tax</strong></td>
+<td>Local regulations</td>
+<td><code>(subtotal * tax_rate)</code></td>
+<td>12% of total</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-mermaid"><div class="mermaid">flowchart TD
+    A[Base Price] --> B{Seasonal?}
+    B -->|Yes| C[Apply Modifier]
+    B -->|No| D{Long Stay?}
+    D -->|Yes| E[Apply Discount]
+    D -->|No| F[Final Price]
+    C --> F
+    E --> F
+</div></code></pre>
+<h1 id="cancellation-policies">Cancellation Policies</h1>
+<table>
+<thead>
+<tr>
+<th>Policy Tier</th>
+<th>Refund Amount</th>
+<th>Deadline Before Check-In</th>
+<th>Admin Fee</th>
+<th>Guest Protection</th>
+<th>Property Protection</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Flexible</strong></td>
+<td>100% refund</td>
+<td>24 hours</td>
+<td>None</td>
+<td>✅ Full protection</td>
+<td>🟡 Moderate</td>
+</tr>
+<tr>
+<td><strong>Moderate</strong></td>
+<td>50% refund</td>
+<td>5 days</td>
+<td>$50 or 10% (whichever is lower)</td>
+<td>🟠 Partial protection</td>
+<td>✅ High</td>
+</tr>
+<tr>
+<td><strong>Strict</strong></td>
+<td>No refund</td>
+<td>7 days</td>
+<td>$100 or 15%</td>
+<td>❌ No protection</td>
+<td>✅ Maximum</td>
+</tr>
+<tr>
+<td><strong>Non-Refundable</strong></td>
+<td>0% refund</td>
+<td>Instant</td>
+<td>-</td>
+<td>❌ No protection</td>
+<td>🔒 Guaranteed</td>
+</tr>
+<tr>
+<td><strong>Custom</strong></td>
+<td>Set by host</td>
+<td>Variable</td>
+<td>Variable</td>
+<td>Depends on terms</td>
+<td>Depends on terms</td>
+</tr>
+</tbody>
+</table>
+<h2 id="key-features">Key Features</h2>
+<h3 id="refund-calculation-examples">Refund Calculation Examples</h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Policy</th>
+<th>Total Paid</th>
+<th>Days Before</th>
+<th>Refund Amount</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Early cancellation</td>
+<td>Moderate</td>
+<td>$1,200</td>
+<td>6 days</td>
+<td>$600 (50%) - $50 = <strong>$550</strong></td>
+</tr>
+<tr>
+<td>Last-minute cancellation</td>
+<td>Flexible</td>
+<td>$800</td>
+<td>12 hours</td>
+<td><strong>$0</strong> (missed 24h window)</td>
+</tr>
+<tr>
+<td>Medical emergency*</td>
+<td>Strict</td>
+<td>$2,000</td>
+<td>3 days</td>
+<td><strong>$1,600</strong> (80% with documentation)</td>
+</tr>
+</tbody>
+</table>
+<p><em>*Requires valid documentation</em></p>
+<h3 id="policy-enforcement-flow">Policy Enforcement Flow</h3>
+<pre><code class="language-mermaid"><div class="mermaid">flowchart TD
+    A[Cancel Request] --> B{Policy Tier}
+    B -->|Flexible| C[Check 24h window]
+    B -->|Moderate| D[Check 5d window]
+    B -->|Strict| E[Check 7d window]
+    C --> F{Within window?}
+    D --> F
+    E --> F
+    F -->|Yes| G[Process refund]
+    F -->|No| H[Apply penalties]
+    G --> I[Notify parties]
+    H --> I
+</div></code></pre>
+<h1 id="cancellation-policy-special-cases--implementation">Cancellation Policy: Special Cases &amp; Implementation</h1>
+<h2 id="special-circumstances-handling">Special Circumstances Handling</h2>
+<h3 id="exceptional-refund-scenarios">Exceptional Refund Scenarios</h3>
+<table>
+<thead>
+<tr>
+<th>Case</th>
+<th>Refund %</th>
+<th>Required Documentation</th>
+<th>Processing Time</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Natural Disasters</strong></td>
+<td>100%</td>
+<td>• Government-issued alert<br>• Property damage photos</td>
+<td>3-5 business days</td>
+<td>Applies to hurricanes, floods, wildfires</td>
+</tr>
+<tr>
+<td><strong>Medical Emergencies</strong></td>
+<td>80-100%</td>
+<td>• Doctor's note on letterhead<br>• Hospital admission records</td>
+<td>5-7 business days</td>
+<td>Does not cover pre-existing conditions</td>
+</tr>
+<tr>
+<td><strong>Death in Family</strong></td>
+<td>90%</td>
+<td>• Death certificate<br>• Relationship proof</td>
+<td>7-10 business days</td>
+<td>Immediate family only</td>
+</tr>
+<tr>
+<td><strong>Military Orders</strong></td>
+<td>100%</td>
+<td>• Official deployment papers<br>• Unit commander signature</td>
+<td>3 business days</td>
+<td>Active duty only</td>
+</tr>
+<tr>
+<td><strong>Property Issues</strong></td>
+<td>100-125%</td>
+<td>• Timestamped photos/video<br>• Police report (if applicable)</td>
+<td>14 business days</td>
+<td>Applies to:<br>- Significant misrepresentation<br>- Safety hazards<br>- Uninhabitable conditions</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-mermaid"><div class="mermaid">flowchart TD
+    A[Special Case Claim] --> B{Documentation Submitted?}
+    B -->|Yes| C[Verification Team Review]
+    B -->|No| D[Request Additional Docs]
+    C --> E{Approved?}
+    E -->|Yes| F[Process Refund]
+    E -->|No| G[Deny with Explanation]
+    F --> H[Notify Both Parties]
+    G --> H
+</div></code></pre>
+
+</body>
+</html>
