@@ -1,0 +1,1578 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>requirements.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<p>ctr+ shift + p --&gt; pdf</p>
+<h1 id="real-estate-listing-and-management-system---api-documentation---part1">Real Estate Listing and Management System - API Documentation - part1</h1>
+<h2 id="class-diagram">Class Diagram</h2>
+<pre><code class="language-mermaid"><div class="mermaid">classDiagram
+    class User {
+        +id: String
+        +name: String
+        +email: String
+        +password: String
+        +phone: String
+        +avatar: String
+        +role: Enum
+        +socialLinks: String[]
+        +createdAt: DateTime
+        +updatedAt: DateTime
+        +authenticate()
+        +updateProfile()
+        +changePassword()
+    }
+
+    class Property {
+        +id: String
+        +title: String
+        +description: String
+        +price: Number
+        +type: Enum
+        +category: Enum
+        +bedrooms: Number
+        +bathrooms: Number
+        +area: Number
+        +location: Object
+        +amenities: String[]
+        +images: String[] linked by imageId
+        +status: Enum
+        +createdBy: User
+        +createdAt: DateTime
+        +updatedAt: DateTime
+        +save()
+        +update()
+        +delete()
+    }
+
+    class Wishlist {
+        +id: String
+        +user: User
+        +properties: Property[]
+        +createdAt: DateTime
+        +addProperty()
+        +removeProperty()
+        +clear()
+    }
+
+    class Search {
+        +keywords: String
+        +location: String
+        +priceRange: Object
+        +type: Enum
+        +category: Enum
+        +execute()
+    }
+
+    class Review {
+        +id: String
+        +property: Property
+        +user: User
+        +rating: Number
+        +comment: String
+        +createdAt: DateTime
+        +save()
+        +delete()
+    }
+
+      class Media {
+        +id: String
+        +url: String
+        +type: Enum (image|video|document|3d_tour)
+        +format: String (jpg|png|webp|mp4|pdf|etc)
+        +width: Number
+        +height: Number
+        +size: Number (bytes)
+        +duration: Number (for videos)
+        +isPrimary: Boolean
+        +createdAt: DateTime
+        +updatedAt: DateTime
+        +getDimensions()
+        +getFileSize()
+        +generateThumbnail()
+        +deleteFromStorage()
+    }
+
+    User "1" -- "0..*" Property: creates
+    User "1" -- "1" Wishlist: has
+    Wishlist "1" -- "0..*" Property: contains
+    Property "1" -- "0..*" Review: has
+    Search --> Property: queries
+    Property "1" -- "0..*" Media: has
+
+
+</div></code></pre>
+<h2 id="api-endpoints-reference">API Endpoints Reference</h2>
+<h3 id="authentication">Authentication</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Description</th>
+<th>Requires Auth</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST</td>
+<td><code>/api/auth/register</code></td>
+<td>Register new user</td>
+<td>No</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/auth/login</code></td>
+<td>User login</td>
+<td>No</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/auth/logout</code></td>
+<td>User logout</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/auth/forgot-password</code></td>
+<td>Request password reset</td>
+<td>No</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/auth/reset-password</code></td>
+<td>Reset password</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<h3 id="users">Users</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/api/users/me</code></td>
+<td>Get current user profile</td>
+</tr>
+<tr>
+<td>PUT</td>
+<td><code>/api/users/me</code></td>
+<td>Update user profile</td>
+</tr>
+<tr>
+<td>PUT</td>
+<td><code>/api/users/me/password</code></td>
+<td>Change password</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/users/me/avatar</code></td>
+<td>Upload profile avatar</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/api/users/me/avatar</code></td>
+<td>Remove profile avatar</td>
+</tr>
+</tbody>
+</table>
+<h3 id="properties">Properties</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/api/properties</code></td>
+<td>List all properties (filterable)</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/properties</code></td>
+<td>Create new property</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/properties/:id</code></td>
+<td>Get property details</td>
+</tr>
+<tr>
+<td>PUT</td>
+<td><code>/api/properties/:id</code></td>
+<td>Update property</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/api/properties/:id</code></td>
+<td>Delete property</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/properties/me</code></td>
+<td>Get current user's properties</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/properties/:id/media</code></td>
+<td>Upload property media</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/api/properties/:id/media/:mediaId</code></td>
+<td>Delete property media</td>
+</tr>
+</tbody>
+</table>
+<h3 id="wishlist">Wishlist</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/api/wishlist</code></td>
+<td>Get user's wishlist</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/wishlist/:propertyId</code></td>
+<td>Add property to wishlist</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/api/wishlist/:propertyId</code></td>
+<td>Remove from wishlist</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/api/wishlist</code></td>
+<td>Clear entire wishlist</td>
+</tr>
+</tbody>
+</table>
+<h3 id="search">Search</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/api/search</code></td>
+<td>Search properties</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/search/suggestions</code></td>
+<td>Get search suggestions</td>
+</tr>
+</tbody>
+</table>
+<h3 id="reviews">Reviews</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/api/properties/:id/reviews</code></td>
+<td>Get property reviews</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/properties/:id/reviews</code></td>
+<td>Add review to property</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/api/reviews/:id</code></td>
+<td>Delete review</td>
+</tr>
+</tbody>
+</table>
+<h3 id="mediaimages-management">Media/Images Management</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Description</th>
+<th>Parameters</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST</td>
+<td><code>/api/media/upload</code></td>
+<td>Upload media file</td>
+<td><code>file</code> (required), <code>type</code> (property</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/media/:mediaId</code></td>
+<td>Get media metadata</td>
+<td>-</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/api/media/:mediaId</code></td>
+<td>Delete media</td>
+<td>-</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/properties/:id/media</code></td>
+<td>List all media for property</td>
+<td><code>?type=image|video|document</code> (filter by type)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Media Object Properties:</strong></p>
+<pre class="hljs"><code><div>{
+  <span class="hljs-attr">"id"</span>: <span class="hljs-string">"media_123"</span>,
+  <span class="hljs-attr">"url"</span>: <span class="hljs-string">"https://cdn.example.com/properties/media_123.jpg"</span>,
+  <span class="hljs-attr">"type"</span>: <span class="hljs-string">"image"</span>,
+  <span class="hljs-attr">"format"</span>: <span class="hljs-string">"jpg"</span>,
+  <span class="hljs-attr">"width"</span>: <span class="hljs-number">1920</span>,
+  <span class="hljs-attr">"height"</span>: <span class="hljs-number">1080</span>,
+  <span class="hljs-attr">"size"</span>: <span class="hljs-number">1245789</span>,
+  <span class="hljs-attr">"createdAt"</span>: <span class="hljs-string">"2023-11-15T10:00:00Z"</span>,
+  <span class="hljs-attr">"metadata"</span>: {
+    <span class="hljs-attr">"propertyId"</span>: <span class="hljs-string">"prop_123"</span>,
+    <span class="hljs-attr">"uploadedBy"</span>: <span class="hljs-string">"user_456"</span>,
+    <span class="hljs-attr">"isPrimary"</span>: <span class="hljs-literal">true</span>
+  }
+}
+
+## Request/Response Examples
+
+### Property Creation (POST /api/properties)
+
+**Request:**
+```json
+{
+  <span class="hljs-attr">"title"</span>: <span class="hljs-string">"Modern Downtown Apartment"</span>,
+  <span class="hljs-attr">"description"</span>: <span class="hljs-string">"Luxury apartment with city views"</span>,
+  <span class="hljs-attr">"price"</span>: <span class="hljs-number">250000</span>,
+  <span class="hljs-attr">"type"</span>: <span class="hljs-string">"sale"</span>,
+  <span class="hljs-attr">"category"</span>: <span class="hljs-string">"apartment"</span>,
+  <span class="hljs-attr">"bedrooms"</span>: <span class="hljs-number">2</span>,
+  <span class="hljs-attr">"bathrooms"</span>: <span class="hljs-number">2</span>,
+  <span class="hljs-attr">"area"</span>: <span class="hljs-number">1200</span>,
+  <span class="hljs-attr">"location"</span>: {
+    <span class="hljs-attr">"address"</span>: <span class="hljs-string">"123 Main St"</span>,
+    <span class="hljs-attr">"city"</span>: <span class="hljs-string">"New York"</span>,
+    <span class="hljs-attr">"state"</span>: <span class="hljs-string">"NY"</span>,
+    <span class="hljs-attr">"coordinates"</span>: {
+      <span class="hljs-attr">"lat"</span>: <span class="hljs-number">40.7128</span>,
+      <span class="hljs-attr">"lng"</span>: <span class="hljs-number">-74.0060</span>
+    }
+  },
+  <span class="hljs-attr">"amenities"</span>: [<span class="hljs-string">"wifi"</span>, <span class="hljs-string">"parking"</span>, <span class="hljs-string">"gym"</span>]
+}
+</div></code></pre>
+<h1 id="diagrams">Diagrams</h1>
+<ol>
+<li>Property Listing Search</li>
+</ol>
+<pre><code class="language-mermaid"><div class="mermaid">sequenceDiagram
+    participant Client
+    participant API
+    participant Database
+    
+    Client->>API: GET /api/properties?type=sale&location=NY
+    API->>Database: Query properties with filters
+    Database-->>API: Return filtered properties
+    API-->>Client: Return property list with pagination
+
+</div></code></pre>
+<ol start="2">
+<li>Add Property to Wishlist</li>
+</ol>
+<pre><code class="language-mermaid"><div class="mermaid">sequenceDiagram
+    participant Client
+    participant API
+    participant Database
+    
+    Client->>API: POST /api/wishlist/123 (with auth token)
+    API->>Database: Verify property exists
+    API->>Database: Add property to user's wishlist
+    Database-->>API: Confirm update
+    API-->>Client: Return updated wishlist
+
+</div></code></pre>
+<ol start="3">
+<li>Create New Property Listing</li>
+</ol>
+<pre><code class="language-mermaid"><div class="mermaid">sequenceDiagram
+    participant Client
+    participant API
+    participant Database
+    participant Storage
+    
+    Client->>API: POST /api/properties (with property data)
+    API->>Database: Validate and create property
+    Database-->>API: Return created property
+    Client->>API: POST /api/properties/123/media (with images)
+    API->>Storage: Upload images
+    Storage-->>API: Return image URLs
+    API->>Database: Update property with media
+    Database-->>API: Confirm update
+    API-->>Client: Return complete property data
+
+</div></code></pre>
+<ol start="4">
+<li>User Registration</li>
+</ol>
+<pre><code class="language-mermaid"><div class="mermaid">sequenceDiagram
+    participant Client
+    participant API
+    participant Database
+    participant EmailService
+    
+    Client->>API: POST /api/auth/register (user data)
+    API->>Database: Check if email exists
+    Database-->>API: Email available
+    API->>Database: Create new user
+    Database-->>API: User created
+    API->>EmailService: Send verification email
+    EmailService-->>API: Email sent
+    API-->>Client: Return success response
+
+</div></code></pre>
+<ol start="5">
+<li>Property Review Submission</li>
+</ol>
+<pre><code class="language-mermaid"><div class="mermaid">sequenceDiagram
+    participant Client
+    participant API
+    participant Database
+    
+    Client->>API: POST /api/properties/123/reviews (with review data)
+    API->>Database: Verify property exists
+    API->>Database: Create new review
+    Database-->>API: Review created
+    API->>Database: Update property rating
+    Database-->>API: Property updated
+    API-->>Client: Return created review
+
+</div></code></pre>
+<ol start="5">
+<li>Media Upload Flow</li>
+</ol>
+<pre><code class="language-mermaid"><div class="mermaid">sequenceDiagram
+    participant Client
+    participant API
+    participant Storage
+    participant Database
+    
+    Client->>API: POST /api/media/upload (file + metadata)
+    API->>Storage: Upload file to CDN
+    Storage-->>API: Return CDN URL
+    API->>Database: Create media record
+    Database-->>API: Confirm creation
+    API-->>Client: Return media object
+    
+    Note right of API: Validation includes:<br>1. File type check<br>2. Size verification<br>3. Virus scan
+
+</div></code></pre>
+<h1 id="subscription-module-documentation">Subscription Module Documentation</h1>
+<h2 id="overview">Overview</h2>
+<p>The subscription module provides flexible, configurable pricing plans for property management system users. Each feature can be independently configured per plan, allowing administrators to customize offerings without code changes.</p>
+<h2 id="class-diagram">Class Diagram</h2>
+<pre><code class="language-mermaid"><div class="mermaid">classDiagram
+    class SubscriptionPlan {
+        +id: String
+        +name: String
+        +description: String
+        +basePrice: Number
+        +billingCycle: Enum(monthly,yearly)
+        +isActive: Boolean
+        +features: Feature[]
+        +createPlan()
+        +updatePlan()
+        +deactivatePlan()
+    }
+
+    class Feature {
+        +id: String
+        +key: String
+        +name: String
+        +description: String
+        +valueType: Enum(boolean,number,string)
+        +defaultValue: Mixed
+        +constraints: Object
+        +isModifiable: Boolean
+    }
+
+    class PlanFeature {
+        +planId: String
+        +featureId: String
+        +value: Mixed
+        +setValue()
+    }
+
+    class UserSubscription {
+        +userId: String
+        +planId: String
+        +startDate: DateTime
+        +endDate: DateTime
+        +status: Enum(active,inactive,paused)
+        +renewSubscription()
+        +upgradePlan()
+        +cancelSubscription()
+    }
+
+    SubscriptionPlan "1" -- "*" PlanFeature: contains
+    Feature "1" -- "*" PlanFeature: configures
+    User "1" -- "*" UserSubscription: has
+
+</div></code></pre>
+<h2 id="available-subscription-plans--features">Available Subscription Plans &amp; Features</h2>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Free (Basic)</th>
+<th>Basic ($10/month)</th>
+<th>Extended ($20/month)</th>
+<th>Premium ($40/month)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Property Listings</strong></td>
+<td>1 property</td>
+<td>20 properties</td>
+<td>Unlimited</td>
+<td>Unlimited</td>
+</tr>
+<tr>
+<td><strong>Built-in Chat</strong></td>
+<td>❌ Not available</td>
+<td>❌ Not available</td>
+<td>✔️ Enabled</td>
+<td>✔️ Enabled</td>
+</tr>
+<tr>
+<td><strong>Email Integration</strong></td>
+<td>Basic forwarding</td>
+<td>Basic forwarding</td>
+<td>Dedicated inbox</td>
+<td>Dedicated inbox</td>
+</tr>
+<tr>
+<td><strong>Availability Duration</strong></td>
+<td>30 days</td>
+<td>50 days</td>
+<td>100 days</td>
+<td>Lifetime</td>
+</tr>
+<tr>
+<td><strong>Customer Support</strong></td>
+<td>❌ No support</td>
+<td>❌ No support</td>
+<td>📞 Business hours</td>
+<td>🕒 24/7 support</td>
+</tr>
+<tr>
+<td><strong>Featured Listings</strong></td>
+<td>❌ Normal ranking</td>
+<td>❌ Normal ranking</td>
+<td>❌ Normal ranking</td>
+<td>⭐ Featured boost</td>
+</tr>
+<tr>
+<td><strong>Analytics Dashboard</strong></td>
+<td>❌ Not available</td>
+<td>❌ Not available</td>
+<td>📊 Basic metrics</td>
+<td>📈 Advanced analytics</td>
+</tr>
+<tr>
+<td><strong>Mobile App Access</strong></td>
+<td>❌ Web only</td>
+<td>❌ Web only</td>
+<td>✔️ Basic app</td>
+<td>✔️ Full app</td>
+</tr>
+<tr>
+<td><strong>API Access</strong></td>
+<td>❌ Not available</td>
+<td>100 calls/day</td>
+<td>500 calls/day</td>
+<td>Unlimited calls</td>
+</tr>
+<tr>
+<td><strong>File Storage</strong></td>
+<td>100 MB</td>
+<td>1 GB</td>
+<td>5 GB</td>
+<td>20 GB</td>
+</tr>
+</tbody>
+</table>
+<h3 id="key-differences">Key Differences</h3>
+<p><strong>Free Plan:</strong></p>
+<ul>
+<li>Ideal for individual landlords testing the platform</li>
+<li>Limited to 1 active property listing</li>
+<li>Basic contact management only</li>
+</ul>
+<p><strong>Basic Plan ($10):</strong></p>
+<ul>
+<li>Suitable for small property managers</li>
+<li>20 active listings</li>
+<li>No chat or premium support</li>
+</ul>
+<p><strong>Extended Plan ($20):</strong></p>
+<ul>
+<li>Best for growing agencies</li>
+<li>Unlimited listings</li>
+<li>Business hours support</li>
+<li>Basic analytics</li>
+</ul>
+<p><strong>Premium Plan ($40):</strong></p>
+<ul>
+<li>Enterprise-grade features</li>
+<li>24/7 priority support</li>
+<li>Featured listing placement</li>
+<li>Advanced reporting tools</li>
+</ul>
+<h3 id="upgrade-paths">Upgrade Paths</h3>
+<pre><code class="language-mermaid"><div class="mermaid">flowchart LR
+    A[Free] --> B[Basic]
+    B --> C[Extended]
+    C --> D[Premium]
+    B --> D
+    A --> C
+</div></code></pre>
+<h2 id="business-rules">Business Rules</h2>
+<p>Feature Access Flow</p>
+<pre><code class="language-mermaid"><div class="mermaid">    sequenceDiagram
+    participant User
+    participant System
+    participant FeatureToggle
+    
+    User->>System: Attempt to list 21st property
+    System->>FeatureToggle: Check listing_limit
+    FeatureToggle-->>System: Max 20 (Basic plan)
+    System-->>User: Return "Limit exceeded" error + upgrade prompt
+</div></code></pre>
+<pre><code class="language-mermaid"><div class="mermaid">   flowchart TD
+    A[Start Upgrade] --> B{Valid Payment?}
+    B -->|Yes| C[Prorate Charges]
+    C --> D[Apply New Features]
+    D --> E[Confirm Upgrade]
+    B -->|No| F[Show Payment Error]
+
+</div></code></pre>
+<h2 id="subscription-api-endpoints-reference">Subscription API Endpoints Reference</h2>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Description</th>
+<th>Requires Auth</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/subscriptions/plans</code></td>
+<td>List all available subscription plans</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/subscriptions/plans/:id</code></td>
+<td>Get details of a specific plan</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/subscriptions/plans</code></td>
+<td>Create a new subscription plan (Admin)</td>
+<td>Yes (Admin)</td>
+</tr>
+<tr>
+<td><code>PUT</code></td>
+<td><code>/api/subscriptions/plans/:id</code></td>
+<td>Update a subscription plan (Admin)</td>
+<td>Yes (Admin)</td>
+</tr>
+<tr>
+<td><code>DELETE</code></td>
+<td><code>/api/subscriptions/plans/:id</code></td>
+<td>Deactivate a plan (Admin)</td>
+<td>Yes (Admin)</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/subscriptions/features</code></td>
+<td>List all available features</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>PATCH</code></td>
+<td><code>/api/subscriptions/plans/:id/features</code></td>
+<td>Update features for a plan (Admin)</td>
+<td>Yes (Admin)</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/subscriptions/user/:userId</code></td>
+<td>Get user's current subscription</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/subscriptions/user</code></td>
+<td>Create new subscription for user</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/subscriptions/user/upgrade</code></td>
+<td>Upgrade user's subscription plan</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/subscriptions/user/downgrade</code></td>
+<td>Downgrade user's subscription plan</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/subscriptions/user/cancel</code></td>
+<td>Cancel user's subscription</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/subscriptions/user/:userId/invoices</code></td>
+<td>Get user's payment history</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/subscriptions/user/:userId/usage</code></td>
+<td>Get feature usage statistics</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/subscriptions/webhook/payment</code></td>
+<td>Payment gateway webhook endpoint</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/subscriptions/trial</code></td>
+<td>Start free trial (if available)</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/subscriptions/coupons/:code</code></td>
+<td>Validate discount coupon</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/subscriptions/renew</code></td>
+<td>Manual subscription renewal</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<p>Authentication:</p>
+<p>Yes - Requires valid JWT token</p>
+<p>Yes (Admin) - Requires admin privileges</p>
+<p>No - Publicly accessible</p>
+<p>This table provides a comprehensive overview of all subscription-related API endpoints while keeping the documentation clean and focused on the essential routing information.</p>
+<p>The actual request/response schemas will be documented separately in an API specification document.</p>
+<h2 id="modeule---policy">Modeule - Policy</h2>
+<h1 id="policy-module---role-based-access-control-rbac-with-groups">Policy Module - Role-Based Access Control (RBAC) with Groups</h1>
+<h2 id="class-diagram">Class Diagram</h2>
+<pre><code class="language-mermaid"><div class="mermaid">classDiagram
+    class User {
+        +id: String
+        +username: String
+        +email: String
+        +groups: Group[]
+        +hasPermission()
+        +addToGroup()
+    }
+
+    class Group {
+        +id: String
+        +name: String
+        +description: String
+        +roles: Role[]
+        +users: User[]
+        +addRole()
+        +removeRole()
+    }
+
+    class Role {
+        +id: String
+        +name: String
+        +permissions: Permission[]
+        +addPermission()
+    }
+
+    class Permission {
+        +id: String
+        +resource: String
+        +action: String (create|read|update|delete|manage)
+        +constraints: JSON
+    }
+
+    User "n" -- "m" Group: belongs to
+    Group "1" -- "n" Role: contains
+    Role "1" -- "n" Permission: has
+
+
+</div></code></pre>
+<h1 id="policy-module---core-components">Policy Module - Core Components</h1>
+<h2 id="1-permission-structure">1. Permission Structure</h2>
+<h3 id="permission-object">Permission Object</h3>
+<pre class="hljs"><code><div>{
+  <span class="hljs-attr">"id"</span>: <span class="hljs-string">"perm_property_delete"</span>,
+  <span class="hljs-attr">"resource"</span>: <span class="hljs-string">"property"</span>,
+  <span class="hljs-attr">"action"</span>: <span class="hljs-string">"delete"</span>,
+  <span class="hljs-attr">"constraints"</span>: {
+    <span class="hljs-attr">"scope"</span>: <span class="hljs-string">"group"</span>,
+    <span class="hljs-attr">"conditions"</span>: {
+      <span class="hljs-attr">"status"</span>: [<span class="hljs-string">"active"</span>, <span class="hljs-string">"pending"</span>],
+      <span class="hljs-attr">"max_value"</span>: <span class="hljs-number">500000</span>
+    }
+  }
+}
+</div></code></pre>
+<h5 id="note-custom-roles-can-override-inherited-permissions-but-cannot-exceed-parent-role-privileges">Note: Custom roles can override inherited permissions but cannot exceed parent role privileges.</h5>
+<h1 id="policy-management-api-endpoints">Policy Management API Endpoints</h1>
+<h2 id="role-management">Role Management</h2>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Description</th>
+<th>Required Permissions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/policy/roles</code></td>
+<td>Create new role</td>
+<td><code>policy:roles:create</code></td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/policy/roles</code></td>
+<td>List all roles</td>
+<td><code>policy:roles:read</code></td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/policy/roles/:roleId</code></td>
+<td>Get role details</td>
+<td><code>policy:roles:read</code></td>
+</tr>
+<tr>
+<td><code>PUT</code></td>
+<td><code>/api/policy/roles/:roleId</code></td>
+<td>Update role</td>
+<td><code>policy:roles:update</code></td>
+</tr>
+<tr>
+<td><code>DELETE</code></td>
+<td><code>/api/policy/roles/:roleId</code></td>
+<td>Delete role</td>
+<td><code>policy:roles:delete</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="permission-management">Permission Management</h2>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Description</th>
+<th>Required Permissions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/policy/roles/:roleId/permissions</code></td>
+<td>Add permission to role</td>
+<td><code>policy:permissions:create</code></td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/policy/roles/:roleId/permissions</code></td>
+<td>List role permissions</td>
+<td><code>policy:permissions:read</code></td>
+</tr>
+<tr>
+<td><code>DELETE</code></td>
+<td><code>/api/policy/roles/:roleId/permissions/:permissionId</code></td>
+<td>Remove permission</td>
+<td><code>policy:permissions:delete</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="group-management">Group Management</h2>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Description</th>
+<th>Required Permissions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/policy/groups</code></td>
+<td>Create new group</td>
+<td><code>policy:groups:create</code></td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/policy/groups</code></td>
+<td>List all groups</td>
+<td><code>policy:groups:read</code></td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/policy/groups/:groupId</code></td>
+<td>Get group details</td>
+<td><code>policy:groups:read</code></td>
+</tr>
+<tr>
+<td><code>PUT</code></td>
+<td><code>/api/policy/groups/:groupId</code></td>
+<td>Update group</td>
+<td><code>policy:groups:update</code></td>
+</tr>
+<tr>
+<td><code>DELETE</code></td>
+<td><code>/api/policy/groups/:groupId</code></td>
+<td>Delete group</td>
+<td><code>policy:groups:delete</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="user-assignment">User Assignment</h2>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Description</th>
+<th>Required Permissions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/policy/groups/:groupId/users</code></td>
+<td>Add user to group</td>
+<td><code>policy:assignments:create</code></td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/policy/groups/:groupId/users</code></td>
+<td>List group users</td>
+<td><code>policy:assignments:read</code></td>
+</tr>
+<tr>
+<td><code>DELETE</code></td>
+<td><code>/api/policy/groups/:groupId/users/:userId</code></td>
+<td>Remove user from group</td>
+<td><code>policy:assignments:delete</code></td>
+</tr>
+<tr>
+<td><code>PUT</code></td>
+<td><code>/api/policy/users/:userId/roles</code></td>
+<td>Set user's roles</td>
+<td><code>policy:assignments:update</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="policy-evaluation">Policy Evaluation</h2>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Description</th>
+<th>Required Permissions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>POST</code></td>
+<td><code>/api/policy/evaluate</code></td>
+<td>Check permissions</td>
+<td><code>policy:evaluate</code></td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/policy/users/:userId/permissions</code></td>
+<td>List user's effective permissions</td>
+<td><code>policy:permissions:read</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="audit-logs">Audit Logs</h2>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Endpoint</th>
+<th>Description</th>
+<th>Required Permissions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/policy/audit</code></td>
+<td>Query policy changes</td>
+<td><code>policy:audit:read</code></td>
+</tr>
+<tr>
+<td><code>GET</code></td>
+<td><code>/api/policy/audit/:userId</code></td>
+<td>Get user's policy history</td>
+<td><code>policy:audit:read</code></td>
+</tr>
+</tbody>
+</table>
+<h2 id="notes">Notes:</h2>
+<ol>
+<li><strong>Base Path</strong>: All endpoints are prefixed with <code>/v1</code></li>
+<li><strong>Authentication</strong>: Requires valid JWT with appropriate permissions</li>
+<li><strong>Rate Limiting</strong>:
+<ul>
+<li>60 requests/minute for read operations</li>
+<li>30 requests/minute for write operations</li>
+</ul>
+</li>
+<li><strong>Response Format</strong>: All endpoints return JSON</li>
+<li><strong>Error Codes</strong>:
+<ul>
+<li><code>403 Forbidden</code> - Insufficient permissions</li>
+<li><code>404 Not Found</code> - Resource doesn't exist</li>
+<li><code>409 Conflict</code> - Invalid state change</li>
+</ul>
+</li>
+</ol>
+<pre><code class="language-mermaid"><div class="mermaid">flowchart LR
+    A[Roles] --> B[Permissions]
+    C[Groups] --> D[Users]
+    B --> E[Policy Evaluation]
+    D --> E
+</div></code></pre>
+<h1 id="predefined-roles-reference">Predefined Roles Reference</h1>
+<h2 id="core-system-roles">Core System Roles</h2>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Key Permissions</th>
+<th>Constraints</th>
+<th>Group Inheritance</th>
+<th>Ideal For</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Super Admin</strong><br><em>(system:admin)</em></td>
+<td><code>*:*</code> (All permissions)</td>
+<td>None</td>
+<td>Applies to all groups</td>
+<td>System administrators</td>
+</tr>
+<tr>
+<td><strong>Group Owner</strong><br><em>(group:owner)</em></td>
+<td><ul><li><code>users:manage</code></li><li><code>roles:assign</code></li><li><code>properties:manage</code></li></ul></td>
+<td><ul><li>Scope: Own group</li><li>Max 5 role creations</li></ul></td>
+<td>Inheritable by subgroups</td>
+<td>Team leads, Office managers</td>
+</tr>
+<tr>
+<td><strong>Property Manager</strong><br><em>(property:manager)</em></td>
+<td><ul><li><code>properties:crud</code></li><li><code>contracts:read</code></li><li><code>tenants:manage</code></li></ul></td>
+<td><ul><li>Scope: Assigned properties</li><li>Max 50 properties</li></ul></td>
+<td>Inherits group member permissions</td>
+<td>Leasing agents, Brokers</td>
+</tr>
+<tr>
+<td><strong>Agent</strong><br><em>(property:agent)</em></td>
+<td><ul><li><code>properties:read</code></li><li><code>contacts:create</code></li><li><code>showings:manage</code></li></ul></td>
+<td><ul><li>Scope: Own listings</li><li>No deletion rights</li></ul></td>
+<td>Inherits basic permissions</td>
+<td>Sales agents, Showing staff</td>
+</tr>
+<tr>
+<td><strong>Guest</strong><br><em>(system:guest)</em></td>
+<td><ul><li><code>properties:read</code></li><li><code>analytics:read</code></li></ul></td>
+<td><ul><li>No write actions</li><li>API rate-limited</li></ul></td>
+<td>No inheritance</td>
+<td>Prospective clients, Auditors</td>
+</tr>
+</tbody>
+</table>
+<h2 id="specialized-roles">Specialized Roles</h2>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Key Permissions</th>
+<th>Constraints</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Finance</strong><br><em>(finance:analyst)</em></td>
+<td><ul><li><code>invoices:crud</code></li><li><code>reports:generate</code></li></ul></td>
+<td><ul><li>Time: Business hours</li><li>Amount limit: $10k</li></ul></td>
+<td>Accounting teams</td>
+</tr>
+<tr>
+<td><strong>Maintenance</strong><br><em>(property:tech)</em></td>
+<td><ul><li><code>workorders:crud</code></li><li><code>properties:read</code></li></ul></td>
+<td><ul><li>Scope: Assigned locations</li><li>No financial data</li></ul></td>
+<td>Facility management</td>
+</tr>
+<tr>
+<td><strong>Marketing</strong><br><em>(marketing:specialist)</em></td>
+<td><ul><li><code>listings:feature</code></li><li><code>content:publish</code></li></ul></td>
+<td><ul><li>Approval required</li><li>Brand guidelines</li></ul></td>
+<td>Marketing teams</td>
+</tr>
+</tbody>
+</table>
+<h2 id="permission-legend">Permission Legend</h2>
+<ul>
+<li><strong>CRUD</strong>: Create, Read, Update, Delete</li>
+<li><strong>Scope Types</strong>:
+<ul>
+<li><code>own</code>: Only user-created resources</li>
+<li><code>group</code>: Resources within user's group(s)</li>
+<li><code>all</code>: System-wide access</li>
+</ul>
+</li>
+</ul>
+<h2 id="role-inheritance-example">Role Inheritance Example</h2>
+<pre><code class="language-mermaid"><div class="mermaid">flowchart TD
+    A[Super Admin] --> B[Group Owner]
+    B --> C[Property Manager]
+    C --> D[Agent]
+    D --> E[Guest]
+    B --> F[Finance]
+    B --> G[Maintenance]
+</div></code></pre>
+
+</body>
+</html>
