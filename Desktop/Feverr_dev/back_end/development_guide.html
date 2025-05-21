@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>development_guide.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="real-estate-listing-and-management-system---api-development-guidelines">Real Estate Listing and Management System - API Development GuideLines</h1>
+<h3 id="this-implementation-provides">This implementation provides:</h3>
+<ul>
+<li>
+<p>Complete project structure with Maven</p>
+</li>
+<li>
+<p>All required endpoints as specified in the requiment doc part 1</p>
+</li>
+<li>
+<p>Standard response format</p>
+</li>
+<li>
+<p>Jakarta Filter for authentication (without Spring Security)</p>
+</li>
+<li>
+<p>Model classes matching the class diagram in the requiment doc part 1</p>
+</li>
+<li>
+<p>Minimal Spring dependencies for easier framework migration</p>
+</li>
+<li>
+<p>DO NOT USE jakarta.validation we will do our validation</p>
+</li>
+<li>
+<p>Avoid spring specific annotation like   @Bean as much as possible</p>
+</li>
+<li>
+<p>Professional code organization and comments</p>
+</li>
+<li>
+<p>The implementation leaves service and repository layers empty for your implementation.</p>
+</li>
+<li>
+<p>The authentication filter is implemented but currently just passes through requests - you would need to add your actual authentication logic there.</p>
+</li>
+</ul>
+<hr>
+<h2 id="project-structure">Project Structure</h2>
+<ul>
+<li>
+<p>GroupId: <code>com.imovel.api</code></p>
+</li>
+<li>
+<p>ArtfactId: <code>imovel-api</code></p>
+</li>
+<li>
+<p>Application Properties</p>
+</li>
+</ul>
+<pre class="hljs"><code><div><span class="hljs-comment">
+# Server configuration</span>
+<span class="hljs-attr">server.port</span>=<span class="hljs-string">8080</span>
+<span class="hljs-attr">server.servlet.context-path</span>=<span class="hljs-string">/imovel</span>
+<span class="hljs-comment"># Application properties</span>
+<span class="hljs-attr">app.name</span>=<span class="hljs-string">Imovel API</span>
+<span class="hljs-attr">app.version</span>=<span class="hljs-string">1.0.0</span>
+<span class="hljs-comment"># PostgreSQL Database Configuration</span>
+<span class="hljs-attr">spring.datasource.url</span>=<span class="hljs-string">jdbc:postgresql://localhost:5432/imovel_db</span>
+
+<span class="hljs-attr">&lt;!--</span> <span class="hljs-string">lets all use these credentials --&gt;</span>
+<span class="hljs-attr">spring.datasource.username</span>=<span class="hljs-string">postgres</span>
+<span class="hljs-attr">spring.datasource.password</span>=<span class="hljs-string">postgres  </span>
+<span class="hljs-attr">spring.datasource.driver-class-name</span>=<span class="hljs-string">org.postgresql.Driver</span>
+<span class="hljs-comment">
+# Hibernate/JPA Configuration</span>
+<span class="hljs-attr">spring.jpa.database-platform</span>=<span class="hljs-string">org.hibernate.dialect.PostgreSQLDialect</span>
+<span class="hljs-attr">spring.jpa.hibernate.ddl-auto</span>=<span class="hljs-string">update</span>
+<span class="hljs-attr">spring.jpa.show-sql</span>=<span class="hljs-string">true</span>
+<span class="hljs-attr">spring.jpa.properties.hibernate.format_sql</span>=<span class="hljs-string">true</span>
+<span class="hljs-attr">spring.jpa.properties.hibernate.jdbc.lob.non_contextual_creation</span>=<span class="hljs-string">true</span>
+<span class="hljs-comment">
+# Connection pool settings (HikariCP is the default with Spring Boot)</span>
+<span class="hljs-attr">spring.datasource.hikari.connection-timeout</span>=<span class="hljs-string">20000</span>
+<span class="hljs-attr">spring.datasource.hikari.maximum-pool-size</span>=<span class="hljs-string">10</span>
+<span class="hljs-attr">spring.datasource.hikari.minimum-idle</span>=<span class="hljs-string">5</span>
+<span class="hljs-attr">spring.datasource.hikari.idle-timeout</span>=<span class="hljs-string">30000</span>
+<span class="hljs-attr">spring.datasource.hikari.max-lifetime</span>=<span class="hljs-string">200000</span>
+<span class="hljs-attr">spring.datasource.hikari.auto-commit</span>=<span class="hljs-string">true</span>
+</div></code></pre>
+<ul>
+<li>Project structure</li>
+</ul>
+<pre class="hljs"><code><div>
+imovel-api/
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   └── com/
+│   │   │       └── imovel/
+│   │   │           └── api/
+│   │   │               ├── config/
+│   │   │               ├── controller/
+│   │   │               ├── response/
+|   |   |               ├── request/
+│   │   │               ├── filter/
+│   │   │               ├── model/
+|   |   |               |──repository/
+│   │   │               ├── service/
+│   │   │               └── ImovelApiApplication.java
+│   │   └── resources/
+│   │       └── application.properties
+│   └── test/
+└── pom.xml
+
+</div></code></pre>
+<ul>
+<li>Base pom.xml</li>
+<li>We will remove lombok dependency in the future</li>
+</ul>
+<pre class="hljs"><code><div>
+<span class="hljs-meta">&lt;?xml version=<span class="hljs-string">&quot;1.0&quot;</span> encoding=<span class="hljs-string">&quot;UTF-8&quot;</span>?&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">project</span> <span class="hljs-attr">xmlns</span>=<span class="hljs-string">&quot;http://maven.apache.org/POM/4.0.0&quot;</span>
+         <span class="hljs-attr">xmlns:xsi</span>=<span class="hljs-string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span>
+         <span class="hljs-attr">xsi:schemaLocation</span>=<span class="hljs-string">&quot;http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd&quot;</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">modelVersion</span>&gt;</span>4.0.0<span class="hljs-tag">&lt;/<span class="hljs-name">modelVersion</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">parent</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-boot-starter-parent<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>3.1.0<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">relativePath</span>/&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">parent</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>com.imovel.api<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>imovel-api<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>1.0.0<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">name</span>&gt;</span>imovel-api<span class="hljs-tag">&lt;/<span class="hljs-name">name</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">description</span>&gt;</span>Real Estate Listing and Management System<span class="hljs-tag">&lt;/<span class="hljs-name">description</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">properties</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">java.version</span>&gt;</span>17<span class="hljs-tag">&lt;/<span class="hljs-name">java.version</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">jakarta.servlet-api.version</span>&gt;</span>5.0.0<span class="hljs-tag">&lt;/<span class="hljs-name">jakarta.servlet-api.version</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">properties</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">dependencies</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-boot-starter-web<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-boot-starter-validation<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>jakarta.servlet<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>jakarta.servlet-api<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">version</span>&gt;</span>${jakarta.servlet-api.version}<span class="hljs-tag">&lt;/<span class="hljs-name">version</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">dependency</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.projectlombok<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>lombok<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">optional</span>&gt;</span>true<span class="hljs-tag">&lt;/<span class="hljs-name">optional</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">dependency</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">dependencies</span>&gt;</span>
+
+    <span class="hljs-tag">&lt;<span class="hljs-name">build</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">plugins</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">plugin</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">groupId</span>&gt;</span>org.springframework.boot<span class="hljs-tag">&lt;/<span class="hljs-name">groupId</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">artifactId</span>&gt;</span>spring-boot-maven-plugin<span class="hljs-tag">&lt;/<span class="hljs-name">artifactId</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">plugin</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">plugins</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">build</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">project</span>&gt;</span>
+
+</div></code></pre>
+<ul>
+<li>Application entry point</li>
+</ul>
+<pre class="hljs"><code><div><span class="hljs-keyword">package</span> com.imovel.api;
+
+<span class="hljs-keyword">import</span> org.springframework.boot.SpringApplication;
+<span class="hljs-keyword">import</span> org.springframework.boot.autoconfigure.SpringBootApplication;
+
+<span class="hljs-meta">@SpringBootApplication</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">ImovelApiApplication</span> {
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> {
+        SpringApplication.run(ImovelApiApplication.class, args);
+    }
+}
+
+
+</div></code></pre>
+<ul>
+<li>StandardResponse.java</li>
+</ul>
+<pre class="hljs"><code><div>
+<span class="hljs-keyword">package</span> com.imovel.api.dto;
+<span class="hljs-keyword">import</span> lombok.AllArgsConstructor;
+<span class="hljs-keyword">import</span> lombok.Data;
+<span class="hljs-keyword">import</span> lombok.NoArgsConstructor;
+
+<span class="hljs-comment">/**
+ * Standard API response structure for all endpoints
+ * <span class="hljs-doctag">@param</span> &lt;T&gt; Type of the data payload
+ */</span>
+<span class="hljs-meta">@Data</span>
+<span class="hljs-meta">@NoArgsConstructor</span>
+<span class="hljs-meta">@AllArgsConstructor</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">StandardResponse</span>&lt;T&gt; {
+    <span class="hljs-keyword">private</span> String errorText;
+    <span class="hljs-keyword">private</span> String errorCode;
+    <span class="hljs-keyword">private</span> T data;
+}
+
+</div></code></pre>
+<ul>
+<li>AuthenticationFilter.java</li>
+</ul>
+<pre class="hljs"><code><div>
+<span class="hljs-keyword">package</span> com.imovel.api.filter;
+
+<span class="hljs-keyword">import</span> jakarta.servlet.Filter;
+<span class="hljs-keyword">import</span> jakarta.servlet.FilterChain;
+<span class="hljs-keyword">import</span> jakarta.servlet.ServletException;
+<span class="hljs-keyword">import</span> jakarta.servlet.ServletRequest;
+<span class="hljs-keyword">import</span> jakarta.servlet.ServletResponse;
+<span class="hljs-keyword">import</span> jakarta.servlet.http.HttpServletRequest;
+<span class="hljs-keyword">import</span> jakarta.servlet.http.HttpServletResponse;
+<span class="hljs-keyword">import</span> org.springframework.stereotype.Component;
+
+<span class="hljs-keyword">import</span> java.io.IOException;
+
+<span class="hljs-comment">/**
+ * Filter for authenticating requests using JWT or other authentication mechanisms
+ */</span>
+<span class="hljs-meta">@Component</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">AuthenticationFilter</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">Filter</span> {
+
+    <span class="hljs-meta">@Override</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">doFilter</span><span class="hljs-params">(ServletRequest request, ServletResponse response, FilterChain chain)</span> 
+            <span class="hljs-keyword">throws</span> IOException, ServletException {
+        <span class="hljs-type">HttpServletRequest</span> <span class="hljs-variable">httpRequest</span> <span class="hljs-operator">=</span> (HttpServletRequest) request;
+        <span class="hljs-type">HttpServletResponse</span> <span class="hljs-variable">httpResponse</span> <span class="hljs-operator">=</span> (HttpServletResponse) response;
+
+        
+        chain.doFilter(request, response);
+    }
+}
+
+</div></code></pre>
+<ul>
+<li>Model classes (under com.imovel.api.model)</li>
+</ul>
+<pre class="hljs"><code><div>
+<span class="hljs-keyword">package</span> com.imovel.api.model;
+
+<span class="hljs-keyword">import</span> lombok.Data;
+<span class="hljs-keyword">import</span> java.time.LocalDateTime;
+<span class="hljs-keyword">import</span> java.util.List;
+
+<span class="hljs-comment">/**
+ * Represents a user in the system
+ */</span>
+<span class="hljs-meta">@Data</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">User</span> {
+    <span class="hljs-keyword">private</span> String id;
+    <span class="hljs-keyword">private</span> String name;
+    <span class="hljs-keyword">private</span> String email;
+    <span class="hljs-keyword">private</span> String password;
+    <span class="hljs-keyword">private</span> String phone;
+    <span class="hljs-keyword">private</span> String avatar;
+    <span class="hljs-keyword">private</span> UserRole role;
+    <span class="hljs-keyword">private</span> List&lt;String&gt; socialLinks;
+    <span class="hljs-keyword">private</span> LocalDateTime createdAt;
+    <span class="hljs-keyword">private</span> LocalDateTime updatedAt;
+}
+
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">enum</span> <span class="hljs-title class_">UserRole</span> {
+    ADMIN, AGENT, CLIENT
+}
+
+<span class="hljs-keyword">package</span> com.imovel.api.model;
+
+<span class="hljs-keyword">import</span> lombok.Data;
+<span class="hljs-keyword">import</span> java.time.LocalDateTime;
+<span class="hljs-keyword">import</span> java.util.List;
+
+<span class="hljs-comment">/**
+ * Represents a property listing
+ */</span>
+<span class="hljs-meta">@Data</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Property</span> {
+    <span class="hljs-keyword">private</span> String id;
+    <span class="hljs-keyword">private</span> String title;
+    <span class="hljs-keyword">private</span> String description;
+    <span class="hljs-keyword">private</span> Double price;
+    <span class="hljs-keyword">private</span> PropertyType type;
+    <span class="hljs-keyword">private</span> PropertyCategory category;
+    <span class="hljs-keyword">private</span> Integer bedrooms;
+    <span class="hljs-keyword">private</span> Integer bathrooms;
+    <span class="hljs-keyword">private</span> Double area;
+    <span class="hljs-keyword">private</span> Location location;
+    <span class="hljs-keyword">private</span> List&lt;String&gt; amenities;
+    <span class="hljs-keyword">private</span> List&lt;String&gt; images;
+    <span class="hljs-keyword">private</span> PropertyStatus status;
+    <span class="hljs-keyword">private</span> String createdBy;
+    <span class="hljs-keyword">private</span> LocalDateTime createdAt;
+    <span class="hljs-keyword">private</span> LocalDateTime updatedAt;
+}
+
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">enum</span> <span class="hljs-title class_">PropertyType</span> {
+    HOUSE, APARTMENT, LAND, COMMERCIAL
+}
+
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">enum</span> <span class="hljs-title class_">PropertyCategory</span> {
+    SALE, RENT, LEASE
+}
+
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">enum</span> <span class="hljs-title class_">PropertyStatus</span> {
+    AVAILABLE, PENDING, SOLD, RENTED
+}
+
+<span class="hljs-meta">@Data</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">Location</span> {
+    <span class="hljs-keyword">private</span> String address;
+    <span class="hljs-keyword">private</span> String city;
+    <span class="hljs-keyword">private</span> String state;
+    <span class="hljs-keyword">private</span> String country;
+    <span class="hljs-keyword">private</span> Double latitude;
+    <span class="hljs-keyword">private</span> Double longitude;
+}
+
+<span class="hljs-keyword">package</span> com.imovel.api.model;
+
+<span class="hljs-keyword">import</span> lombok.Data;
+<span class="hljs-keyword">import</span> java.time.LocalDateTime;
+<span class="hljs-keyword">import</span> java.util.List;
+
+<span class="hljs-comment">/**
+ * Represents a user&#x27;s wishlist of properties
+ */</span>
+<span class="hljs-meta">@Data</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Wishlist</span> {
+    <span class="hljs-keyword">private</span> String id;
+    <span class="hljs-keyword">private</span> String userId;
+    <span class="hljs-keyword">private</span> List&lt;String&gt; propertyIds;
+    <span class="hljs-keyword">private</span> LocalDateTime createdAt;
+}
+
+<span class="hljs-keyword">package</span> com.imovel.api.model;
+
+<span class="hljs-keyword">import</span> lombok.Data;
+<span class="hljs-keyword">import</span> java.time.LocalDateTime;
+
+<span class="hljs-comment">/**
+ * Represents a review/rating for a property
+ */</span>
+<span class="hljs-meta">@Data</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Review</span> {
+    <span class="hljs-keyword">private</span> String id;
+    <span class="hljs-keyword">private</span> String propertyId;
+    <span class="hljs-keyword">private</span> String userId;
+    <span class="hljs-keyword">private</span> Integer rating;
+    <span class="hljs-keyword">private</span> String comment;
+    <span class="hljs-keyword">private</span> LocalDateTime createdAt;
+}
+
+<span class="hljs-keyword">package</span> com.imovel.api.model;
+
+<span class="hljs-keyword">import</span> lombok.Data;
+<span class="hljs-keyword">import</span> java.time.LocalDateTime;
+
+<span class="hljs-comment">/**
+ * Represents media files associated with properties
+ */</span>
+<span class="hljs-meta">@Data</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">Media</span> {
+    <span class="hljs-keyword">private</span> String id;
+    <span class="hljs-keyword">private</span> String url;
+    <span class="hljs-keyword">private</span> MediaType type;
+    <span class="hljs-keyword">private</span> String format;
+    <span class="hljs-keyword">private</span> Integer width;
+    <span class="hljs-keyword">private</span> Integer height;
+    <span class="hljs-keyword">private</span> Long size;
+    <span class="hljs-keyword">private</span> Integer duration;
+    <span class="hljs-keyword">private</span> Boolean isPrimary;
+    <span class="hljs-keyword">private</span> LocalDateTime createdAt;
+    <span class="hljs-keyword">private</span> LocalDateTime updatedAt;
+}
+
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">enum</span> <span class="hljs-title class_">MediaType</span> {
+    IMAGE, VIDEO, DOCUMENT, TOUR_3D
+}
+
+</div></code></pre>
+<ul>
+<li>Controller classes (under com.imovel.api.controller)</li>
+</ul>
+<pre class="hljs"><code><div><span class="hljs-keyword">package</span> com.imovel.api.controller;
+
+<span class="hljs-keyword">import</span> com.imovel.api.dto.StandardResponse;
+<span class="hljs-keyword">import</span> org.springframework.web.bind.annotation.*;
+
+<span class="hljs-comment">/**
+ * Authentication endpoints
+ */</span>
+<span class="hljs-meta">@RestController</span>
+<span class="hljs-meta">@RequestMapping(&quot;/api/auth&quot;)</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">AuthController</span> {
+
+    <span class="hljs-meta">@PostMapping(&quot;/register&quot;)</span>
+    <span class="hljs-keyword">public</span> StandardResponse&lt;Void&gt; <span class="hljs-title function_">register</span><span class="hljs-params">()</span> {
+        <span class="hljs-comment">// <span class="hljs-doctag">TODO:</span> Implement registration logic</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">StandardResponse</span>&lt;&gt;();
+    }
+
+    <span class="hljs-meta">@PostMapping(&quot;/login&quot;)</span>
+    <span class="hljs-keyword">public</span> StandardResponse&lt;String&gt; <span class="hljs-title function_">login</span><span class="hljs-params">()</span> {
+        <span class="hljs-comment">// <span class="hljs-doctag">TODO:</span> Implement login logic</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">StandardResponse</span>&lt;&gt;();
+    }
+
+    <span class="hljs-meta">@PostMapping(&quot;/logout&quot;)</span>
+    <span class="hljs-keyword">public</span> StandardResponse&lt;Void&gt; <span class="hljs-title function_">logout</span><span class="hljs-params">()</span> {
+        <span class="hljs-comment">// <span class="hljs-doctag">TODO:</span> Implement logout logic</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">StandardResponse</span>&lt;&gt;();
+    }
+
+    <span class="hljs-meta">@PostMapping(&quot;/forgot-password&quot;)</span>
+    <span class="hljs-keyword">public</span> StandardResponse&lt;Void&gt; <span class="hljs-title function_">forgotPassword</span><span class="hljs-params">()</span> {
+        <span class="hljs-comment">// <span class="hljs-doctag">TODO:</span> Implement forgot password logic</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">StandardResponse</span>&lt;&gt;();
+    }
+
+    <span class="hljs-meta">@PostMapping(&quot;/reset-password&quot;)</span>
+    <span class="hljs-keyword">public</span> StandardResponse&lt;Void&gt; <span class="hljs-title function_">resetPassword</span><span class="hljs-params">()</span> {
+        <span class="hljs-comment">// <span class="hljs-doctag">TODO:</span> Implement reset password logic</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">StandardResponse</span>&lt;&gt;();
+    }
+}
+
+<span class="hljs-keyword">package</span> com.imovel.api.controller;
+
+<span class="hljs-keyword">import</span> com.imovel.api.dto.StandardResponse;
+<span class="hljs-keyword">import</span> org.springframework.web.bind.annotation.*;
+
+<span class="hljs-comment">/**
+ * User profile management endpoints
+ */</span>
+<span class="hljs-meta">@RestController</span>
+<span class="hljs-meta">@RequestMapping(&quot;/api/users&quot;)</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">UserController</span> {
+
+    <span class="hljs-meta">@GetMapping(&quot;/me&quot;)</span>
+    <span class="hljs-keyword">public</span> StandardResponse&lt;Void&gt; <span class="hljs-title function_">getCurrentUser</span><span class="hljs-params">()</span> {
+        <span class="hljs-comment">// <span class="hljs-doctag">TODO:</span> Implement get current user logic</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">StandardResponse</span>&lt;&gt;();
+    }
+
+    <span class="hljs-meta">@PutMapping(&quot;/me&quot;)</span>
+    <span class="hljs-keyword">public</span> StandardResponse&lt;Void&gt; <span class="hljs-title function_">updateProfile</span><span class="hljs-params">()</span> {
+        <span class="hljs-comment">// <span class="hljs-doctag">TODO:</span> Implement update profile logic</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">StandardResponse</span>&lt;&gt;();
+    }
+
+    <span class="hljs-meta">@PutMapping(&quot;/me/password&quot;)</span>
+    <span class="hljs-keyword">public</span> StandardResponse&lt;Void&gt; <span class="hljs-title function_">changePassword</span><span class="hljs-params">()</span> {
+        <span class="hljs-comment">// <span class="hljs-doctag">TODO:</span> Implement change password logic</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">StandardResponse</span>&lt;&gt;();
+    }
+
+    <span class="hljs-meta">@PostMapping(&quot;/me/avatar&quot;)</span>
+    <span class="hljs-keyword">public</span> StandardResponse&lt;Void&gt; <span class="hljs-title function_">uploadAvatar</span><span class="hljs-params">()</span> {
+        <span class="hljs-comment">// <span class="hljs-doctag">TODO:</span> Implement upload avatar logic</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">StandardResponse</span>&lt;&gt;();
+    }
+
+    <span class="hljs-meta">@DeleteMapping(&quot;/me/avatar&quot;)</span>
+    <span class="hljs-keyword">public</span> StandardResponse&lt;Void&gt; <span class="hljs-title function_">removeAvatar</span><span class="hljs-params">()</span> {
+        <span class="hljs-comment">// <span class="hljs-doctag">TODO:</span> Implement remove avatar logic</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">StandardResponse</span>&lt;&gt;();
+    }
+}
+
+<span class="hljs-keyword">package</span> com.imovel.api.controller;
+
+<span class="hljs-keyword">import</span> com.imovel.api.dto.StandardResponse;
+<span class="hljs-keyword">import</span> org.springframework.web.bind.annotation.*;
+
+<span class="hljs-comment">/**
+ * Property management endpoints
+ */</span>
+<span class="hljs-meta">@RestController</span>
+<span class="hljs-meta">@RequestMapping(&quot;/api/properties&quot;)</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">PropertyController</span> {
+
+    <span class="hljs-meta">@GetMapping</span>
+    <span class="hljs-keyword">public</span> StandardResponse&lt;Void&gt; <span class="hljs-title function_">getAllProperties</span><span class="hljs-params">()</span> {
+        <span class="hljs-comment">// <span class="hljs-doctag">TODO:</span> Implement get all properties logic</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">StandardResponse</span>&lt;&gt;();
+    }
+
+    <span class="hljs-meta">@PostMapping</span>
+    <span class="hljs-keyword">public</span> StandardResponse&lt;Void&gt; <span class="hljs-title function_">createProperty</span><span class="hljs-params">()</span> {
+        <span class="hljs-comment">// <span class="hljs-doctag">TODO:</span> Implement create property logic</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">StandardResponse</span>&lt;&gt;();
+    }
+
+    <span class="hljs-meta">@GetMapping(&quot;/{id}&quot;)</span>
+    <span class="hljs-keyword">public</span> StandardResponse&lt;Void&gt; <span class="hljs-title function_">getProperty</span><span class="hljs-params">(<span class="hljs-meta">@PathVariable</span> String id)</span> {
+        <span class="hljs-comment">// <span class="hljs-doctag">TODO:</span> Implement get property logic</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">StandardResponse</span>&lt;&gt;();
+    }
+
+    <span class="hljs-meta">@PutMapping(&quot;/{id}&quot;)</span>
+    <span class="hljs-keyword">public</span> StandardResponse&lt;Void&gt; <span class="hljs-title function_">updateProperty</span><span class="hljs-params">(<span class="hljs-meta">@PathVariable</span> String id)</span> {
+        <span class="hljs-comment">// <span class="hljs-doctag">TODO:</span> Implement update property logic</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">StandardResponse</span>&lt;&gt;();
+    }
+
+    <span class="hljs-meta">@DeleteMapping(&quot;/{id}&quot;)</span>
+    <span class="hljs-keyword">public</span> StandardResponse&lt;Void&gt; <span class="hljs-title function_">deleteProperty</span><span class="hljs-params">(<span class="hljs-meta">@PathVariable</span> String id)</span> {
+        <span class="hljs-comment">// <span class="hljs-doctag">TODO:</span> Implement delete property logic</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">StandardResponse</span>&lt;&gt;();
+    }
+
+    <span class="hljs-meta">@GetMapping(&quot;/me&quot;)</span>
+    <span class="hljs-keyword">public</span> StandardResponse&lt;Void&gt; <span class="hljs-title function_">getUserProperties</span><span class="hljs-params">()</span> {
+        <span class="hljs-comment">// <span class="hljs-doctag">TODO:</span> Implement get user properties logic</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">StandardResponse</span>&lt;&gt;();
+    }
+
+    <span class="hljs-meta">@PostMapping(&quot;/{id}/media&quot;)</span>
+    <span class="hljs-keyword">public</span> StandardResponse&lt;Void&gt; <span class="hljs-title function_">uploadPropertyMedia</span><span class="hljs-params">(<span class="hljs-meta">@PathVariable</span> String id)</span> {
+        <span class="hljs-comment">// <span class="hljs-doctag">TODO:</span> Implement upload property media logic</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">StandardResponse</span>&lt;&gt;();
+    }
+
+    <span class="hljs-meta">@DeleteMapping(&quot;/{id}/media/{mediaId}&quot;)</span>
+    <span class="hljs-keyword">public</span> StandardResponse&lt;Void&gt; <span class="hljs-title function_">deletePropertyMedia</span><span class="hljs-params">(
+            <span class="hljs-meta">@PathVariable</span> String id, 
+            <span class="hljs-meta">@PathVariable</span> String mediaId)</span> {
+        <span class="hljs-comment">// <span class="hljs-doctag">TODO:</span> Implement delete property media logic</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">StandardResponse</span>&lt;&gt;();
+    }
+}
+
+<span class="hljs-keyword">package</span> com.imovel.api.controller;
+
+<span class="hljs-keyword">import</span> com.imovel.api.dto.StandardResponse;
+<span class="hljs-keyword">import</span> org.springframework.web.bind.annotation.*;
+
+<span class="hljs-comment">/**
+ * Wishlist management endpoints
+ */</span>
+<span class="hljs-meta">@RestController</span>
+<span class="hljs-meta">@RequestMapping(&quot;/api/wishlist&quot;)</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">WishlistController</span> {
+
+    <span class="hljs-meta">@GetMapping</span>
+    <span class="hljs-keyword">public</span> StandardResponse&lt;Void&gt; <span class="hljs-title function_">getWishlist</span><span class="hljs-params">()</span> {
+        <span class="hljs-comment">// <span class="hljs-doctag">TODO:</span> Implement get wishlist logic</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">StandardResponse</span>&lt;&gt;();
+    }
+
+    <span class="hljs-meta">@PostMapping(&quot;/{propertyId}&quot;)</span>
+    <span class="hljs-keyword">public</span> StandardResponse&lt;Void&gt; <span class="hljs-title function_">addToWishlist</span><span class="hljs-params">(<span class="hljs-meta">@PathVariable</span> String propertyId)</span> {
+        <span class="hljs-comment">// <span class="hljs-doctag">TODO:</span> Implement add to wishlist logic</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">StandardResponse</span>&lt;&gt;();
+    }
+
+    <span class="hljs-meta">@DeleteMapping(&quot;/{propertyId}&quot;)</span>
+    <span class="hljs-keyword">public</span> StandardResponse&lt;Void&gt; <span class="hljs-title function_">removeFromWishlist</span><span class="hljs-params">(<span class="hljs-meta">@PathVariable</span> String propertyId)</span> {
+        <span class="hljs-comment">// <span class="hljs-doctag">TODO:</span> Implement remove from wishlist logic</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">StandardResponse</span>&lt;&gt;();
+    }
+
+    <span class="hljs-meta">@DeleteMapping</span>
+    <span class="hljs-keyword">public</span> StandardResponse&lt;Void&gt; <span class="hljs-title function_">clearWishlist</span><span class="hljs-params">()</span> {
+        <span class="hljs-comment">// <span class="hljs-doctag">TODO:</span> Implement clear wishlist logic</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">StandardResponse</span>&lt;&gt;();
+    }
+}
+
+<span class="hljs-keyword">package</span> com.imovel.api.controller;
+
+<span class="hljs-keyword">import</span> com.imovel.api.dto.StandardResponse;
+<span class="hljs-keyword">import</span> org.springframework.web.bind.annotation.*;
+
+<span class="hljs-comment">/**
+ * Search endpoints
+ */</span>
+<span class="hljs-meta">@RestController</span>
+<span class="hljs-meta">@RequestMapping(&quot;/api/search&quot;)</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">SearchController</span> {
+
+    <span class="hljs-meta">@GetMapping</span>
+    <span class="hljs-keyword">public</span> StandardResponse&lt;Void&gt; <span class="hljs-title function_">searchProperties</span><span class="hljs-params">()</span> {
+        <span class="hljs-comment">// <span class="hljs-doctag">TODO:</span> Implement search properties logic</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">StandardResponse</span>&lt;&gt;();
+    }
+
+    <span class="hljs-meta">@GetMapping(&quot;/suggestions&quot;)</span>
+    <span class="hljs-keyword">public</span> StandardResponse&lt;Void&gt; <span class="hljs-title function_">getSearchSuggestions</span><span class="hljs-params">()</span> {
+        <span class="hljs-comment">// <span class="hljs-doctag">TODO:</span> Implement search suggestions logic</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">StandardResponse</span>&lt;&gt;();
+    }
+}
+
+<span class="hljs-keyword">package</span> com.imovel.api.controller;
+
+<span class="hljs-keyword">import</span> com.imovel.api.dto.StandardResponse;
+<span class="hljs-keyword">import</span> org.springframework.web.bind.annotation.*;
+
+<span class="hljs-comment">/**
+ * Review management endpoints
+ */</span>
+<span class="hljs-meta">@RestController</span>
+<span class="hljs-meta">@RequestMapping(&quot;/api/properties/{propertyId}/reviews&quot;)</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">ReviewController</span> {
+
+    <span class="hljs-meta">@GetMapping</span>
+    <span class="hljs-keyword">public</span> StandardResponse&lt;Void&gt; <span class="hljs-title function_">getPropertyReviews</span><span class="hljs-params">(<span class="hljs-meta">@PathVariable</span> String propertyId)</span> {
+        <span class="hljs-comment">// <span class="hljs-doctag">TODO:</span> Implement get property reviews logic</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">StandardResponse</span>&lt;&gt;();
+    }
+
+    <span class="hljs-meta">@PostMapping</span>
+    <span class="hljs-keyword">public</span> StandardResponse&lt;Void&gt; <span class="hljs-title function_">addReview</span><span class="hljs-params">(<span class="hljs-meta">@PathVariable</span> String propertyId)</span> {
+        <span class="hljs-comment">// <span class="hljs-doctag">TODO:</span> Implement add review logic</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">StandardResponse</span>&lt;&gt;();
+    }
+}
+
+<span class="hljs-meta">@RestController</span>
+<span class="hljs-meta">@RequestMapping(&quot;/api/reviews&quot;)</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">ReviewDeleteController</span> {
+    
+    <span class="hljs-meta">@DeleteMapping(&quot;/{id}&quot;)</span>
+    <span class="hljs-keyword">public</span> StandardResponse&lt;Void&gt; <span class="hljs-title function_">deleteReview</span><span class="hljs-params">(<span class="hljs-meta">@PathVariable</span> String id)</span> {
+        <span class="hljs-comment">// <span class="hljs-doctag">TODO:</span> Implement delete review logic</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">StandardResponse</span>&lt;&gt;();
+    }
+}
+
+
+<span class="hljs-keyword">package</span> com.imovel.api.controller;
+
+<span class="hljs-keyword">import</span> com.imovel.api.dto.StandardResponse;
+<span class="hljs-keyword">import</span> org.springframework.web.bind.annotation.*;
+
+<span class="hljs-comment">/**
+ * Media management endpoints
+ */</span>
+<span class="hljs-meta">@RestController</span>
+<span class="hljs-meta">@RequestMapping(&quot;/api/media&quot;)</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">MediaController</span> {
+
+    <span class="hljs-meta">@PostMapping(&quot;/upload&quot;)</span>
+    <span class="hljs-keyword">public</span> StandardResponse&lt;Void&gt; <span class="hljs-title function_">uploadMedia</span><span class="hljs-params">()</span> {
+        <span class="hljs-comment">// <span class="hljs-doctag">TODO:</span> Implement upload media logic</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">StandardResponse</span>&lt;&gt;();
+    }
+
+    <span class="hljs-meta">@GetMapping(&quot;/{mediaId}&quot;)</span>
+    <span class="hljs-keyword">public</span> StandardResponse&lt;Void&gt; <span class="hljs-title function_">getMedia</span><span class="hljs-params">(<span class="hljs-meta">@PathVariable</span> String mediaId)</span> {
+        <span class="hljs-comment">// <span class="hljs-doctag">TODO:</span> Implement get media logic</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">StandardResponse</span>&lt;&gt;();
+    }
+
+    <span class="hljs-meta">@DeleteMapping(&quot;/{mediaId}&quot;)</span>
+    <span class="hljs-keyword">public</span> StandardResponse&lt;Void&gt; <span class="hljs-title function_">deleteMedia</span><span class="hljs-params">(<span class="hljs-meta">@PathVariable</span> String mediaId)</span> {
+        <span class="hljs-comment">// <span class="hljs-doctag">TODO:</span> Implement delete media logic</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">StandardResponse</span>&lt;&gt;();
+    }
+}
+
+</div></code></pre>
+<ul>
+<li>Main application class</li>
+</ul>
+<pre class="hljs"><code><div><span class="hljs-keyword">package</span> com.imovel.api;
+
+<span class="hljs-keyword">import</span> org.springframework.boot.SpringApplication;
+<span class="hljs-keyword">import</span> org.springframework.boot.autoconfigure.SpringBootApplication;
+
+<span class="hljs-meta">@SpringBootApplication</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">ImovelApiApplication</span> {
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">main</span><span class="hljs-params">(String[] args)</span> {
+        SpringApplication.run(ImovelApiApplication.class, args);
+    }
+}
+
+</div></code></pre>
+
+</body>
+</html>
