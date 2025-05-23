@@ -5,23 +5,18 @@ import com.imovel.api.model.UserRole;
 import com.imovel.api.repository.UserRepository;
 import com.imovel.api.request.UserRegistrationRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class UserService {
 
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
     }
 
     public Optional<User> registerUser(UserRegistrationRequest request) {
@@ -33,7 +28,7 @@ public class UserService {
         User newUser = new User();
         newUser.setName(request.getName());
         newUser.setEmail(request.getEmail());
-        newUser.setPassword(passwordEncoder.encode(request.getPassword())); // Hash the password
+        newUser.setPassword(request.getPassword()); // Hash the password
         newUser.setPhone(request.getPhone());
         newUser.setRole(UserRole.CLIENT);
 
@@ -49,7 +44,7 @@ public class UserService {
         if (userOptional.isPresent()) {
             User user = userOptional.get();
             // Compare the provided password with the stored hashed password
-            if (passwordEncoder.matches(password, user.getPassword())) {
+            if (password.equals(user.getPassword())) {
                 return Optional.of(user); // Login successful
             }
         }
