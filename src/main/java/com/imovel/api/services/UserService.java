@@ -1,7 +1,7 @@
 package com.imovel.api.services;
 
 import com.imovel.api.model.User;
-import com.imovel.api.model.UserRole;
+import com.imovel.api.model.enums.UserRole;
 import com.imovel.api.repository.UserRepository;
 import com.imovel.api.request.UserRegistrationRequest;
 import org.springframework.beans.factory.annotation.Autowired;
