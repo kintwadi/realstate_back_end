@@ -2,6 +2,8 @@ package com.imovel.api.model;
 
 import com.imovel.api.model.enums.UserRole;
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -37,9 +39,11 @@ public class User {
     @Column(name = "social_link")
     private List<String> socialLinks = new ArrayList<>();
 
+    @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
@@ -52,10 +56,7 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews = new ArrayList<>();
 
-    public User() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
-    }
+    public User() {}
 
     public User(Long id, String name, String email, String password, UserRole role) {
         this();

@@ -1,6 +1,8 @@
 package com.imovel.api.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -13,25 +15,24 @@ public class Review {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "property_id", nullable = false)
-    private Property property; 
+    private Property property;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @Column(nullable = false)
-    private Integer rating; 
+    private Integer rating;
 
     @Lob
-    private String comment; 
+    private String comment;
 
+    @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt; 
+    private LocalDateTime createdAt;
 
     // Constructors
-    public Review() {
-        this.createdAt = LocalDateTime.now();
-    }
+    public Review() {}
 
     public Review(Long id, Property property, User user, Integer rating) {
         this();

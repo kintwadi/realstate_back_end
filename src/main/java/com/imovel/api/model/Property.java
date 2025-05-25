@@ -4,11 +4,11 @@ import com.imovel.api.model.enums.PropertyCategory;
 import com.imovel.api.model.enums.PropertyStatus;
 import com.imovel.api.model.enums.PropertyType;
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Entity
 @Table(name = "properties")
@@ -45,7 +45,7 @@ public class Property {
     @ElementCollection
     @CollectionTable(name = "property_amenities", joinColumns = @JoinColumn(name = "property_id"))
     @Column(name = "amenity")
-    private List<String> amenities = new ArrayList<>();
+    private Set<String> amenities = new HashSet<>();
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -55,13 +55,14 @@ public class Property {
     @JoinColumn(name = "created_by_user_id", nullable = false)
     private User createdBy;
 
+    @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    // Relationships from the first diagram
     @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Media> images = new ArrayList<>();
 
@@ -72,10 +73,7 @@ public class Property {
     private List<Wishlist> wishlists = new ArrayList<>();
 
     // Constructors
-    public Property() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
-    }
+    public Property() {}
 
     public Property(Long id, String title, Double price, PropertyType type, PropertyCategory category, User createdBy) {
         this();
@@ -89,42 +87,149 @@ public class Property {
     }
 
     // Getters and Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
-    public Double getPrice() { return price; }
-    public void setPrice(Double price) { this.price = price; }
-    public PropertyType getType() { return type; }
-    public void setType(PropertyType type) { this.type = type; }
-    public PropertyCategory getCategory() { return category; }
-    public void setCategory(PropertyCategory category) { this.category = category; }
-    public Integer getBedrooms() { return bedrooms; }
-    public void setBedrooms(Integer bedrooms) { this.bedrooms = bedrooms; }
-    public Integer getBathrooms() { return bathrooms; }
-    public void setBathrooms(Integer bathrooms) { this.bathrooms = bathrooms; }
-    public Double getArea() { return area; }
-    public void setArea(Double area) { this.area = area; }
-    public Location getLocation() { return location; }
-    public void setLocation(Location location) { this.location = location; }
-    public List<String> getAmenities() { return amenities; }
-    public void setAmenities(List<String> amenities) { this.amenities = amenities; }
-    public PropertyStatus getStatus() { return status; }
-    public void setStatus(PropertyStatus status) { this.status = status; }
-    public User getCreatedBy() { return createdBy; }
-    public void setCreatedBy(User createdBy) { this.createdBy = createdBy; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
-    public List<Media> getImages() { return images; }
-    public void setImages(List<Media> images) { this.images = images; }
-    public List<Review> getReviews() { return reviews; }
-    public void setReviews(List<Review> reviews) { this.reviews = reviews; }
-    public List<Wishlist> getWishlists() { return wishlists; }
-    public void setWishlists(List<Wishlist> wishlists) { this.wishlists = wishlists; }
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Double getPrice() {
+        return price;
+    }
+
+    public void setPrice(Double price) {
+        this.price = price;
+    }
+
+    public PropertyType getType() {
+        return type;
+    }
+
+    public void setType(PropertyType type) {
+        this.type = type;
+    }
+
+    public PropertyCategory getCategory() {
+        return category;
+    }
+
+    public void setCategory(PropertyCategory category) {
+        this.category = category;
+    }
+
+    public Integer getBedrooms() {
+        return bedrooms;
+    }
+
+    public void setBedrooms(Integer bedrooms) {
+        this.bedrooms = bedrooms;
+    }
+
+    public Integer getBathrooms() {
+        return bathrooms;
+    }
+
+    public void setBathrooms(Integer bathrooms) {
+        this.bathrooms = bathrooms;
+    }
+
+    public Double getArea() {
+        return area;
+    }
+
+    public void setArea(Double area) {
+        this.area = area;
+    }
+
+    public Location getLocation() {
+        return location;
+    }
+
+    public void setLocation(Location location) {
+        this.location = location;
+    }
+
+    public Set<String> getAmenities() { // CHANGED return type
+        return amenities;
+    }
+
+    public void setAmenities(Set<String> amenities) { // CHANGED parameter type
+        this.amenities = amenities;
+    }
+
+    public PropertyStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(PropertyStatus status) {
+        this.status = status;
+    }
+
+    public User getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(User createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public List<Media> getImages() {
+        return images;
+    }
+
+    public void setImages(List<Media> images) {
+        this.images = images;
+    }
+
+    public List<Review> getReviews() {
+        return reviews;
+    }
+
+    public void setReviews(List<Review> reviews) {
+        this.reviews = reviews;
+    }
+
+    public List<Wishlist> getWishlists() {
+        return wishlists;
+    }
+
+    public void setWishlists(List<Wishlist> wishlists) {
+        this.wishlists = wishlists;
+    }
 
     @PreUpdate
     protected void onUpdate() {

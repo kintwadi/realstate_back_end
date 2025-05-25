@@ -1,6 +1,8 @@
 package com.imovel.api.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,12 +28,11 @@ public class Wishlist {
     )
     private List<Property> properties = new ArrayList<>();
 
+    @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt; 
+    private LocalDateTime createdAt;
 
-    public Wishlist() {
-        this.createdAt = LocalDateTime.now();
-    }
+    public Wishlist() {}
 
     public Wishlist(Long id, User user) {
         this();
@@ -40,14 +41,37 @@ public class Wishlist {
     }
 
     // Getters and Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
-    public List<Property> getProperties() { return properties; }
-    public void setProperties(List<Property> properties) { this.properties = properties; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public List<Property> getProperties() {
+        return properties;
+    }
+
+    public void setProperties(List<Property> properties) {
+        this.properties = properties;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
 
     @Override
     public boolean equals(Object o) {
