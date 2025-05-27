@@ -18,7 +18,7 @@ public class AuthControllerAspect {
 
     private static final Pattern EMAIL_REGEX_PATTERN =  Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
 
-    @Around("execution(* com.imovel.api.controller.AuthController.register(..))")
+    @Around("com.imovel.api.security.validation.pointcut.PointCuts.registerValidation()")
     public Object registerValidation(ProceedingJoinPoint joinPoint) throws Throwable {
         Object[] args = joinPoint.getArgs();
 
@@ -46,7 +46,7 @@ public class AuthControllerAspect {
         return joinPoint.proceed();
     }
 
-    @Around("execution(* com.imovel.api.controller.AuthController.login(..))")
+    @Around("com.imovel.api.security.validation.pointcut.PointCuts.loginValidation())")
     public Object loginValidation(ProceedingJoinPoint joinPoint) throws Throwable {
 
         Object[] args = joinPoint.getArgs();
