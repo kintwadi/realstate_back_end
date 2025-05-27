@@ -1,5 +1,6 @@
 package com.imovel.api.security.validation;
 
+import com.imovel.api.request.UserLoginRequest;
 import com.imovel.api.request.UserRegistrationRequest;
 import com.imovel.api.response.StandardResponse;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -15,12 +16,12 @@ import java.util.regex.Pattern;
 @Component
 public class AuthControllerAspect {
 
-    private static final Pattern EMAIL_PATTERN =
-            Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
+    private static final Pattern EMAIL_REGEX_PATTERN =  Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
 
     @Around("execution(* com.imovel.api.controller.AuthController.register(..))")
-    public Object validateEmail(ProceedingJoinPoint joinPoint) throws Throwable {
+    public Object registerValidation(ProceedingJoinPoint joinPoint) throws Throwable {
         Object[] args = joinPoint.getArgs();
+
         if (args.length == 0 || !(args[0] instanceof UserRegistrationRequest))
         {
             return new ResponseEntity<>(
@@ -30,28 +31,61 @@ public class AuthControllerAspect {
 
         UserRegistrationRequest request = (UserRegistrationRequest) args[0];
 
-        if (isValidInput(request)) {
+
+        if (isRegisterInputNotValid(request)) {
             return new ResponseEntity<>(
                     new StandardResponse<>("Missing required fields", "REGISTRATION_002", null),
                     HttpStatus.BAD_REQUEST);
         }
 
-        if (isValidEmail(request)) {
+        if (isRegisterEmailNotValid(request)) {
             return new ResponseEntity<>(
                     new StandardResponse<>("Invalid email format", "REGISTRATION_003", null),
                     HttpStatus.BAD_REQUEST);
         }
-
-        return joinPoint.proceed(); // Continue with method execution if valid
+        return joinPoint.proceed();
     }
 
-    private static boolean isValidEmail(UserRegistrationRequest request) {
-        return !EMAIL_PATTERN.matcher(request.getEmail()).matches();
+    @Around("execution(* com.imovel.api.controller.AuthController.login(..))")
+    public Object loginValidation(ProceedingJoinPoint joinPoint) throws Throwable {
+
+        Object[] args = joinPoint.getArgs();
+        UserLoginRequest request = (UserLoginRequest) args[0];
+
+        if (isLoginInputNotValid(request))
+        {
+            return new ResponseEntity<>(
+                    new StandardResponse<>("Missing required fields", "REGISTRATION_002", null),
+                    HttpStatus.BAD_REQUEST);
+        }
+
+        if (isLoginEmailNotValid(request)) {
+            return new ResponseEntity<>(
+                    new StandardResponse<>("Invalid email format", "REGISTRATION_003", null),
+                    HttpStatus.BAD_REQUEST);
+        }
+        return joinPoint.proceed();
     }
 
-    private static boolean isValidInput(UserRegistrationRequest request) {
+    private static boolean isLoginInputNotValid(UserLoginRequest request)
+    {
+
         return request.getEmail() == null || request.getEmail().isEmpty() ||
-                request.getPassword() == null || request.getPassword().isEmpty() ||
-                request.getName() == null || request.getName().isEmpty();
+                request.getPassword() == null || request.getPassword().isEmpty();
+    }
+    private static boolean isLoginEmailNotValid(UserLoginRequest request)
+    {
+        return !EMAIL_REGEX_PATTERN.matcher(request.getEmail()).matches();
+    }
+
+
+    private static boolean isRegisterInputNotValid(UserRegistrationRequest request)
+    {
+        return request.getEmail() == null || request.getEmail().isEmpty() ||
+                request.getPassword() == null || request.getPassword().isEmpty() ;
+    }
+    private static boolean isRegisterEmailNotValid(UserRegistrationRequest request)
+    {
+        return EMAIL_REGEX_PATTERN.matcher(request.getEmail()).matches();
     }
 }

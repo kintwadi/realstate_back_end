@@ -27,7 +27,6 @@ public class AuthController {
     @PostMapping("/register") //
     public ResponseEntity<StandardResponse<Object>> register(@RequestBody UserRegistrationRequest request) {
 
-
         return userService.registerUser(request)
                 .map(user -> new ResponseEntity<>(
                         new StandardResponse<>("User registered successfully", null, null),
@@ -39,12 +38,6 @@ public class AuthController {
 
     @PostMapping("/login") //
     public ResponseEntity<StandardResponse<String>> login(@RequestBody UserLoginRequest request) {
-        if (request.getEmail() == null || request.getEmail().isEmpty() ||
-                request.getPassword() == null || request.getPassword().isEmpty()) {
-            return new ResponseEntity<>(
-                    new StandardResponse<>("Email and password are required", "LOGIN_001", null),
-                    HttpStatus.BAD_REQUEST);
-        }
 
         return userService.loginUser(request.getEmail(), request.getPassword())
                 .map(user -> new ResponseEntity<>(
