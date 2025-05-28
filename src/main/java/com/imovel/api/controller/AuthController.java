@@ -1,9 +1,11 @@
 package com.imovel.api.controller;
 
+import com.imovel.api.request.ChangePasswordRequestDto;
 import com.imovel.api.request.UserLoginRequest;
 import com.imovel.api.request.UserRegistrationRequest;
 import com.imovel.api.response.StandardResponse;
-import com.imovel.api.services.UserService;
+import com.imovel.api.services.AuthService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,10 +19,10 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    private final UserService userService;
+    private final AuthService userService;
 
     @Autowired
-    public AuthController(UserService userService) {
+    public AuthController(AuthService userService) {
         this.userService = userService;
     }
 
@@ -73,9 +75,31 @@ public class AuthController {
         return new StandardResponse<>();
     }
 
-    @PostMapping("/reset-password")
-    public StandardResponse<Void> resetPassword() {
-        // TODO: Implement reset password logic
-        return new StandardResponse<>();
+    @PostMapping("/reset-password") // Endpoint name as requested
+    public ResponseEntity<StandardResponse<Object>> resetPassword(@Valid @RequestBody ChangePasswordRequestDto changePasswordRequestDto) {
+        String errorCode = userService.changeUserPassword(changePasswordRequestDto);
+
+        if (errorCode == null) {
+            return new ResponseEntity<>(
+                    new StandardResponse<>("Password changed successfully.", null, null),
+                    HttpStatus.OK);
+        } else {
+            String message;
+            HttpStatus status = switch (errorCode) {
+                case "OLD_PASSWORD_MISMATCH" -> {
+                    message = "Failed to change password. The old password provided is incorrect.";
+                    yield HttpStatus.BAD_REQUEST;
+                }
+                case "USER_NOT_FOUND" -> {
+                    message = "User not found. Authentication error.";
+                    yield HttpStatus.NOT_FOUND;
+                }
+                default -> {
+                    message = "An unexpected error occurred while changing password.";
+                    yield HttpStatus.INTERNAL_SERVER_ERROR;
+                }
+            };
+            return new ResponseEntity<>(new StandardResponse<>(message, errorCode, null), status);
+        }
     }
 }
