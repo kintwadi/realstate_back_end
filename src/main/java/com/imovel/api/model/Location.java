@@ -1,27 +1,65 @@
 package com.imovel.api.model; //
 
-import jakarta.persistence.Column; //
-import jakarta.persistence.Embeddable; //
-import lombok.Data; //
+import jakarta.persistence.Embeddable;
 
-@Embeddable //
-@Data //
+@Embeddable
 public class Location {
-    @Column(name = "address") //
-    private String address; //
+    private String address;
+    private String city;
+    private String state;
+    private String zipCode;
+    private Double latitude;
+    private Double longitude;
 
-    @Column(name = "city") //
-    private String city; //
+    public Location() {
+    }
 
-    @Column(name = "state") //
-    private String state; //
+    // Getters and Setters for Location
+    public String getAddress() {
+        return address;
+    }
 
-    @Column(name = "country") //
-    private String country; //
+    public void setAddress(String address) {
+        this.address = address;
+    }
 
-    @Column(name = "latitude") //
-    private Double latitude; //
+    public String getCity() {
+        return city;
+    }
 
-    @Column(name = "longitude") //
-    private Double longitude; //
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    public String getZipCode() {
+        return zipCode;
+    }
+
+    public void setZipCode(String zipCode) {
+        this.zipCode = zipCode;
+    }
+
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
+    }
 }
