@@ -1,8 +1,9 @@
-package com.imovel.api.request;
+package com.imovel.api.response;
 
 import com.imovel.api.model.enums.PropertyCategory;
 import com.imovel.api.model.enums.PropertyStatus;
 import com.imovel.api.model.enums.PropertyType;
+import com.imovel.api.request.LocationDto;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -24,7 +25,6 @@ public class PropertyResponseDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    // Constructors, Getters, and Setters
     public PropertyResponseDto() {
     }
 

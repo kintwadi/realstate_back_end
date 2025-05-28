@@ -3,11 +3,8 @@ package com.imovel.api.request;
 import jakarta.validation.constraints.NotBlank;
 
 public class LocationDto {
-    @NotBlank(message = "Address cannot be blank")
     private String address;
-    @NotBlank(message = "City cannot be blank")
     private String city;
-    @NotBlank(message = "State cannot be blank")
     private String state;
     private String zipCode;
     private Double latitude;

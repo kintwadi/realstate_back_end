@@ -1,7 +1,7 @@
 package com.imovel.api.controller;
 
 import com.imovel.api.request.PropertyRequestDto;
-import com.imovel.api.request.PropertyResponseDto;
+import com.imovel.api.response.PropertyResponseDto;
 import com.imovel.api.response.StandardResponse;
 import com.imovel.api.services.PropertyService;
 

@@ -11,35 +11,25 @@ import jakarta.validation.constraints.Size;
 import java.util.Set;
 
 public class PropertyRequestDto {
-    @NotBlank(message = "Title cannot be blank")
-    @Size(min = 5, max = 100, message = "Title must be between 5 and 100 characters")
     private String title;
 
-    @Size(max = 1000, message = "Description can be up to 1000 characters")
     private String description;
 
-    @NotNull(message = "Price cannot be null")
-    @Positive(message = "Price must be positive")
     private Double price;
 
-    @NotNull(message = "Property type cannot be null")
     private PropertyType type;
 
-    @NotNull(message = "Property category cannot be null")
     private PropertyCategory category;
 
     private Integer bedrooms;
     private Integer bathrooms;
 
-    @Positive(message = "Area must be positive")
     private Double area;
 
-    @NotNull(message = "Location cannot be null")
     private LocationDto location;
 
     private Set<String> amenities; // Using Set as discussed
 
-    @NotNull(message = "Property status cannot be null")
     private PropertyStatus status; // Usually set on creation or updated separately
 
     // Constructors, Getters, and Setters

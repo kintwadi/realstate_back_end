@@ -7,7 +7,7 @@ import com.imovel.api.repository.PropertyRepository;
 import com.imovel.api.repository.UserRepository;
 import com.imovel.api.request.LocationDto;
 import com.imovel.api.request.PropertyRequestDto;
-import com.imovel.api.request.PropertyResponseDto;
+import com.imovel.api.response.PropertyResponseDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
