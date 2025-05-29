@@ -24,8 +24,6 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
-    private String password;
 
     private String phone;
 
@@ -58,12 +56,11 @@ public class User {
 
     public User() {}
 
-    public User(Long id, String name, String email, String password, UserRole role) {
+    public User(Long id, String name, String email, UserRole role) {
         this();
         this.id = id;
         this.name = name;
         this.email = email;
-        this.password = password;
         this.role = role;
     }
 
@@ -90,14 +87,6 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public String getPhone() {
