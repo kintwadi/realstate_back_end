@@ -373,7 +373,6 @@ code {
         +id: String
         +name: String
         +email: String
-        +password: String
         +phone: String
         +avatar: String
         +role: Enum
@@ -383,6 +382,13 @@ code {
         +authenticate()
         +updateProfile()
         +changePassword()
+    }
+
+     class AuthDetails {
+        +id: Long
+        +salt: String
+        +hash: String
+        +userId: Long
     }
 
     class Property {
@@ -455,6 +461,7 @@ code {
         +deleteFromStorage()
     }
 
+    User "1" -- "1" AuthDetails: has
     User "1" -- "0..*" Property: creates
     User "1" -- "1" Wishlist: has
     Wishlist "1" -- "0..*" Property: contains
