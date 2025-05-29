@@ -1,6 +1,6 @@
 package com.imovel.api.controller;
 
-import com.imovel.api.request.ChangePasswordRequestDto;
+import com.imovel.api.request.PasswordChangeRequest;
 import com.imovel.api.request.UserLoginRequest;
 import com.imovel.api.request.UserRegistrationRequest;
 import com.imovel.api.response.StandardResponse;
@@ -28,13 +28,6 @@ public class AuthController {
 
     @PostMapping("/register") //
     public ResponseEntity<StandardResponse<Object>> register(@RequestBody UserRegistrationRequest request) {
-        if (request.getEmail() == null || request.getEmail().isEmpty() ||
-                request.getPassword() == null || request.getPassword().isEmpty() ||
-                request.getName() == null || request.getName().isEmpty()) {
-            return new ResponseEntity<>(
-                    new StandardResponse<>("Missing required fields", "REGISTRATION_001", null),
-                    HttpStatus.BAD_REQUEST);
-        }
 
         return userService.registerUser(request)
                 .map(user -> new ResponseEntity<>(
@@ -47,12 +40,6 @@ public class AuthController {
 
     @PostMapping("/login") //
     public ResponseEntity<StandardResponse<String>> login(@RequestBody UserLoginRequest request) {
-        if (request.getEmail() == null || request.getEmail().isEmpty() ||
-                request.getPassword() == null || request.getPassword().isEmpty()) {
-            return new ResponseEntity<>(
-                    new StandardResponse<>("Email and password are required", "LOGIN_001", null),
-                    HttpStatus.BAD_REQUEST);
-        }
 
         return userService.loginUser(request.getEmail(), request.getPassword())
                 .map(user -> new ResponseEntity<>(
@@ -76,30 +63,11 @@ public class AuthController {
     }
 
     @PostMapping("/reset-password") // Endpoint name as requested
-    public ResponseEntity<StandardResponse<Object>> resetPassword(@Valid @RequestBody ChangePasswordRequestDto changePasswordRequestDto) {
-        String errorCode = userService.changeUserPassword(changePasswordRequestDto);
+    public ResponseEntity<StandardResponse<Object>> resetPassword(@Valid @RequestBody PasswordChangeRequest changePasswordRequestDto) {
 
-        if (errorCode == null) {
-            return new ResponseEntity<>(
-                    new StandardResponse<>("Password changed successfully.", null, null),
-                    HttpStatus.OK);
-        } else {
-            String message;
-            HttpStatus status = switch (errorCode) {
-                case "OLD_PASSWORD_MISMATCH" -> {
-                    message = "Failed to change password. The old password provided is incorrect.";
-                    yield HttpStatus.BAD_REQUEST;
-                }
-                case "USER_NOT_FOUND" -> {
-                    message = "User not found. Authentication error.";
-                    yield HttpStatus.NOT_FOUND;
-                }
-                default -> {
-                    message = "An unexpected error occurred while changing password.";
-                    yield HttpStatus.INTERNAL_SERVER_ERROR;
-                }
-            };
-            return new ResponseEntity<>(new StandardResponse<>(message, errorCode, null), status);
-        }
+        StandardResponse standardResponse = userService.changeUserPassword(changePasswordRequestDto);
+        return new ResponseEntity<>(new StandardResponse<>(standardResponse.getErrorText(),
+                                standardResponse.getErrorCode(), null),
+                                HttpStatus.OK);
     }
 }

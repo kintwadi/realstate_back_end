@@ -1,23 +1,20 @@
 package com.imovel.api.request; // Or your actual DTO package
 
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
-
-public class ChangePasswordRequestDto {
+public class PasswordChangeRequest {
 
     private String oldPassword;
 
     private String newPassword;
-    private String userEmail;
+    private String email;
 
-    public ChangePasswordRequestDto() {
+    public PasswordChangeRequest() {
     }
 
-    public ChangePasswordRequestDto(String oldPassword, String newPassword, String userEmail) {
+    public PasswordChangeRequest(String oldPassword, String newPassword, String userEmail) {
         this.oldPassword = oldPassword;
         this.newPassword = newPassword;
-        this.userEmail = userEmail;
+        this.email = userEmail;
     }
 
     // Getters and Setters
@@ -37,12 +34,12 @@ public class ChangePasswordRequestDto {
         this.newPassword = newPassword;
     }
 
-    public String getUserEmail() {
-        return userEmail;
+    public String getEmail() {
+        return email;
     }
 
-    public void setUserEmail(String userEmail) {
-        this.userEmail = userEmail;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
 }
