@@ -1,0 +1,8 @@
+SETUP KEYSTORE ENV VARIABLES IN YOUR workspace.xml or your OS
+  <envs>
+        <env name="ENV_ACCESS_TOKEN_ALIAS" value="imovel_access_token_alias" />
+        <env name="ENV_ACCESS_TOKEN_PASS" value="@Imovel!432" />
+        <env name="ENV_REFRESH_TOKEN_ALIAS" value="imovel_refresh_token_alias" />
+        <env name="ENV_REFRESH_TOKEN_PASS" value="@Imovel!432" />
+        <env name="ENV_KEYSTORE_PASS" value="@Imovel!432" />
+ </envs>
