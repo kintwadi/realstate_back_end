@@ -1,12 +1,14 @@
 package com.imovel.api.controller;
 
-import com.imovel.api.model.User;
 import com.imovel.api.request.PasswordChangeRequest;
+import com.imovel.api.request.RefreshTokenRequest;
 import com.imovel.api.request.UserLoginRequest;
 import com.imovel.api.request.UserRegistrationRequest;
 import com.imovel.api.response.StandardResponse;
-import com.imovel.api.security.token.JWTProcessor;
+import com.imovel.api.security.token.JWTProvider;
+import com.imovel.api.security.token.Token;
 import com.imovel.api.services.AuthService;
+import com.imovel.api.services.TokenService;
 import com.imovel.api.util.Util;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,12 +26,15 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
-    private final JWTProcessor jwtProcessor;
+    private final JWTProvider jwtProcessor;
+    private final TokenService tokenService;
 
     @Autowired
-    public AuthController(AuthService authService, JWTProcessor jwtProcessor) {
+    public AuthController(AuthService authService, JWTProvider jwtProcessor,TokenService tokenService) {
         this.authService = authService;
         this.jwtProcessor = jwtProcessor;
+        this.tokenService = tokenService;
+        this.jwtProcessor.initialize();
     }
 
     /**
@@ -61,39 +66,56 @@ public class AuthController {
 
         return authService.loginUser(loginRequest.getEmail(), loginRequest.getPassword())
                 .map(user -> {
-                    prepareJwtToken(loginRequest, user);
+                    Token tokens = tokenService.login(user);
                     return new ResponseEntity<>(
                             new StandardResponse<>("Login successful", "LOGIN_001",
-                                    Util.toJSON(jwtProcessor.generateToken())),
+                                    Util.toJSON(tokens)),
                             HttpStatus.OK);
                 })
                 .orElse(new ResponseEntity<>(
                         new StandardResponse<>("Invalid email or password", "LOGIN_002", null),
                         HttpStatus.UNAUTHORIZED));
     }
-
     /**
-     * Prepares JWT token with user claims
-     * @param loginRequest User login details
-     * @param user Authenticated user entity
+     * Refresh token endpoint
+     *
+     * Steps:
+     * 1. Receive refresh token
+     * 2. Delegate to AuthService for token refresh
+     * 3. Return new token pair
+     *
+     * @param request Refresh token request
+     * @return New token pair (access + refresh)
      */
-    private void prepareJwtToken(UserLoginRequest loginRequest, User user) {
-        jwtProcessor.initialize();
-        jwtProcessor.setIssuer("api.auth.login");
-        jwtProcessor.addClaim("userId", String.valueOf(user.getId()));
-        jwtProcessor.addClaim("email", loginRequest.getEmail());
+    @PostMapping("/refresh-token")
+    public ResponseEntity<Token> refreshToken(@RequestBody RefreshTokenRequest request) {
+        Token tokens = tokenService.refreshToken(request.getRefreshToken());
+        return ResponseEntity.ok(tokens);
     }
 
     /**
-     * Handles user logout (currently not implemented)
-     * @return Empty standard response
+     * Logout endpoint (single device)
+     *
+     * @param request Refresh token to revoke
+     * @return Success response
      */
     @PostMapping("/logout")
-    public StandardResponse<Void> logoutUser() {
-        // TODO: Implement logout logic (token invalidation, session cleanup)
-        return new StandardResponse<>();
+    public ResponseEntity<Void> logout(@RequestBody RefreshTokenRequest request) {
+        tokenService.logout(request.getRefreshToken());
+        return ResponseEntity.ok().build();
     }
 
+    /**
+     * Logout all endpoint (all devices)
+     *
+     * @param userId The user ID to logout from all devices
+     * @return Success response
+     */
+    @PostMapping("/logout-all")
+    public ResponseEntity<Void> logoutAll(@RequestParam Long userId) {
+        tokenService.logoutAll(userId);
+        return ResponseEntity.ok().build();
+    }
     /**
      * Initiates password reset process (currently not implemented)
      * @return Empty standard response
