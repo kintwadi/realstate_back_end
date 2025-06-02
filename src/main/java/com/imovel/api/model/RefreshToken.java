@@ -33,6 +33,15 @@ public class RefreshToken {
     @Column(name = "expires_at", nullable = false)
     private Instant expiresAt;
 
+    @Column(name = "issued_ip")
+    private String issuedIp;
+
+    @Column(name = "user_agent")
+    private String userAgent;
+
+    @Column(name = "device_fingerprint")
+    private String deviceFingerprint;
+
     // Constructors
     public RefreshToken() {
     }
@@ -98,5 +107,26 @@ public class RefreshToken {
 
     public void setExpiresAt(Instant expiresAt) {
         this.expiresAt = expiresAt;
+    }
+
+    public String getIssuedIp() {
+        return issuedIp;
+    }
+    public void setIssuedIp(String issuedIp) {
+        this.issuedIp = issuedIp;
+    }
+    public String getUserAgent() {
+        return userAgent;
+    }
+    public void setUserAgent(String userAgent) {
+        this.userAgent = userAgent;
+    }
+
+    public String getDeviceFingerprint() {
+        return deviceFingerprint;
+    }
+
+    public void setDeviceFingerprint(String deviceFingerprint) {
+        this.deviceFingerprint = deviceFingerprint;
     }
 }

@@ -10,6 +10,7 @@ import com.imovel.api.security.token.Token;
 import com.imovel.api.services.AuthService;
 import com.imovel.api.services.TokenService;
 import com.imovel.api.util.Util;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -62,11 +63,11 @@ public class AuthController {
      */
     @PostMapping("/login")
     public ResponseEntity<StandardResponse<String>> authenticateUser(
-            @RequestBody UserLoginRequest loginRequest) {
+            @RequestBody UserLoginRequest loginRequest, HttpServletRequest request) {
 
         return authService.loginUser(loginRequest.getEmail(), loginRequest.getPassword())
                 .map(user -> {
-                    Token tokens = tokenService.login(user);
+                    Token tokens = tokenService.login(user,request);
                     return new ResponseEntity<>(
                             new StandardResponse<>("Login successful", "LOGIN_001",
                                     Util.toJSON(tokens)),
@@ -84,12 +85,13 @@ public class AuthController {
      * 2. Delegate to AuthService for token refresh
      * 3. Return new token pair
      *
-     * @param request Refresh token request
+     * @param refreshTokenRequest Refresh token request
+     * @param request  {@link HttpServletRequest}
      * @return New token pair (access + refresh)
      */
     @PostMapping("/refresh-token")
-    public ResponseEntity<Token> refreshToken(@RequestBody RefreshTokenRequest request) {
-        Token tokens = tokenService.refreshToken(request.getRefreshToken());
+    public ResponseEntity<Token> refreshToken(@RequestBody RefreshTokenRequest refreshTokenRequest, HttpServletRequest request) {
+        Token tokens = tokenService.refreshToken(refreshTokenRequest.getRefreshToken(),request);
         return ResponseEntity.ok(tokens);
     }
 
