@@ -1,7 +1,9 @@
 package com.imovel.api.exception;
 
-public class TokenRefreshException extends RuntimeException {
-    public TokenRefreshException(String message) {
-        super(message);
+import org.springframework.http.HttpStatus;
+
+public class TokenRefreshException extends ApplicationException {
+    public TokenRefreshException(String code, String message, HttpStatus httpStatus) {
+        super(code, message, httpStatus);
     }
 }

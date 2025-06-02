@@ -1,7 +1,9 @@
 package com.imovel.api.services;
 
+import com.imovel.api.exception.ResourceNotFoundException;
 import com.imovel.api.model.AuthDetails;
 import com.imovel.api.repository.AuthDetailRepository;
+import com.imovel.api.response.StandardResponse;
 import com.imovel.api.security.PasswordManager;
 import org.springframework.stereotype.Service;
 
@@ -33,19 +35,24 @@ public class AuthDetailsService {
      * Saves authentication details to the repository.
      *
      * @param authDetails The authentication details to be saved
+     * @return StandardResponse containing the saved AuthDetails
      */
-    public AuthDetails save(final AuthDetails authDetails) {
-        return  authDetailRepository.save(authDetails);
+    public StandardResponse<AuthDetails> save(final AuthDetails authDetails) {
+        AuthDetails savedDetails = authDetailRepository.save(authDetails);
+        return StandardResponse.success(savedDetails);
     }
 
     /**
      * Retrieves authentication details by user ID.
      *
      * @param id The user ID to search for
-     * @return Optional containing AuthDetails if found, empty otherwise
+     * @return StandardResponse containing AuthDetails if found
+     * @throws ResourceNotFoundException if no auth details found for user
      */
-    public Optional<AuthDetails> findByUserId(final long id) {
-        return authDetailRepository.findByUserId(id);
+    public StandardResponse<AuthDetails> findByUserId(final long id) {
+        return authDetailRepository.findByUserId(id)
+                .map(StandardResponse::success)
+                .orElseThrow(() -> new ResourceNotFoundException("AuthDetails", id));
     }
 
     /**
@@ -53,13 +60,15 @@ public class AuthDetailsService {
      *
      * @param userId The ID of the user to verify
      * @param password The plaintext password to verify
-     * @return true if credentials are valid, false otherwise
-     * @throws IllegalArgumentException if no user exists with the given ID
+     * @return StandardResponse with verification result
+     * @throws ResourceNotFoundException if no user exists with the given ID
      */
-    public boolean verifyUserCredentials(final long userId, final String password) {
-        return findByUserId(userId)
-                .map(authDetails -> isPasswordValid(authDetails, password))
-                .orElseThrow(() -> new IllegalArgumentException("User not found with ID: " + userId));
+    public StandardResponse<Boolean> verifyUserCredentials(final long userId, final String password) {
+        AuthDetails authDetails = authDetailRepository.findByUserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("AuthDetails", userId));
+
+        boolean isValid = isPasswordValid(authDetails, password);
+        return StandardResponse.success(isValid);
     }
 
     /**

@@ -3,6 +3,7 @@ package com.imovel.api.security.aspect;
 import com.imovel.api.request.PasswordChangeRequest;
 import com.imovel.api.request.UserLoginRequest;
 import com.imovel.api.request.UserRegistrationRequest;
+import com.imovel.api.response.ErrorResponse;
 import com.imovel.api.response.StandardResponse;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -146,9 +147,9 @@ public class AuthControllerAspect {
      * @return ResponseEntity containing the error response
      */
     private ResponseEntity<StandardResponse<String>> createErrorResponse(
-            final String message, final String code, final HttpStatus status) {
-        return new ResponseEntity<>(
-                new StandardResponse<>(message, code, null),
-                status);
+            final String message, final String code, final HttpStatus status)
+    {
+        StandardResponse<String> standardResponse = StandardResponse.error(code,message);
+        return new ResponseEntity<>(standardResponse,status);
     }
 }

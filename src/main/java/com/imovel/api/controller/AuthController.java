@@ -1,9 +1,8 @@
 package com.imovel.api.controller;
 
-import com.imovel.api.request.PasswordChangeRequest;
-import com.imovel.api.request.RefreshTokenRequest;
-import com.imovel.api.request.UserLoginRequest;
-import com.imovel.api.request.UserRegistrationRequest;
+import com.imovel.api.exception.AuthenticationException;
+import com.imovel.api.model.User;
+import com.imovel.api.request.*;
 import com.imovel.api.response.StandardResponse;
 import com.imovel.api.security.token.JWTProvider;
 import com.imovel.api.security.token.Token;
@@ -11,7 +10,6 @@ import com.imovel.api.services.AuthService;
 import com.imovel.api.services.TokenService;
 import com.imovel.api.util.Util;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +29,7 @@ public class AuthController {
     private final TokenService tokenService;
 
     @Autowired
-    public AuthController(AuthService authService, JWTProvider jwtProcessor,TokenService tokenService) {
+    public AuthController(AuthService authService, JWTProvider jwtProcessor, TokenService tokenService) {
         this.authService = authService;
         this.jwtProcessor = jwtProcessor;
         this.tokenService = tokenService;
@@ -39,110 +37,96 @@ public class AuthController {
     }
 
     /**
-     * Registers a new user in the system
+     * Registers a new user in the system.
+     *
      * @param registrationRequest Contains user registration details
      * @return ResponseEntity with registration status
      */
     @PostMapping("/register")
-    public ResponseEntity<StandardResponse<Object>> registerUser(
+    public ResponseEntity<StandardResponse<User>> registerUser(
             @RequestBody UserRegistrationRequest registrationRequest) {
-
-        return authService.registerUser(registrationRequest)
-                .map(user -> new ResponseEntity<>(
-                        new StandardResponse<>("User registered successfully", null, null),
-                        HttpStatus.CREATED))
-                .orElse(new ResponseEntity<>(
-                        new StandardResponse<>("Email already registered", "REGISTRATION_002", null),
-                        HttpStatus.CONFLICT));
+        StandardResponse<User> response = authService.registerUser(registrationRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     /**
-     * Authenticates a user and generates a JWT token upon successful login
+     * Authenticates a user and generates a JWT token upon successful login.
+     *
      * @param loginRequest Contains user credentials
-     * @return ResponseEntity with JWT token or error message
+     * @return ResponseEntity with JWT token
      */
     @PostMapping("/login")
-    public ResponseEntity<StandardResponse<String>> authenticateUser(
+    public ResponseEntity<StandardResponse<Token>> authenticateUser(
             @RequestBody UserLoginRequest loginRequest, HttpServletRequest request) {
+        StandardResponse<User> userResponse = authService.loginUser(loginRequest.getEmail(), loginRequest.getPassword());
 
-        return authService.loginUser(loginRequest.getEmail(), loginRequest.getPassword())
-                .map(user -> {
-                    Token tokens = tokenService.login(user,request);
-                    return new ResponseEntity<>(
-                            new StandardResponse<>("Login successful", "LOGIN_001",
-                                    Util.toJSON(tokens)),
-                            HttpStatus.OK);
-                })
-                .orElse(new ResponseEntity<>(
-                        new StandardResponse<>("Invalid email or password", "LOGIN_002", null),
-                        HttpStatus.UNAUTHORIZED));
+        if (!userResponse.isSuccess()) {
+            throw new AuthenticationException("INVALID_CREDENTIALS", "Invalid email or password");
+        }
+
+        StandardResponse<Token>  standardResponse = tokenService.login(userResponse.getData(), request);
+        return ResponseEntity.ok(StandardResponse.success(standardResponse.getData()));
     }
+
     /**
-     * Refresh token endpoint
-     *
-     * Steps:
-     * 1. Receive refresh token
-     * 2. Delegate to AuthService for token refresh
-     * 3. Return new token pair
+     * Refresh token endpoint.
      *
      * @param refreshTokenRequest Refresh token request
-     * @param request  {@link HttpServletRequest}
      * @return New token pair (access + refresh)
      */
     @PostMapping("/refresh-token")
-    public ResponseEntity<Token> refreshToken(@RequestBody RefreshTokenRequest refreshTokenRequest, HttpServletRequest request) {
-        Token tokens = tokenService.refreshToken(refreshTokenRequest.getRefreshToken(),request);
-        return ResponseEntity.ok(tokens);
+    public ResponseEntity<StandardResponse<Token>> refreshToken(
+            @RequestBody RefreshTokenRequest refreshTokenRequest,
+            HttpServletRequest request) {
+        StandardResponse<Token>  standardResponse = tokenService.refreshToken(refreshTokenRequest.getRefreshToken(), request);
+        return ResponseEntity.ok(StandardResponse.success(standardResponse.getData()));
     }
 
     /**
-     * Logout endpoint (single device)
+     * Logout endpoint (single device).
      *
      * @param request Refresh token to revoke
      * @return Success response
      */
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(@RequestBody RefreshTokenRequest request) {
+    public ResponseEntity<StandardResponse<Void>> logout(@RequestBody RefreshTokenRequest request) {
         tokenService.logout(request.getRefreshToken());
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(StandardResponse.success(null, "Logged out successfully"));
     }
 
     /**
-     * Logout all endpoint (all devices)
+     * Logout all endpoint (all devices).
      *
      * @param userId The user ID to logout from all devices
      * @return Success response
      */
     @PostMapping("/logout-all")
-    public ResponseEntity<Void> logoutAll(@RequestParam Long userId) {
+    public ResponseEntity<StandardResponse<Void>> logoutAll(@RequestParam Long userId) {
         tokenService.logoutAll(userId);
-        return ResponseEntity.ok().build();
-    }
-    /**
-     * Initiates password reset process (currently not implemented)
-     * @return Empty standard response
-     */
-    @PostMapping("/forgot-password")
-    public StandardResponse<Void> initiatePasswordReset() {
-        // TODO: Implement password reset initiation (email verification, token generation)
-        return new StandardResponse<>();
+        return ResponseEntity.ok(StandardResponse.success(null, "Logged out from all devices"));
     }
 
     /**
-     * Resets user password with new credentials
+     * Initiates password reset process.
+     *
+     * @return StandardResponse indicating initiation status
+     */
+    @PostMapping("/forgot-password")
+    public ResponseEntity<StandardResponse<Void>> initiatePasswordReset() {
+        // TODO: Implement password reset initiation
+        return ResponseEntity.ok(StandardResponse.success(null, "Password reset initiated"));
+    }
+
+    /**
+     * Resets user password with new credentials.
+     *
      * @param passwordChangeRequest Contains old and new password details
-     * @param session HTTP session
      * @return ResponseEntity with password change status
      */
     @PostMapping("/reset-password")
-    public ResponseEntity<StandardResponse<Object>> resetUserPassword(
-            @RequestBody PasswordChangeRequest passwordChangeRequest,
-            HttpSession session) {
-
-        StandardResponse response = authService.changeUserPassword(passwordChangeRequest);
-        return new ResponseEntity<>(
-                new StandardResponse<>(response.getErrorText(),
-                        response.getErrorCode(), null),
-                HttpStatus.OK);
+    public ResponseEntity<StandardResponse<User>> resetUserPassword(
+            @RequestBody PasswordChangeRequest passwordChangeRequest) {
+        StandardResponse<User> response = authService.changeUserPassword(passwordChangeRequest);
+        return ResponseEntity.ok(response);
     }
 }

@@ -2,14 +2,15 @@ package com.imovel.api.services;
 
 import com.imovel.api.exception.AuthenticationException;
 import com.imovel.api.exception.TokenRefreshException;
-import com.imovel.api.model.Configuration;
 import com.imovel.api.model.RefreshToken;
 import com.imovel.api.model.User;
 import com.imovel.api.repository.RefreshTokenRepository;
+import com.imovel.api.response.StandardResponse;
 import com.imovel.api.security.token.JWTProvider;
 import com.imovel.api.security.token.Token;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,12 @@ public class TokenService {
 
     // Constants
     public static final int CLEANUP_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
+    // Error codes
+    private static final String INVALID_REFRESH_TOKEN = "TOKEN_001";
+    private static final String EXPIRED_REFRESH_TOKEN = "TOKEN_002";
+    private static final String TOKEN_NOT_FOUND = "TOKEN_003";
+    private static final String TOKEN_LIMIT_EXCEEDED = "TOKEN_004";
 
     // Dependencies
     private final JWTProvider jwtProvider;
@@ -37,6 +44,7 @@ public class TokenService {
         this.configurationService = configurationService;
         this.jwtProvider.initialize();
     }
+
     /**
      * Authenticates a user and generates new tokens
      *
@@ -45,22 +53,27 @@ public class TokenService {
      * 2. Revoke all existing active refresh tokens for the user
      * 3. Generate new access and refresh tokens
      * 4. Save the new refresh token to database
-     * 5. Return the token pair
+     * 5. Return the token pair wrapped in StandardResponse
      *
      * @param user The user to authenticate
-     * @return Token pair (access + refresh)
-     * @throws AuthenticationException if credentials are invalid
+     * @param request HTTP request for device information
+     * @return StandardResponse containing Token pair (access + refresh)
+     * @throws AuthenticationException if credentials are invalid (HTTP 401)
      */
-    public Token login(User user, HttpServletRequest request) {
-        enforceTokenLimits(user.getId());
+    public StandardResponse<Token> login(User user, HttpServletRequest request) {
+        try {
+            enforceTokenLimits(user.getId());
 
-        Instant now = Instant.now();
-        revokeAllUserTokens(user.getId(), now);
+            Instant now = Instant.now();
+            revokeAllUserTokens(user.getId(), now);
 
-        Token tokens = generateTokensForUser(user);
-        saveRefreshToken(tokens.getRefreshToken(), user, now,request);
+            Token tokens = generateTokensForUser(user);
+            saveRefreshToken(tokens.getRefreshToken(), user, now, request);
 
-        return tokens;
+            return StandardResponse.success(tokens);
+        } catch (Exception ex) {
+            throw new AuthenticationException("AUTH_001", "Authentication failed: " + ex.getMessage());
+        }
     }
 
     /**
@@ -74,13 +87,14 @@ public class TokenService {
      * 5. Mark previous refresh token as superseded
      * 6. Generate new token pair
      * 7. Save new refresh token
-     * 8. Return new token pair
+     * 8. Return new token pair wrapped in StandardResponse
      *
      * @param refreshToken The refresh token string
-     * @return New token pair (access + refresh)
-     * @throws TokenRefreshException if refresh token is invalid
+     * @param request HTTP request for device information
+     * @return StandardResponse containing new Token pair (access + refresh)
+     * @throws TokenRefreshException if refresh token is invalid (HTTP 401)
      */
-    public Token refreshToken(String refreshToken, HttpServletRequest request) {
+    public StandardResponse<Token> refreshToken(String refreshToken, HttpServletRequest request) {
         validateRefreshToken(refreshToken);
 
         RefreshToken storedToken = getValidRefreshTokenFromDB(refreshToken);
@@ -90,32 +104,37 @@ public class TokenService {
         supersedePreviousTokens(user.getId(), storedToken.getId());
 
         Token tokens = generateTokensForUser(user);
-        saveRefreshToken(tokens.getRefreshToken(), user, Instant.now(),request);
+        saveRefreshToken(tokens.getRefreshToken(), user, Instant.now(), request);
 
-        return tokens;
+        return StandardResponse.success(tokens);
     }
 
     /**
      * Revokes a specific refresh token (logout single device)
      *
      * @param refreshToken The refresh token to revoke
+     * @return StandardResponse indicating success or failure
      */
-    public void logout(String refreshToken) {
+    public StandardResponse<Void> logout(String refreshToken) {
         refreshTokenRepository.findByToken(refreshToken)
                 .ifPresent(token -> {
                     token.setRevoked(true);
                     token.setRevokedAt(Instant.now());
                     refreshTokenRepository.save(token);
                 });
+
+        return StandardResponse.success(null);
     }
 
     /**
      * Revokes all refresh tokens for a user (logout all devices)
      *
      * @param userId The user ID
+     * @return StandardResponse indicating success or failure
      */
-    public void logoutAll(Long userId) {
+    public StandardResponse<Void> logoutAll(Long userId) {
         revokeAllUserTokens(userId, Instant.now());
+        return StandardResponse.success(null);
     }
 
     /**
@@ -127,8 +146,12 @@ public class TokenService {
         refreshTokenRepository.deleteExpiredTokens(Instant.now());
     }
 
+    // ============ PRIVATE HELPER METHODS ============ //
+
     /**
      * Generates JWT tokens for the given user with appropriate claims
+     * @param user The user to generate tokens for
+     * @return Generated token pair
      */
     private Token generateTokensForUser(User user) {
         jwtProvider.addClaim("userId", user.getId().toString());
@@ -139,6 +162,10 @@ public class TokenService {
 
     /**
      * Saves a new refresh token to the database
+     * @param tokenValue The token value to save
+     * @param user The associated user
+     * @param creationTime Token creation time
+     * @param request HTTP request for device information
      */
     private void saveRefreshToken(String tokenValue, User user, Instant creationTime, HttpServletRequest request) {
         RefreshToken refreshToken = new RefreshToken();
@@ -152,33 +179,47 @@ public class TokenService {
         refreshTokenRepository.save(refreshToken);
     }
 
+    /**
+     * Generates a device fingerprint from request characteristics
+     * @param request HTTP request
+     * @return Generated fingerprint string
+     */
     private String generateDeviceFingerprint(HttpServletRequest request) {
-        // Combine IP, User-Agent, and other immutable characteristics
         return request.getRemoteAddr() +
-                        request.getHeader("User-Agent") +
-                        request.getHeader("Accept-Language");
-
+                request.getHeader("User-Agent") +
+                request.getHeader("Accept-Language");
     }
 
     /**
      * Validates a refresh token's JWT signature and expiration
+     * @param refreshToken The token to validate
+     * @throws TokenRefreshException if token is invalid
      */
     private void validateRefreshToken(String refreshToken) {
         if (!jwtProvider.validateRefreshToken(refreshToken)) {
-            throw new TokenRefreshException("Invalid refresh token");
+            throw new TokenRefreshException(INVALID_REFRESH_TOKEN,
+                    "Invalid refresh token signature",
+                    HttpStatus.UNAUTHORIZED);
         }
     }
 
     /**
      * Retrieves and validates a refresh token from the database
+     * @param refreshToken The token to retrieve
+     * @return Valid RefreshToken entity
+     * @throws TokenRefreshException if token is invalid or expired
      */
     private RefreshToken getValidRefreshTokenFromDB(String refreshToken) {
         RefreshToken storedToken = refreshTokenRepository
                 .findByTokenAndRevokedFalseAndSupersededFalse(refreshToken)
-                .orElseThrow(() -> new TokenRefreshException("Refresh token not found or invalid"));
+                .orElseThrow(() -> new TokenRefreshException(TOKEN_NOT_FOUND,
+                        "Refresh token not found or invalid",
+                        HttpStatus.UNAUTHORIZED));
 
         if (storedToken.getExpiresAt().isBefore(Instant.now())) {
-            throw new TokenRefreshException("Refresh token expired");
+            throw new TokenRefreshException(EXPIRED_REFRESH_TOKEN,
+                    "Refresh token expired",
+                    HttpStatus.UNAUTHORIZED);
         }
 
         return storedToken;
@@ -186,6 +227,8 @@ public class TokenService {
 
     /**
      * Revokes all tokens for a specific user
+     * @param userId The user ID
+     * @param revocationTime Time of revocation
      */
     private void revokeAllUserTokens(Long userId, Instant revocationTime) {
         refreshTokenRepository.revokeAllUserTokens(userId, revocationTime);
@@ -193,6 +236,8 @@ public class TokenService {
 
     /**
      * Marks previous tokens as superseded when generating new ones
+     * @param userId The user ID
+     * @param currentTokenId The ID of the current valid token
      */
     private void supersedePreviousTokens(Long userId, Long currentTokenId) {
         refreshTokenRepository.supersedePreviousTokens(userId, currentTokenId);
@@ -200,6 +245,7 @@ public class TokenService {
 
     /**
      * Revokes a single token
+     * @param token The token to revoke
      */
     private void revokeToken(RefreshToken token) {
         token.setRevoked(true);
@@ -209,6 +255,8 @@ public class TokenService {
 
     /**
      * Enforces maximum active tokens per user by revoking oldest tokens when limit exceeded
+     * @param userId The user ID to check
+     * @throws TokenRefreshException if token limit is exceeded
      */
     private void enforceTokenLimits(Long userId) {
         long activeTokenCount = refreshTokenRepository.countActiveTokensByUserId(userId);
@@ -216,21 +264,27 @@ public class TokenService {
 
         if (activeTokenCount >= maxTokens) {
             revokeExcessTokens(userId, activeTokenCount - maxTokens + 1);
+            throw new TokenRefreshException(TOKEN_LIMIT_EXCEEDED,
+                    "Token limit exceeded. Oldest tokens have been revoked.",
+                    HttpStatus.TOO_MANY_REQUESTS);
         }
     }
 
     /**
      * Retrieves the maximum allowed refresh tokens per user from configuration
+     * @return Maximum allowed tokens
      */
     private int getMaxRefreshTokensPerUser() {
-        return Integer.valueOf(configurationService
+        return Integer.parseInt(configurationService
                 .findByConfigKey(ConfigurationService.MAX_REFRESH_TOKEN_PER_USER_KEY)
-                .get()
+                .orElseThrow(() -> new IllegalStateException("Token limit configuration not found"))
                 .getConfigValue());
     }
 
     /**
      * Revokes the oldest tokens for a user when they exceed the limit
+     * @param userId The user ID
+     * @param numberOfTokensToRevoke Number of tokens to revoke
      */
     private void revokeExcessTokens(Long userId, long numberOfTokensToRevoke) {
         List<RefreshToken> oldestTokens = refreshTokenRepository

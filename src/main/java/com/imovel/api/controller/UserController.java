@@ -4,13 +4,15 @@ import com.imovel.api.request.UserProfileUpdateRequestDto;
 import com.imovel.api.response.StandardResponse;
 import com.imovel.api.response.UserProfileResponseDto;
 import com.imovel.api.services.UserService;
-
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * Controller for handling user profile related operations.
+ * Provides endpoints for retrieving and updating user profiles.
+ */
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/users")
@@ -23,40 +25,27 @@ public class UserController {
         this.userService = userService;
     }
 
+    /**
+     * Retrieves the profile of the currently authenticated user.
+     *
+     * @return ResponseEntity containing StandardResponse with user profile or error
+     */
     @GetMapping("/me")
     public ResponseEntity<StandardResponse<UserProfileResponseDto>> getCurrentUserProfile() {
-        try {
-            UserProfileResponseDto userProfile = userService.getCurrentUserProfile();
-            return new ResponseEntity<>(
-                    new StandardResponse<>("User profile retrieved successfully.", null, userProfile),
-                    HttpStatus.OK);
-        } catch (RuntimeException e) {
-            String errorCode = "USER_PROFILE_ERROR";
-            if (e.getMessage() != null && e.getMessage().contains("Default user for profile operations")) {
-                errorCode = "DEFAULT_USER_NOT_FOUND";
-            }
-            return new ResponseEntity<>(
-                    new StandardResponse<>(e.getMessage(), errorCode, null),
-                    HttpStatus.NOT_FOUND);
-        }
+        StandardResponse<UserProfileResponseDto> response = userService.getCurrentUserProfile();
+        return ResponseEntity.ok(response);
     }
 
+    /**
+     * Updates the profile of the currently authenticated user.
+     *
+     * @param updateRequestDto DTO containing the updated profile information
+     * @return ResponseEntity containing StandardResponse with updated profile or error
+     */
     @PutMapping("/profile-update")
     public ResponseEntity<StandardResponse<UserProfileResponseDto>> updateUserProfile(
             @Valid @RequestBody UserProfileUpdateRequestDto updateRequestDto) {
-        try {
-            UserProfileResponseDto updatedUserProfile = userService.updateCurrentUserProfile(updateRequestDto);
-            return new ResponseEntity<>(
-                    new StandardResponse<>("User profile updated successfully.", null, updatedUserProfile),
-                    HttpStatus.OK);
-        } catch (RuntimeException e) {
-            String errorCode = "USER_PROFILE_UPDATE_ERROR";
-            if (e.getMessage() != null && e.getMessage().contains("Default user for profile operations")) {
-                errorCode = "DEFAULT_USER_NOT_FOUND";
-            }
-            return new ResponseEntity<>(
-                    new StandardResponse<>(e.getMessage(), errorCode, null),
-                    HttpStatus.BAD_REQUEST);
-        }
+        StandardResponse<UserProfileResponseDto> response = userService.updateCurrentUserProfile(updateRequestDto);
+        return ResponseEntity.ok(response);
     }
 }

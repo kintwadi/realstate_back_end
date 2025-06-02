@@ -1,9 +1,9 @@
 package com.imovel.api.exception;
 
-// Custom exceptions
-public class AuthenticationException extends RuntimeException {
-    public AuthenticationException(String message) {
-        super(message);
+import org.springframework.http.HttpStatus;
+
+public class AuthenticationException extends ApplicationException {
+    public AuthenticationException(String code, String message) {
+        super(code, message, HttpStatus.UNAUTHORIZED);
     }
 }
-
