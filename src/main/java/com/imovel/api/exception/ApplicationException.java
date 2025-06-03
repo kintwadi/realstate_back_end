@@ -1,23 +1,18 @@
 package com.imovel.api.exception;
 
-import com.imovel.api.response.ErrorResponse;
+import com.imovel.api.error.ErrorCode;
 import org.springframework.http.HttpStatus;
 
 public abstract class ApplicationException extends RuntimeException {
-    private final ErrorResponse errorResponse;
-    private final HttpStatus httpStatus;
+    private final ErrorCode errorResponse;
 
     public ApplicationException(String code, String message, HttpStatus httpStatus) {
         super(message);
-        this.errorResponse = new ErrorResponse(code, message);
-        this.httpStatus = httpStatus;
+        this.errorResponse = new ErrorCode(code, message,httpStatus);
     }
 
-    public ErrorResponse getErrorResponse() {
+    public ErrorCode getErrorResponse() {
         return errorResponse;
     }
 
-    public HttpStatus getHttpStatus() {
-        return httpStatus;
-    }
 }

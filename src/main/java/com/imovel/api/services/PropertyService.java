@@ -1,5 +1,6 @@
 package com.imovel.api.services;
 
+import com.imovel.api.error.ApiCode;
 import com.imovel.api.exception.*;
 import com.imovel.api.model.Location;
 import com.imovel.api.model.Property;
@@ -81,7 +82,7 @@ public class PropertyService {
                 .orElseThrow(() -> new ResourceNotFoundException("Property", propertyId));
 
         if (!propertyToUpdate.getCreatedBy().getId().equals(currentUser.getId())) {
-            throw new AuthorizationException("PROPERTY_UPDATE_UNAUTHORIZED",
+            throw new AuthorizationException(ApiCode.PROPERTY_OPERATION_NOT_ALLOWED.getCode().toString(),
                     "User not authorized to update this property", HttpStatus.UNAUTHORIZED);
         }
 
@@ -97,7 +98,7 @@ public class PropertyService {
                 .orElseThrow(() -> new ResourceNotFoundException("Property", propertyId));
 
         if (!propertyToDelete.getCreatedBy().getId().equals(currentUser.getId())) {
-            throw new AuthorizationException("PROPERTY_DELETE_UNAUTHORIZED",
+            throw new AuthorizationException(ApiCode.PROPERTY_OPERATION_NOT_ALLOWED.getCode().toString(),
                     "User not authorized to delete this property",HttpStatus.UNAUTHORIZED);
         }
 

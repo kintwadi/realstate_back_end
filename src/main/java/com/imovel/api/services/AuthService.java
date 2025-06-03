@@ -1,5 +1,6 @@
 package com.imovel.api.services;
 
+import com.imovel.api.error.ApiCode;
 import com.imovel.api.exception.ConflictException;
 import com.imovel.api.model.User;
 import com.imovel.api.model.enums.UserRole;
@@ -9,6 +10,7 @@ import com.imovel.api.request.UserRegistrationRequest;
 import com.imovel.api.response.StandardResponse;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 /**
@@ -57,7 +59,7 @@ public class AuthService {
     public StandardResponse<User> findByEmail(final String email) {
         return userRepository.findByEmail(email)
                 .map(StandardResponse::success)
-                .orElse(StandardResponse.error("USER_NOT_FOUND", "User not found with email: " + email));
+                .orElse(StandardResponse.error(ApiCode.USER_NOT_FOUND.getCode().toString(), "User not found with email: " + email, HttpStatus.NOT_FOUND));
     }
 
     /**
@@ -81,6 +83,6 @@ public class AuthService {
     public StandardResponse<User> changeUserPassword(PasswordChangeRequest changePasswordRequestDto) {
         return userRepository.findByEmail(changePasswordRequestDto.getEmail())
                 .map(user -> StandardResponse.success(user, "Password changed successfully"))
-                .orElse(StandardResponse.error("USER_NOT_FOUND", "User not found"));
+                .orElse(StandardResponse.error(ApiCode.USER_NOT_FOUND.getCode().toString(), "User not found",HttpStatus.NOT_FOUND));
     }
 }

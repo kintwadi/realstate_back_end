@@ -1,5 +1,8 @@
 package com.imovel.api.response;
 
+import com.imovel.api.error.ErrorCode;
+import org.springframework.http.HttpStatus;
+
 import java.time.Instant;
 
 /**
@@ -11,11 +14,11 @@ public class StandardResponse<T> {
     private boolean success;
     private T data;
     private String message;
-    private ErrorResponse error;
+    private ErrorCode error;
     private Instant timestamp;
 
     // Private constructor to enforce use of factory methods
-    private StandardResponse(boolean success, T data, String message, ErrorResponse error) {
+    private StandardResponse(boolean success, T data, String message, ErrorCode error) {
         this.success = success;
         this.data = data;
         this.message = message;
@@ -63,8 +66,8 @@ public class StandardResponse<T> {
      * @param message Error message
      * @return StandardResponse with error details
      */
-    public static <T> StandardResponse<T> error(String code, String message) {
-        return new StandardResponse<>(false, null, null, new ErrorResponse(code, message));
+    public static <T> StandardResponse<T> error(String code, String message, HttpStatus status) {
+        return new StandardResponse<>(false, null, null, new ErrorCode(code, message,status));
     }
 
     /**
@@ -73,7 +76,7 @@ public class StandardResponse<T> {
      * @param error ErrorResponse containing code and message
      * @return StandardResponse with error details
      */
-    public static <T> StandardResponse<T> error(ErrorResponse error) {
+    public static <T> StandardResponse<T> error(ErrorCode error) {
         return new StandardResponse<>(false, null, null, error);
     }
 
@@ -90,7 +93,7 @@ public class StandardResponse<T> {
         return message;
     }
 
-    public ErrorResponse getError() {
+    public ErrorCode getError() {
         return error;
     }
 
@@ -107,7 +110,7 @@ public class StandardResponse<T> {
         this.message = message;
     }
 
-    public void setError(ErrorResponse error) {
+    public void setError(ErrorCode error) {
         this.error = error;
     }
 }

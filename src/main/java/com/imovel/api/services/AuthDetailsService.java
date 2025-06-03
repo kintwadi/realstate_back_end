@@ -7,8 +7,6 @@ import com.imovel.api.response.StandardResponse;
 import com.imovel.api.security.PasswordManager;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 /**
  * Service layer for authentication details operations.
  * Handles business logic related to user authentication credentials.

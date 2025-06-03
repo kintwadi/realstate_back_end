@@ -1,5 +1,6 @@
 package com.imovel.api.security.aspect;
 
+import com.imovel.api.error.ApiCode;
 import com.imovel.api.exception.AuthenticationException;
 import com.imovel.api.exception.ResourceNotFoundException;
 import com.imovel.api.model.AuthDetails;
@@ -14,6 +15,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -25,10 +27,6 @@ import java.util.Optional;
 @Aspect
 @Component
 public class AuthServiceAspect {
-
-    // Error codes
-    private static final String PASSWORD_RESET_FAILED = "PASSWORD_RESET_0001";
-    private static final String INVALID_CREDENTIALS = "AUTH_001";
 
     private final PasswordManager passwordManager;
     private final AuthDetailsService authDetailsService;
@@ -93,7 +91,7 @@ public class AuthServiceAspect {
         StandardResponse<User> userResponse = authService.findByEmail(email);
 
         if (!userResponse.isSuccess() || !verifyUserPassword(userResponse.getData().getId(), password)) {
-            throw new AuthenticationException(INVALID_CREDENTIALS, "Invalid email or password");
+            throw new AuthenticationException(ApiCode.INVALID_CREDENTIALS.getCode().toString(), "Invalid email or password");
         }
 
         return joinPoint.proceed();
@@ -113,11 +111,11 @@ public class AuthServiceAspect {
         final StandardResponse<User> userResponse = authService.findByEmail(passwordChangeRequest.getEmail());
 
         if (!userResponse.isSuccess()) {
-            return StandardResponse.error(PASSWORD_RESET_FAILED, "User not found");
+            return StandardResponse.error(ApiCode.PASSWORD_RESET_FAILED.getCode().toString(), "User not found", HttpStatus.BAD_REQUEST);
         }
 
         if (!isPasswordValid(userResponse.getData().getId(), passwordChangeRequest.getOldPassword())) {
-            return StandardResponse.error(PASSWORD_RESET_FAILED, "Current password is incorrect");
+            return StandardResponse.error(ApiCode.PASSWORD_RESET_FAILED.getCode().toString(), "Current password is incorrect",HttpStatus.BAD_REQUEST);
         }
 
         // Update authentication details

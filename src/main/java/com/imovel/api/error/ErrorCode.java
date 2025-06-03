@@ -1,19 +1,20 @@
-package com.imovel.api.exception;
+package com.imovel.api.error;
+
+import org.springframework.http.HttpStatus;
 
 import java.time.Instant;
 
-/**
- * Standardized error response format
- */
-public class ErrorResponse {
+public class ErrorCode {
     private String code;
     private String message;
     private Instant timestamp;
+    private HttpStatus status;
 
-    public ErrorResponse(String code, String message) {
+    public ErrorCode(String code, String message, HttpStatus status) {
         this.code = code;
         this.message = message;
         this.timestamp = Instant.now();
+        this.status = status;
     }
 
     // Getters
@@ -27,5 +28,9 @@ public class ErrorResponse {
 
     public Instant getTimestamp() {
         return timestamp;
+    }
+
+    public HttpStatus getStatus() {
+        return status;
     }
 }

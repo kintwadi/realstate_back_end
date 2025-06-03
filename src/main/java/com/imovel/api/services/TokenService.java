@@ -1,5 +1,6 @@
 package com.imovel.api.services;
 
+import com.imovel.api.error.ApiCode;
 import com.imovel.api.exception.AuthenticationException;
 import com.imovel.api.exception.TokenRefreshException;
 import com.imovel.api.model.RefreshToken;
@@ -23,13 +24,6 @@ public class TokenService {
 
     // Constants
     public static final int CLEANUP_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
-
-    // Error codes
-    private static final String INVALID_REFRESH_TOKEN = "TOKEN_001";
-    private static final String EXPIRED_REFRESH_TOKEN = "TOKEN_002";
-    private static final String TOKEN_NOT_FOUND = "TOKEN_003";
-    private static final String TOKEN_LIMIT_EXCEEDED = "TOKEN_004";
-
     // Dependencies
     private final JWTProvider jwtProvider;
     private final RefreshTokenRepository refreshTokenRepository;
@@ -72,7 +66,7 @@ public class TokenService {
 
             return StandardResponse.success(tokens);
         } catch (Exception ex) {
-            throw new AuthenticationException("AUTH_001", "Authentication failed: " + ex.getMessage());
+            throw new AuthenticationException(ApiCode.AUTHENTICATION_FAILED.getCode().toString(), "Authentication failed: " + ex.getMessage());
         }
     }
 
@@ -197,7 +191,7 @@ public class TokenService {
      */
     private void validateRefreshToken(String refreshToken) {
         if (!jwtProvider.validateRefreshToken(refreshToken)) {
-            throw new TokenRefreshException(INVALID_REFRESH_TOKEN,
+            throw new TokenRefreshException(ApiCode.INVALID_REFRESH_TOKEN.getCode().toString(),
                     "Invalid refresh token signature",
                     HttpStatus.UNAUTHORIZED);
         }
@@ -212,12 +206,12 @@ public class TokenService {
     private RefreshToken getValidRefreshTokenFromDB(String refreshToken) {
         RefreshToken storedToken = refreshTokenRepository
                 .findByTokenAndRevokedFalseAndSupersededFalse(refreshToken)
-                .orElseThrow(() -> new TokenRefreshException(TOKEN_NOT_FOUND,
+                .orElseThrow(() -> new TokenRefreshException(ApiCode.REFRESH_TOKEN_NOT_FOUND.getCode().toString(),
                         "Refresh token not found or invalid",
                         HttpStatus.UNAUTHORIZED));
 
         if (storedToken.getExpiresAt().isBefore(Instant.now())) {
-            throw new TokenRefreshException(EXPIRED_REFRESH_TOKEN,
+            throw new TokenRefreshException(ApiCode.REFRESH_TOKEN_EXPIRED.getCode().toString(),
                     "Refresh token expired",
                     HttpStatus.UNAUTHORIZED);
         }
@@ -264,7 +258,7 @@ public class TokenService {
 
         if (activeTokenCount >= maxTokens) {
             revokeExcessTokens(userId, activeTokenCount - maxTokens + 1);
-            throw new TokenRefreshException(TOKEN_LIMIT_EXCEEDED,
+            throw new TokenRefreshException(ApiCode.REFRESH_TOKEN_NOT_LIMITE_EXCEEDED.getCode().toString(),
                     "Token limit exceeded. Oldest tokens have been revoked.",
                     HttpStatus.TOO_MANY_REQUESTS);
         }
