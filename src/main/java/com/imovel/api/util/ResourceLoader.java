@@ -5,7 +5,7 @@ import java.io.InputStream;
 import java.util.Properties;
 
 public class ResourceLoader {
-    private static final String DEFAULT_CONFIG_FILE = "endpointConfig.properties";
+    private static final String DEFAULT_CONFIG_FILE = "endpoints.properties";
     
     private final Properties properties;
 
