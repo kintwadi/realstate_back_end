@@ -11,6 +11,9 @@ import org.aspectj.lang.annotation.Pointcut;
  */
 public class PointCuts {
 
+    @Pointcut("within(@org.springframework.web.bind.annotation.RestController *)")
+    public void controllerMethods() {}
+
     /**
      * Pointcut for the user registration endpoint.
      * Targets the register method in AuthController.

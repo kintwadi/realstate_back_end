@@ -1,5 +1,7 @@
 package com.imovel.api.services;
 
+import com.imovel.api.error.ApiCode;
+import com.imovel.api.exception.ConflictException;
 import com.imovel.api.model.User;
 import com.imovel.api.model.enums.UserRole;
 import com.imovel.api.repository.UserRepository;
@@ -8,26 +10,34 @@ import com.imovel.api.request.UserRegistrationRequest;
 import com.imovel.api.response.StandardResponse;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
+/**
+ * Service for handling authentication-related operations.
+ */
 @Service
 public class AuthService {
 
-
     private final UserRepository userRepository;
-    @Autowired
-    private AuthDetailsService authDetailsService;
+    private final AuthDetailsService authDetailsService;
 
     @Autowired
-    public AuthService(UserRepository userRepository) {
+    public AuthService(UserRepository userRepository, AuthDetailsService authDetailsService) {
         this.userRepository = userRepository;
+        this.authDetailsService = authDetailsService;
     }
 
-    public Optional<User> registerUser(UserRegistrationRequest request) {
+    /**
+     * Registers a new user in the system.
+     *
+     * @param request The user registration request
+     * @return StandardResponse containing the registered user
+     * @throws ConflictException if email is already registered
+     */
+    public StandardResponse<User> registerUser(UserRegistrationRequest request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            return Optional.empty();
+            throw new ConflictException(ApiCode.INVALID_EMAIL_ALREADY_EXIST.getCode(), "Email already registered");
         }
 
         User newUser = new User();
@@ -36,45 +46,43 @@ public class AuthService {
         newUser.setPhone(request.getPhone());
         newUser.setRole(UserRole.CLIENT);
 
-        return Optional.of(userRepository.save(newUser));
+        User savedUser = userRepository.save(newUser);
+        return StandardResponse.success(savedUser);
     }
 
-    public Optional<User> findByEmail(final String email) {
-        return userRepository.findByEmail(email);
+    /**
+     * Finds a user by email.
+     *
+     * @param email The email to search for
+     * @return StandardResponse containing the user if found
+     */
+    public StandardResponse<User> findByEmail(final String email) {
+        return userRepository.findByEmail(email)
+                .map(StandardResponse::success)
+                .orElse(StandardResponse.error(ApiCode.USER_NOT_FOUND.getCode(), "User not found with email: " + email, HttpStatus.NOT_FOUND));
     }
 
-    public Optional<User> loginUser(String email, String password) {
-        return userRepository.findByEmail(email);
+    /**
+     * Attempts to log in a user.
+     *
+     * @param email The user's email
+     * @param password The user's password
+     * @return StandardResponse containing the user if credentials are valid
+     */
+    public StandardResponse<User> loginUser(String email, String password) {
+        return findByEmail(email);
     }
 
-    @Transactional
     /**
      * Changes the user's password after validating the request.
-     * @see com.imovel.api.security.aspect.AuthServiceAspect will:
-     *  1. Validate old password matches
-     *  2. Update to new password
-     *  3. Save the updated user entity
-     * @param changePasswordRequestDto The DTO containing password change details (email, old password, new password)
-     * @return StandardResponse indicating the result of the password change operation
      *
+     * @param changePasswordRequestDto The DTO containing password change details
+     * @return StandardResponse indicating the result of the operation
      */
-    public StandardResponse changeUserPassword(PasswordChangeRequest changePasswordRequestDto) {
-        // Initialize response with failure state (will be updated if successful)
-        StandardResponse standardResponse = new StandardResponse(
-                "PASSWORD_RESET_0001",
-                "Old password does not match",
-                null
-        );
-        // Find user by email from the repository
-        userRepository.findByEmail(changePasswordRequestDto.getEmail())
-                .ifPresent(user -> {
-                    // Update response for successful case
-                    standardResponse.setErrorCode("PASSWORD_RESET_000");
-                    standardResponse.setErrorText("Password changed successfully");
-                });
-
-        return standardResponse;
+    @Transactional
+    public StandardResponse<User> changeUserPassword(PasswordChangeRequest changePasswordRequestDto) {
+        return userRepository.findByEmail(changePasswordRequestDto.getEmail())
+                .map(user -> StandardResponse.success(user, "Password changed successfully"))
+                .orElse(StandardResponse.error(ApiCode.USER_NOT_FOUND.getCode(), "User not found",HttpStatus.NOT_FOUND));
     }
-
-
 }

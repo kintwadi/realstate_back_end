@@ -1,5 +1,6 @@
 package com.imovel.api.security.aspect;
 
+import com.imovel.api.error.ApiCode;
 import com.imovel.api.request.PasswordChangeRequest;
 import com.imovel.api.request.UserLoginRequest;
 import com.imovel.api.request.UserRegistrationRequest;
@@ -23,16 +24,6 @@ public class AuthControllerAspect {
     // Regex pattern for validating email format
     private static final Pattern EMAIL_REGEX_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
 
-    // Error codes for consistent error responses
-    private static final String INVALID_PAYLOAD_CODE = "REGISTRATION_001";
-    private static final String MISSING_FIELDS_CODE = "REGISTRATION_002";
-    private static final String INVALID_EMAIL_CODE = "REGISTRATION_003";
-
-    // Error messages
-    private static final String INVALID_PAYLOAD_MSG = "Invalid request payload";
-    private static final String MISSING_FIELDS_MSG = "Missing required fields";
-    private static final String INVALID_EMAIL_MSG = "Invalid email format";
-
     /**
      * Validates user registration requests before processing.
      *
@@ -46,19 +37,19 @@ public class AuthControllerAspect {
 
         // Validate request payload
         if (args.length == 0 || !(args[0] instanceof UserRegistrationRequest)) {
-            return createErrorResponse(INVALID_PAYLOAD_MSG, INVALID_PAYLOAD_CODE, HttpStatus.BAD_REQUEST);
+            return createErrorResponse("Invalid payload", ApiCode.INVALID_PAYLOAD.getCode(), HttpStatus.CONFLICT);
         }
 
         UserRegistrationRequest request = (UserRegistrationRequest) args[0];
 
         // Validate required fields
         if (areFieldsMissing(request.getEmail(), request.getPassword())) {
-            return createErrorResponse(MISSING_FIELDS_MSG, MISSING_FIELDS_CODE, HttpStatus.BAD_REQUEST);
+            return createErrorResponse("Missing required fields", ApiCode.REQUIRED_FIELD_MISSING.getCode(), HttpStatus.BAD_REQUEST);
         }
 
         // Validate email format
         if (isEmailInvalid(request.getEmail())) {
-            return createErrorResponse(INVALID_EMAIL_MSG, INVALID_EMAIL_CODE, HttpStatus.BAD_REQUEST);
+            return createErrorResponse("Email not valid", ApiCode.INVALID_EMAIL.getCode(), HttpStatus.BAD_REQUEST);
         }
 
         return joinPoint.proceed();
@@ -80,12 +71,12 @@ public class AuthControllerAspect {
 
         // Validate required fields
         if (areFieldsMissing(request.getEmail(), request.getPassword())) {
-            return createErrorResponse(MISSING_FIELDS_MSG, MISSING_FIELDS_CODE, HttpStatus.BAD_REQUEST);
+            return createErrorResponse("Missing required fields", ApiCode.REQUIRED_FIELD_MISSING.getCode(), HttpStatus.BAD_REQUEST);
         }
 
         // Validate email format
         if (isEmailInvalid(request.getEmail())) {
-            return createErrorResponse(INVALID_EMAIL_MSG, INVALID_EMAIL_CODE, HttpStatus.BAD_REQUEST);
+            return createErrorResponse("Email not valid", ApiCode.INVALID_EMAIL.getCode(), HttpStatus.BAD_REQUEST);
         }
 
 
@@ -101,15 +92,15 @@ public class AuthControllerAspect {
 
         // Validate required fields
         if (areFieldsMissing(request.getEmail(), request.getOldPassword())) {
-            return createErrorResponse(MISSING_FIELDS_MSG, MISSING_FIELDS_CODE, HttpStatus.BAD_REQUEST);
+            return createErrorResponse("Missing required fields", ApiCode.REQUIRED_FIELD_MISSING.getCode(), HttpStatus.BAD_REQUEST);
         }
         // Validate required fields
         if (areFieldsMissing(request.getEmail(), request.getNewPassword())) {
-            return createErrorResponse(MISSING_FIELDS_MSG, MISSING_FIELDS_CODE, HttpStatus.BAD_REQUEST);
+            return createErrorResponse("Missing required fields", ApiCode.REQUIRED_FIELD_MISSING.getCode(), HttpStatus.BAD_REQUEST);
         }
         // Validate email format
         if (isEmailInvalid(request.getEmail())) {
-            return createErrorResponse(INVALID_EMAIL_MSG, INVALID_EMAIL_CODE, HttpStatus.BAD_REQUEST);
+            return createErrorResponse("Email not valid", ApiCode.INVALID_EMAIL.getCode(), HttpStatus.BAD_REQUEST);
         }
 
         return joinPoint.proceed();
@@ -146,9 +137,9 @@ public class AuthControllerAspect {
      * @return ResponseEntity containing the error response
      */
     private ResponseEntity<StandardResponse<String>> createErrorResponse(
-            final String message, final String code, final HttpStatus status) {
-        return new ResponseEntity<>(
-                new StandardResponse<>(message, code, null),
-                status);
+            final String message, final long code, final HttpStatus status)
+    {
+        StandardResponse<String> standardResponse = StandardResponse.error(code,message,status);
+        return new ResponseEntity<>(standardResponse,status);
     }
 }

@@ -1,5 +1,7 @@
 package com.imovel.api.services;
 
+import com.imovel.api.error.ApiCode;
+import com.imovel.api.exception.*;
 import com.imovel.api.model.Location;
 import com.imovel.api.model.Property;
 import com.imovel.api.model.User;
@@ -8,10 +10,12 @@ import com.imovel.api.repository.UserRepository;
 import com.imovel.api.request.LocationDto;
 import com.imovel.api.request.PropertyRequestDto;
 import com.imovel.api.response.PropertyResponseDto;
+import com.imovel.api.response.StandardResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,95 +40,101 @@ public class PropertyService {
      * Fetches the "current" user for operations.
      * FOR DEVELOPMENT: Fetches user with hardcoded ID.
      * IN PRODUCTION: This would be replaced by getting user from security context.
+     *
+     * @throws ResourceNotFoundException if the default user is not found
      */
-    //TODO
     private User getCurrentUserForOperations() {
         return userRepository.findById(CURRENT_USER_ID)
-                .orElseThrow(() -> new RuntimeException("Default user with ID " + CURRENT_USER_ID + " not found."));
+                .orElseThrow(() -> new ResourceNotFoundException("User", CURRENT_USER_ID));
     }
 
     @Transactional
-    public PropertyResponseDto createProperty(PropertyRequestDto propertyRequestDto) {
+    public StandardResponse<PropertyResponseDto> createProperty(PropertyRequestDto propertyRequestDto) {
         User currentUser = getCurrentUserForOperations();
 
         Property property = mapToEntity(propertyRequestDto);
         property.setCreatedBy(currentUser);
 
         Property savedProperty = propertyRepository.save(property);
-        return mapToResponseDto(savedProperty);
+        return StandardResponse.success(mapToResponseDto(savedProperty));
     }
 
     @Transactional(readOnly = true)
-    public PropertyResponseDto getPropertyById(Long id) {
+    public StandardResponse<PropertyResponseDto> getPropertyById(Long id) {
         Property property = propertyRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Property not found with id: " + id));
-        return mapToResponseDto(property);
+                .orElseThrow(() -> new ResourceNotFoundException("Property", id));
+        return StandardResponse.success(mapToResponseDto(property));
     }
 
     @Transactional(readOnly = true)
-    public Page<PropertyResponseDto> getAllProperties(Pageable pageable) {
+    public StandardResponse<Page<PropertyResponseDto>> getAllProperties(Pageable pageable) {
         Page<Property> propertiesPage = propertyRepository.findAll(pageable);
         List<PropertyResponseDto> dtos = propertiesPage.getContent().stream()
                 .map(this::mapToResponseDto)
                 .collect(Collectors.toList());
-        return new PageImpl<>(dtos, pageable, propertiesPage.getTotalElements());
+        return StandardResponse.success(new PageImpl<>(dtos, pageable, propertiesPage.getTotalElements()));
     }
 
     @Transactional
-    public PropertyResponseDto updateProperty(Long propertyId, PropertyRequestDto propertyRequestDto) {
+    public StandardResponse<PropertyResponseDto> updateProperty(Long propertyId, PropertyRequestDto propertyRequestDto) {
         User currentUser = getCurrentUserForOperations();
         Property propertyToUpdate = propertyRepository.findById(propertyId)
-                .orElseThrow(() -> new RuntimeException("Property not found with id: " + propertyId));
+                .orElseThrow(() -> new ResourceNotFoundException("Property", propertyId));
 
         if (!propertyToUpdate.getCreatedBy().getId().equals(currentUser.getId())) {
-            throw new RuntimeException("User not authorized to update this property. Property owned by user ID " +
-                    propertyToUpdate.getCreatedBy().getId() + ", current user ID " + currentUser.getId());
+            throw new AuthorizationException(ApiCode.PROPERTY_OPERATION_NOT_ALLOWED.getCode(),
+                    "User not authorized to update this property", HttpStatus.UNAUTHORIZED);
         }
 
-        propertyToUpdate.setTitle(propertyRequestDto.getTitle());
-        propertyToUpdate.setDescription(propertyRequestDto.getDescription());
-        propertyToUpdate.setPrice(propertyRequestDto.getPrice());
-        propertyToUpdate.setType(propertyRequestDto.getType());
-        propertyToUpdate.setCategory(propertyRequestDto.getCategory());
-        propertyToUpdate.setBedrooms(propertyRequestDto.getBedrooms());
-        propertyToUpdate.setBathrooms(propertyRequestDto.getBathrooms());
-        propertyToUpdate.setArea(propertyRequestDto.getArea());
-        propertyToUpdate.setStatus(propertyRequestDto.getStatus());
+        updatePropertyFields(propertyToUpdate, propertyRequestDto);
+        Property updatedProperty = propertyRepository.save(propertyToUpdate);
+        return StandardResponse.success(mapToResponseDto(updatedProperty));
+    }
 
-        if (propertyRequestDto.getLocation() != null) {
-            Location location = propertyToUpdate.getLocation();
+    @Transactional
+    public StandardResponse<Void> deleteProperty(Long propertyId) {
+        User currentUser = getCurrentUserForOperations();
+        Property propertyToDelete = propertyRepository.findById(propertyId)
+                .orElseThrow(() -> new ResourceNotFoundException("Property", propertyId));
+
+        if (!propertyToDelete.getCreatedBy().getId().equals(currentUser.getId())) {
+            throw new AuthorizationException(ApiCode.PROPERTY_OPERATION_NOT_ALLOWED.getCode(),
+                    "User not authorized to delete this property",HttpStatus.UNAUTHORIZED);
+        }
+
+        propertyRepository.delete(propertyToDelete);
+        return StandardResponse.success(null);
+    }
+
+    private void updatePropertyFields(Property property, PropertyRequestDto dto) {
+        property.setTitle(dto.getTitle());
+        property.setDescription(dto.getDescription());
+        property.setPrice(dto.getPrice());
+        property.setType(dto.getType());
+        property.setCategory(dto.getCategory());
+        property.setBedrooms(dto.getBedrooms());
+        property.setBathrooms(dto.getBathrooms());
+        property.setArea(dto.getArea());
+        property.setStatus(dto.getStatus());
+
+        if (dto.getLocation() != null) {
+            Location location = property.getLocation();
             if (location == null) location = new Location();
-            LocationDto locDto = propertyRequestDto.getLocation();
+            LocationDto locDto = dto.getLocation();
             location.setAddress(locDto.getAddress());
             location.setCity(locDto.getCity());
             location.setState(locDto.getState());
             location.setZipCode(locDto.getZipCode());
             location.setLatitude(locDto.getLatitude());
             location.setLongitude(locDto.getLongitude());
-            propertyToUpdate.setLocation(location);
+            property.setLocation(location);
         }
 
-        if (propertyRequestDto.getAmenities() != null) {
-            propertyToUpdate.setAmenities(new HashSet<>(propertyRequestDto.getAmenities()));
+        if (dto.getAmenities() != null) {
+            property.setAmenities(new HashSet<>(dto.getAmenities()));
         } else {
-            propertyToUpdate.setAmenities(new HashSet<>());
+            property.setAmenities(new HashSet<>());
         }
-
-        Property updatedProperty = propertyRepository.save(propertyToUpdate);
-        return mapToResponseDto(updatedProperty);
-    }
-
-    @Transactional
-    public void deleteProperty(Long propertyId) {
-        User currentUser = getCurrentUserForOperations();
-        Property propertyToDelete = propertyRepository.findById(propertyId)
-                .orElseThrow(() -> new RuntimeException("Property not found with id: " + propertyId));
-
-        if (!propertyToDelete.getCreatedBy().getId().equals(currentUser.getId())) {
-            throw new RuntimeException("User not authorized to delete this property. Property owned by user ID " +
-                    propertyToDelete.getCreatedBy().getId() + ", current user ID " + currentUser.getId());
-        }
-        propertyRepository.delete(propertyToDelete);
     }
 
     private Property mapToEntity(PropertyRequestDto dto) {
@@ -138,6 +148,7 @@ public class PropertyService {
         entity.setBathrooms(dto.getBathrooms());
         entity.setArea(dto.getArea());
         entity.setStatus(dto.getStatus());
+
         if (dto.getLocation() != null) {
             Location location = new Location();
             location.setAddress(dto.getLocation().getAddress());
@@ -148,11 +159,13 @@ public class PropertyService {
             location.setLongitude(dto.getLocation().getLongitude());
             entity.setLocation(location);
         }
+
         if (dto.getAmenities() != null) {
             entity.setAmenities(new HashSet<>(dto.getAmenities()));
         } else {
             entity.setAmenities(new HashSet<>());
         }
+
         return entity;
     }
 
@@ -168,6 +181,7 @@ public class PropertyService {
         dto.setBathrooms(entity.getBathrooms());
         dto.setArea(entity.getArea());
         dto.setStatus(entity.getStatus());
+
         if (entity.getLocation() != null) {
             LocationDto locDto = new LocationDto();
             locDto.setAddress(entity.getLocation().getAddress());
@@ -178,14 +192,17 @@ public class PropertyService {
             locDto.setLongitude(entity.getLocation().getLongitude());
             dto.setLocation(locDto);
         }
+
         if (entity.getAmenities() != null) {
             dto.setAmenities(new HashSet<>(entity.getAmenities()));
         } else {
             dto.setAmenities(new HashSet<>());
         }
+
         if (entity.getCreatedBy() != null) {
             dto.setCreatedByEmail(entity.getCreatedBy().getEmail());
         }
+
         dto.setCreatedAt(entity.getCreatedAt());
         dto.setUpdatedAt(entity.getUpdatedAt());
         return dto;

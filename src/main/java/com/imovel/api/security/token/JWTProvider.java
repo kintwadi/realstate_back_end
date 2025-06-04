@@ -23,7 +23,7 @@ import java.util.UUID;
  * Provides secure management of both access and refresh tokens with separate algorithms.
  */
 @Component
-public final class JWTProcessor {
+public final class JWTProvider {
 
     private static final String ACCESS_EXPIRATION_MS = "ACCESS_EXPIRATION_MS";
     private static final String REFRESH_EXPIRATION_MS = "REFRESH_EXPIRATION_MS";

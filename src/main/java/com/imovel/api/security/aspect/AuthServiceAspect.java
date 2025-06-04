@@ -1,5 +1,8 @@
 package com.imovel.api.security.aspect;
 
+import com.imovel.api.error.ApiCode;
+import com.imovel.api.exception.AuthenticationException;
+import com.imovel.api.exception.ResourceNotFoundException;
 import com.imovel.api.model.AuthDetails;
 import com.imovel.api.model.User;
 import com.imovel.api.request.PasswordChangeRequest;
@@ -12,6 +15,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -23,11 +27,6 @@ import java.util.Optional;
 @Aspect
 @Component
 public class AuthServiceAspect {
-
-    // Error messages and codes
-    private static final String PASSWORD_RESET_FAILED = "PASSWORD_RESET_0001";
-    private static final String USER_NOT_FOUND_OR_PASSWORD_NOT_MATCH = "User does not exist or Old password does not match";
-    public static final String AUTH_DETAILS_NOT_FOUND_FOR_USER = "Auth details not found for user";
 
     private final PasswordManager passwordManager;
     private final AuthDetailsService authDetailsService;
@@ -54,25 +53,25 @@ public class AuthServiceAspect {
      * Handles creation of authentication details after successful user registration.
      *
      * @param joinPoint The proceeding join point
-     * @return Optional<User> containing the registered user if successful
+     * @return StandardResponse containing the registered user if successful
      * @throws Throwable if an error occurs during processing
      */
     @Around("com.imovel.api.security.aspect.pointcut.PointCuts.registerUser()")
     public Object registerUser(final ProceedingJoinPoint joinPoint) throws Throwable {
         UserRegistrationRequest request = (UserRegistrationRequest) joinPoint.getArgs()[0];
 
-        Optional<User> user = (Optional<User>) joinPoint.proceed();
+        StandardResponse<User> response = (StandardResponse<User>) joinPoint.proceed();
 
-        if (user.isEmpty()) {
-            return Optional.empty();
+        if (!response.isSuccess() || response.getData() == null) {
+            return response;
         }
 
         // Create and save authentication details for the new user
         AuthDetails authDetails = passwordManager.createAuthDetails(request.getPassword());
-        authDetails.setUserId(user.get().getId());
+        authDetails.setUserId(response.getData().getId());
         authDetailsService.save(authDetails);
 
-        return user;
+        return response;
     }
 
     /**
@@ -80,7 +79,7 @@ public class AuthServiceAspect {
      * Verifies user credentials before proceeding with login.
      *
      * @param joinPoint The proceeding join point
-     * @return The result of the login process if credentials are valid
+     * @return StandardResponse with login result if credentials are valid
      * @throws Throwable if an error occurs during processing
      */
     @Around("com.imovel.api.security.aspect.pointcut.PointCuts.loginUser()")
@@ -89,59 +88,46 @@ public class AuthServiceAspect {
         String email = (String) args[0];
         String password = (String) args[1];
 
-        Optional<User> user = authService.findByEmail(email);
+        StandardResponse<User> userResponse = authService.findByEmail(email);
 
-        if (user.isEmpty() || !verifyUserPassword(user.get().getId(), password)) {
-
-            return Optional.empty();
+        if (!userResponse.isSuccess() || !verifyUserPassword(userResponse.getData().getId(), password)) {
+            throw new AuthenticationException(ApiCode.INVALID_CREDENTIALS.getCode(), "Invalid email or password");
         }
-
 
         return joinPoint.proceed();
     }
-
-
 
     /**
      * Interceptor method that verifies the user's current password before allowing a password change.
      *
      * @param joinPoint The proceeding join point for the intercepted method
-     * @return StandardResponse if verification fails, otherwise proceeds with the original method
+     * @return StandardResponse indicating the result of the password change operation
      * @throws Throwable if an error occurs during processing
      */
     @Around("com.imovel.api.security.aspect.pointcut.PointCuts.changeUserPassword()")
     public Object verifyPasswordBeforeChange(final ProceedingJoinPoint joinPoint) throws Throwable {
-        // Extract method arguments
-        final Object[] args = joinPoint.getArgs();
-        final PasswordChangeRequest passwordChangeRequest = (PasswordChangeRequest) args[0];
+        final PasswordChangeRequest passwordChangeRequest = (PasswordChangeRequest) joinPoint.getArgs()[0];
 
-        // Retrieve user by email
-        final Optional<User> userOptional = authService.findByEmail(passwordChangeRequest.getEmail());
+        final StandardResponse<User> userResponse = authService.findByEmail(passwordChangeRequest.getEmail());
 
-        // Verify user exists and current password is correct
-        if (userOptional.isEmpty() || !isPasswordValid(userOptional.get().getId(), passwordChangeRequest.getOldPassword())) {
-            return new StandardResponse(
-                    PASSWORD_RESET_FAILED,
-                    USER_NOT_FOUND_OR_PASSWORD_NOT_MATCH,
-                    null
-            );
+        if (!userResponse.isSuccess()) {
+            return StandardResponse.error(ApiCode.PASSWORD_RESET_FAILED.getCode(), "User not found", HttpStatus.BAD_REQUEST);
         }
 
-        // Prepare new authentication details
-        final User user = userOptional.get();
-        final AuthDetails newAuthDetails = passwordManager.createAuthDetails(passwordChangeRequest.getNewPassword());
+        if (!isPasswordValid(userResponse.getData().getId(), passwordChangeRequest.getOldPassword())) {
+            return StandardResponse.error(ApiCode.PASSWORD_RESET_FAILED.getCode(), "Current password is incorrect",HttpStatus.BAD_REQUEST);
+        }
 
-        // Update existing authentication details
-        final AuthDetails currentAuthDetails = authDetailsService.findByUserId(user.getId())
-                .orElseThrow(() -> new IllegalStateException(AUTH_DETAILS_NOT_FOUND_FOR_USER));
+        // Update authentication details
+        final AuthDetails newAuthDetails = passwordManager.createAuthDetails(passwordChangeRequest.getNewPassword());
+        final AuthDetails currentAuthDetails = authDetailsService.findByUserId(userResponse.getData().getId())
+                .getData();
 
         currentAuthDetails.setHash(newAuthDetails.getHash());
         currentAuthDetails.setSalt(newAuthDetails.getSalt());
 
-        // Persist updated credentials
         authDetailsService.save(currentAuthDetails);
 
-        // Proceed with original operation
         return joinPoint.proceed();
     }
 
@@ -155,6 +141,7 @@ public class AuthServiceAspect {
     private boolean isPasswordValid(Long userId, String password) {
         return verifyUserPassword(userId, password);
     }
+
     /**
      * Verifies if the provided password matches the stored credentials for a user.
      *
@@ -163,12 +150,12 @@ public class AuthServiceAspect {
      * @return true if the password is valid, false otherwise
      */
     private boolean verifyUserPassword(Long userId, String password) {
-        return authDetailsService.findByUserId(userId)
-                .map(authDetails -> passwordManager.verifyPassword(
-                        password,
-                        authDetails.getHash(),
-                        authDetails.getSalt()))
-                .orElse(false);
-    }
+        StandardResponse<AuthDetails> authDetailsResponse = authDetailsService.findByUserId(userId);
+        if (!authDetailsResponse.isSuccess()) {
+            return false;
+        }
 
+        AuthDetails authDetails = authDetailsResponse.getData();
+        return passwordManager.verifyPassword(password, authDetails.getHash(), authDetails.getSalt());
+    }
 }

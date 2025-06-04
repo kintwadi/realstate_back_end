@@ -1,8 +1,10 @@
 package com.imovel.api.services;
 
+import com.imovel.api.exception.ResourceNotFoundException;
 import com.imovel.api.model.User;
 import com.imovel.api.repository.UserRepository;
 import com.imovel.api.request.UserProfileUpdateRequestDto;
+import com.imovel.api.response.StandardResponse;
 import com.imovel.api.response.UserProfileResponseDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,34 +12,57 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 
+/**
+ * Service class for handling user profile operations.
+ * Manages user profile retrieval and updates with proper error handling.
+ */
 @Service
 public class UserService {
 
     private final UserRepository userRepository;
 
+    // Temporary constant for development - to be replaced with actual authenticated user ID
     private static final Long CURRENT_USER_ID_FOR_PROFILE_OPERATIONS = 1L;
 
     @Autowired
-    public UserService(UserRepository userRepository){
+    public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
+    /**
+     * Retrieves the current authenticated user for profile operations.
+     * Note: In production, this should get the user from security context.
+     *
+     * @return The authenticated user entity
+     * @throws ResourceNotFoundException if the default user is not found
+     */
     private User getCurrentAuthenticatedUser() {
         return userRepository.findById(CURRENT_USER_ID_FOR_PROFILE_OPERATIONS)
-                .orElseThrow(() -> new RuntimeException("Default user for profile operations (ID " +
-                        CURRENT_USER_ID_FOR_PROFILE_OPERATIONS + ") not found. Ensure this user exists."));
+                .orElseThrow(() -> new ResourceNotFoundException("User", CURRENT_USER_ID_FOR_PROFILE_OPERATIONS));
     }
 
+    /**
+     * Retrieves the profile of the current authenticated user.
+     *
+     * @return StandardResponse containing the user profile DTO
+     */
     @Transactional(readOnly = true)
-    public UserProfileResponseDto getCurrentUserProfile() {
+    public StandardResponse<UserProfileResponseDto> getCurrentUserProfile() {
         User currentUser = getCurrentAuthenticatedUser();
-        return mapToUserProfileResponseDto(currentUser);
+        return StandardResponse.success(mapToUserProfileResponseDto(currentUser));
     }
 
+    /**
+     * Updates the profile of the current authenticated user.
+     *
+     * @param updateRequestDto DTO containing the updated profile information
+     * @return StandardResponse containing the updated user profile DTO
+     */
     @Transactional
-    public UserProfileResponseDto updateCurrentUserProfile(UserProfileUpdateRequestDto updateRequestDto) {
+    public StandardResponse<UserProfileResponseDto> updateCurrentUserProfile(UserProfileUpdateRequestDto updateRequestDto) {
         User currentUser = getCurrentAuthenticatedUser();
 
+        // Update user fields if they are provided in the request
         if (updateRequestDto.getName() != null) {
             currentUser.setName(updateRequestDto.getName());
         }
@@ -50,10 +75,17 @@ public class UserService {
         if (updateRequestDto.getSocialLinks() != null) {
             currentUser.setSocialLinks(new ArrayList<>(updateRequestDto.getSocialLinks()));
         }
+
         User updatedUser = userRepository.save(currentUser);
-        return mapToUserProfileResponseDto(updatedUser);
+        return StandardResponse.success(mapToUserProfileResponseDto(updatedUser));
     }
 
+    /**
+     * Maps a User entity to a UserProfileResponseDto.
+     *
+     * @param user The user entity to map
+     * @return The mapped UserProfileResponseDto
+     */
     private UserProfileResponseDto mapToUserProfileResponseDto(User user) {
         UserProfileResponseDto dto = new UserProfileResponseDto();
         dto.setId(user.getId());
@@ -62,11 +94,8 @@ public class UserService {
         dto.setPhone(user.getPhone());
         dto.setAvatar(user.getAvatar());
         dto.setRole(user.getRole());
-        if (user.getSocialLinks() != null) {
-            dto.setSocialLinks(new ArrayList<>(user.getSocialLinks()));
-        } else {
-            dto.setSocialLinks(new ArrayList<>());
-        }
+        dto.setSocialLinks(user.getSocialLinks() != null ?
+                new ArrayList<>(user.getSocialLinks()) : new ArrayList<>());
         dto.setCreatedAt(user.getCreatedAt());
         dto.setUpdatedAt(user.getUpdatedAt());
         return dto;

@@ -1,6 +1,6 @@
 package com.imovel.api.filter;
 
-import com.imovel.api.security.token.JWTProcessor;
+import com.imovel.api.security.token.JWTProvider;
 import com.imovel.api.services.ConfigurationService;
 import com.imovel.api.util.ResourceLoader;
 import jakarta.servlet.*;
@@ -24,7 +24,7 @@ public class AuthenticationFilter implements Filter {
     private List<String> protectedEndpoints = Collections.emptyList();
     private List<String> excludedEndpoints = Collections.emptyList();
     @Autowired
-    JWTProcessor jwtProcessor;
+    JWTProvider jwtProcessor;
     @Autowired
     private ConfigurationService configurationService;
 
