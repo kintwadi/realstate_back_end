@@ -259,7 +259,7 @@ public class TokenService {
         if (activeTokenCount >= maxTokens) {
             revokeExcessTokens(userId, activeTokenCount - maxTokens + 1);
             throw new TokenRefreshException(ApiCode.REFRESH_TOKEN_NOT_LIMITE_EXCEEDED.getCode(),
-                    "Token limit exceeded. Oldest tokens have been revoked.",
+                    ApiCode.REFRESH_TOKEN_NOT_LIMITE_EXCEEDED.getMessage(),
                     HttpStatus.TOO_MANY_REQUESTS);
         }
     }
@@ -274,7 +274,6 @@ public class TokenService {
                 .orElseThrow(() -> new IllegalStateException("Token limit configuration not found"))
                 .getConfigValue());
     }
-
     /**
      * Revokes the oldest tokens for a user when they exceed the limit
      * @param userId The user ID

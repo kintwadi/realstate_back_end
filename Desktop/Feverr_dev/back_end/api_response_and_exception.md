@@ -24,6 +24,58 @@ ApplicationException (abstract)
 ├── TokenRefreshException
 └── BusinessRuleException
 ````
+#### Responses structure
+
+````JSON
+{
+  "success": boolean,
+  "data": T,
+  "message": String,
+  "error": {
+    "code": string,
+    "message": string,
+    "timestamp": string
+  },
+  "timestamp": string
+}
+````
+#### Success Response 
+
+````JSON
+{
+  "success": true,
+  "message": "User created successfully",
+  "data": {
+    "id": 123,
+    "name": "John Doe",
+    "email": "john.doe@example.com",
+    "role": "CLIENT",
+    "createdAt": "2023-07-20T10:30:00Z",
+    "updatedAt": "2023-07-20T10:30:00Z"
+  },
+  "error": null,
+  "timestamp": "2023-07-20T12:34:56.789Z"
+}
+````
+
+#### Error Response
+
+````JSON
+{
+    "success": false,
+    "data": null,
+    "message": null,
+    "error": {
+        "code": 2008,
+        "message": "Refresh token not found or invalid",
+        "timestamp": "2025-06-04T13:51:47.751190400Z",
+        "status": "UNAUTHORIZED"
+    },
+    "timestamp": "2025-06-04T13:51:47.753190100Z"
+}
+````
+
+
 
 ##### Rules: 
         -- Services --
@@ -35,29 +87,26 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public User getUserById(Long id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User", id));
-    }
+       /**
+     * Registers a new user in the system.
+     *
+     * @param request The user registration request
+     * @return StandardResponse containing the registered user
+     * @throws ConflictException if email is already registered
+     */
+    public StandardResponse<User> registerUser(UserRegistrationRequest request) {
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new ConflictException(ApiCode.INVALID_EMAIL_ALREADY_EXIST.getCode(),ApiCode.INVALID_EMAIL_ALREADY_EXIST.getMessage());
+        }
 
-    public User createUser(UserDto userDto) {
-        if (userRepository.existsByEmail(userDto.getEmail())) {
-            throw new ConflictException("EMAIL_EXISTS", "Email already registered");
-        }
-        
-        if (!isValidPassword(userDto.getPassword())) {
-            throw new ValidationException(
-                "INVALID_PASSWORD",
-                "Password doesn't meet requirements",
-                List.of(
-                    "Must be at least 8 characters",
-                    "Must contain at least one number"
-                )
-            );
-        }
-        
-        User user = mapToEntity(userDto);
-        return userRepository.save(user);
+        User newUser = new User();
+        newUser.setName(request.getName());
+        newUser.setEmail(request.getEmail());
+        newUser.setPhone(request.getPhone());
+        newUser.setRole(UserRole.CLIENT);
+
+        User savedUser = userRepository.save(newUser);
+        return StandardResponse.success(savedUser);
     }
 }
 ````
@@ -182,78 +231,10 @@ public enum ApiErrorCode {
 }
 ````
 
-
-#### Responses structure
-
-````json
-{
-  "success": boolean,
-  "data": T,
-  "error": {
-    "code": string,
-    "message": string,
-    "timestamp": string
-  },
-  "timestamp": string
-}
-````
-#### Resource Not Found
-````java
-{
-  "success": false,
-  "data": null,
-  "error": {
-    "code": "RESOURCE_NOT_FOUND",
-    "message": "User not found with id: 123",
-    "timestamp": "2023-07-20T12:34:56.789Z"
-  },
-  "timestamp": "2023-07-20T12:34:56.789Z"
-}
-
-````
-#### Validation Error
-
-````java
-{
-  "success": false,
-  "data": null,
-  "error": {
-    "code": "INVALID_REQUEST",
-    "message": "Request validation failed",
-    "details": [
-      "Email is required",
-      "Password must be 8+ characters"
-    ],
-    "timestamp": "2023-07-20T12:34:56.789Z"
-  },
-  "timestamp": "2023-07-20T12:34:56.789Z"
-}
-
-````
-
-#### Success Response 
-
-````java
-{
-  "success": true,
-  "data": {
-    "id": 123,
-    "name": "John Doe",
-    "email": "john.doe@example.com",
-    "role": "CLIENT",
-    "createdAt": "2023-07-20T10:30:00Z",
-    "updatedAt": "2023-07-20T10:30:00Z"
-  },
-  "error": null,
-  "timestamp": "2023-07-20T12:34:56.789Z"
-}
-
-````
-
-#### Best Practices
+#### Best practices adhered
 
 - **Services should throw exceptions** - Let the global handler manage the response  
 - **Controllers should be lean** - Focus on routing and response formatting  
 - **Use specific exceptions** - Choose the most appropriate exception type  
 - **Include helpful messages** - Error messages should help clients debug issues  
-- **Log exceptions** - Ensure exceptions are properly logged before being handled  
+- **Log exceptions** - Ensure exceptions are properly logged before being handled  (TO DO...)

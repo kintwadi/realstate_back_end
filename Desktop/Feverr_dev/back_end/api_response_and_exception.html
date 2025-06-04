@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>api_response_and_exception.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h3 id="api-response-and-exception-handling">API Response and Exception Handling</h3>
+<h4 id="fields-explanation">Fields Explanation</h4>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>success</td>
+<td>boolean</td>
+<td>Indicates if the request was successful</td>
+</tr>
+<tr>
+<td>data</td>
+<td>generic T</td>
+<td>The response payload (null for errors)</td>
+</tr>
+<tr>
+<td>error</td>
+<td>object</td>
+<td>Error details (null for successes) containing:</td>
+</tr>
+<tr>
+<td>∟ code</td>
+<td>string</td>
+<td>Machine-readable error code</td>
+</tr>
+<tr>
+<td>∟ message</td>
+<td>string</td>
+<td>Human-readable error message</td>
+</tr>
+<tr>
+<td>∟ timestamp</td>
+<td>string</td>
+<td>When the error occurred (ISO-8601)</td>
+</tr>
+<tr>
+<td>timestamp</td>
+<td>string</td>
+<td>When the response was generated (ISO-8601)</td>
+</tr>
+</tbody>
+</table>
+<h4 id="custom-exceptions">Custom Exceptions</h4>
+<pre class="hljs"><code><div><span class="hljs-attr">ApplicationException</span> <span class="hljs-string">(abstract)</span>
+<span class="hljs-attr">├──</span> <span class="hljs-string">ResourceNotFoundException</span>
+<span class="hljs-attr">├──</span> <span class="hljs-string">AuthenticationException</span>
+<span class="hljs-attr">├──</span> <span class="hljs-string">AuthorizationException</span>
+<span class="hljs-attr">├──</span> <span class="hljs-string">ValidationException</span>
+<span class="hljs-attr">├──</span> <span class="hljs-string">ConflictException</span>
+<span class="hljs-attr">├──</span> <span class="hljs-string">TokenRefreshException</span>
+<span class="hljs-attr">└──</span> <span class="hljs-string">BusinessRuleException</span>
+</div></code></pre>
+<h4 id="responses-structure">Responses structure</h4>
+<pre class="hljs"><code><div><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;success&quot;</span><span class="hljs-punctuation">:</span> boolean<span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;data&quot;</span><span class="hljs-punctuation">:</span> T<span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> String<span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;error&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;code&quot;</span><span class="hljs-punctuation">:</span> string<span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> string<span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;timestamp&quot;</span><span class="hljs-punctuation">:</span> string
+  <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;timestamp&quot;</span><span class="hljs-punctuation">:</span> string
+<span class="hljs-punctuation">}</span>
+</div></code></pre>
+<h4 id="success-response">Success Response</h4>
+<pre class="hljs"><code><div><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;success&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;User created successfully&quot;</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;data&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">123</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;name&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;John Doe&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;email&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;john.doe@example.com&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;role&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;CLIENT&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;createdAt&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2023-07-20T10:30:00Z&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;updatedAt&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2023-07-20T10:30:00Z&quot;</span>
+  <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;error&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">null</span></span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;timestamp&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2023-07-20T12:34:56.789Z&quot;</span>
+<span class="hljs-punctuation">}</span>
+</div></code></pre>
+<h4 id="error-response">Error Response</h4>
+<pre class="hljs"><code><div><span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;success&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;data&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">null</span></span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">null</span></span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;error&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+        <span class="hljs-attr">&quot;code&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">2008</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">&quot;message&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Refresh token not found or invalid&quot;</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">&quot;timestamp&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2025-06-04T13:51:47.751190400Z&quot;</span><span class="hljs-punctuation">,</span>
+        <span class="hljs-attr">&quot;status&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;UNAUTHORIZED&quot;</span>
+    <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;timestamp&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;2025-06-04T13:51:47.753190100Z&quot;</span>
+<span class="hljs-punctuation">}</span>
+</div></code></pre>
+<h5 id="rules">Rules:</h5>
+<pre><code>    -- Services --
+        Every public methods must return standardResponse
+</code></pre>
+<pre class="hljs"><code><div>
+<span class="hljs-meta">@Service</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">UserService</span> {
+
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> UserRepository userRepository;
+
+       <span class="hljs-comment">/**
+     * Registers a new user in the system.
+     *
+     * <span class="hljs-doctag">@param</span> request The user registration request
+     * <span class="hljs-doctag">@return</span> StandardResponse containing the registered user
+     * <span class="hljs-doctag">@throws</span> ConflictException if email is already registered
+     */</span>
+    <span class="hljs-keyword">public</span> StandardResponse&lt;User&gt; <span class="hljs-title function_">registerUser</span><span class="hljs-params">(UserRegistrationRequest request)</span> {
+        <span class="hljs-keyword">if</span> (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ConflictException</span>(ApiCode.INVALID_EMAIL_ALREADY_EXIST.getCode(),ApiCode.INVALID_EMAIL_ALREADY_EXIST.getMessage());
+        }
+
+        <span class="hljs-type">User</span> <span class="hljs-variable">newUser</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">User</span>();
+        newUser.setName(request.getName());
+        newUser.setEmail(request.getEmail());
+        newUser.setPhone(request.getPhone());
+        newUser.setRole(UserRole.CLIENT);
+
+        <span class="hljs-type">User</span> <span class="hljs-variable">savedUser</span> <span class="hljs-operator">=</span> userRepository.save(newUser);
+        <span class="hljs-keyword">return</span> StandardResponse.success(savedUser);
+    }
+}
+</div></code></pre>
+<h5 id="rules">Rules:</h5>
+<pre><code>    -- Controllers --
+        Every public methods must return standardResponse via ResponseEntity
+</code></pre>
+<pre class="hljs"><code><div>
+<span class="hljs-meta">@RestController</span>
+<span class="hljs-meta">@RequestMapping(&quot;/api/users&quot;)</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">UserController</span> {
+
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> UserService userService;
+
+
+    <span class="hljs-meta">@GetMapping(&quot;/{id}&quot;)</span>
+    <span class="hljs-keyword">public</span> ResponseEntity&lt;StandardResponse&lt;User&gt;&gt; <span class="hljs-title function_">getUser</span><span class="hljs-params">(<span class="hljs-meta">@PathVariable</span> Long id)</span> {
+        <span class="hljs-type">User</span> <span class="hljs-variable">user</span> <span class="hljs-operator">=</span> userService.getUserById(id);
+        <span class="hljs-keyword">return</span> ResponseEntity.ok(StandardResponse.success(user));
+    }
+
+    <span class="hljs-meta">@PostMapping</span>
+    <span class="hljs-keyword">public</span> ResponseEntity&lt;StandardResponse&lt;User&gt;&gt; <span class="hljs-title function_">createUser</span><span class="hljs-params">(<span class="hljs-meta">@Valid</span> <span class="hljs-meta">@RequestBody</span> UserDto userDto)</span> {
+        <span class="hljs-type">User</span> <span class="hljs-variable">createdUser</span> <span class="hljs-operator">=</span> userService.createUser(userDto);
+        <span class="hljs-keyword">return</span> ResponseEntity.status(HttpStatus.CREATED)
+                .body(StandardResponse.success(createdUser));
+    }
+}
+</div></code></pre>
+<h4 id="error-codes-reference">Error Codes Reference</h4>
+<pre class="hljs"><code><div><span class="hljs-keyword">public</span> <span class="hljs-keyword">enum</span> <span class="hljs-title class_">ApiErrorCode</span> {
+    <span class="hljs-comment">// General/System Errors (1000-1999)</span>
+    SYSTEM_ERROR(<span class="hljs-number">1000</span>, <span class="hljs-string">&quot;Internal system error&quot;</span>, HttpStatus.INTERNAL_SERVER_ERROR),
+    DATABASE_CONNECTION_ERROR(<span class="hljs-number">1001</span>, <span class="hljs-string">&quot;Database connection error&quot;</span>, HttpStatus.INTERNAL_SERVER_ERROR),
+    SERVICE_UNAVAILABLE(<span class="hljs-number">1002</span>, <span class="hljs-string">&quot;Service temporarily unavailable&quot;</span>, HttpStatus.SERVICE_UNAVAILABLE),
+    INVALID_REQUEST(<span class="hljs-number">1003</span>, <span class="hljs-string">&quot;Invalid request&quot;</span>, HttpStatus.BAD_REQUEST),
+    RATE_LIMIT_EXCEEDED(<span class="hljs-number">1004</span>, <span class="hljs-string">&quot;Rate limit exceeded&quot;</span>, HttpStatus.TOO_MANY_REQUESTS),
+
+    <span class="hljs-comment">// Authentication Module Errors (2000-2099)</span>
+    AUTHENTICATION_FAILED(<span class="hljs-number">2000</span>, <span class="hljs-string">&quot;Authentication failed&quot;</span>, HttpStatus.UNAUTHORIZED),
+    INVALID_CREDENTIALS(<span class="hljs-number">2001</span>, <span class="hljs-string">&quot;Invalid username or password&quot;</span>, HttpStatus.UNAUTHORIZED),
+    ACCOUNT_LOCKED(<span class="hljs-number">2002</span>, <span class="hljs-string">&quot;Account is locked&quot;</span>, HttpStatus.FORBIDDEN),
+    ACCOUNT_DISABLED(<span class="hljs-number">2003</span>, <span class="hljs-string">&quot;Account is disabled&quot;</span>, HttpStatus.FORBIDDEN),
+    TOKEN_EXPIRED(<span class="hljs-number">2004</span>, <span class="hljs-string">&quot;Token has expired&quot;</span>, HttpStatus.UNAUTHORIZED),
+    INVALID_TOKEN(<span class="hljs-number">2005</span>, <span class="hljs-string">&quot;Invalid token&quot;</span>, HttpStatus.UNAUTHORIZED),
+    ACCESS_DENIED(<span class="hljs-number">2006</span>, <span class="hljs-string">&quot;Access denied&quot;</span>, HttpStatus.FORBIDDEN),
+    INVALID_REFRESH_TOKEN(<span class="hljs-number">2007</span>, <span class="hljs-string">&quot;Invalid refresh token&quot;</span>, HttpStatus.UNAUTHORIZED),
+
+    <span class="hljs-comment">// User Module Errors (2100-2199)</span>
+    USER_NOT_FOUND(<span class="hljs-number">2100</span>, <span class="hljs-string">&quot;User not found&quot;</span>, HttpStatus.NOT_FOUND),
+    USER_ALREADY_EXISTS(<span class="hljs-number">2101</span>, <span class="hljs-string">&quot;User already exists&quot;</span>, HttpStatus.CONFLICT),
+    INVALID_USER_DATA(<span class="hljs-number">2102</span>, <span class="hljs-string">&quot;Invalid user data&quot;</span>, HttpStatus.BAD_REQUEST),
+    PASSWORD_POLICY_VIOLATION(<span class="hljs-number">2103</span>, <span class="hljs-string">&quot;Password does not meet policy requirements&quot;</span>, HttpStatus.BAD_REQUEST),
+    USER_PROFILE_INCOMPLETE(<span class="hljs-number">2104</span>, <span class="hljs-string">&quot;User profile is incomplete&quot;</span>, HttpStatus.BAD_REQUEST),
+
+    <span class="hljs-comment">// Role Module Errors (2200-2299)</span>
+    ROLE_NOT_FOUND(<span class="hljs-number">2200</span>, <span class="hljs-string">&quot;Role not found&quot;</span>, HttpStatus.NOT_FOUND),
+    ROLE_ALREADY_EXISTS(<span class="hljs-number">2201</span>, <span class="hljs-string">&quot;Role already exists&quot;</span>, HttpStatus.CONFLICT),
+    INVALID_ROLE_DATA(<span class="hljs-number">2202</span>, <span class="hljs-string">&quot;Invalid role data&quot;</span>, HttpStatus.BAD_REQUEST),
+    ROLE_IN_USE(<span class="hljs-number">2203</span>, <span class="hljs-string">&quot;Role is assigned to users and cannot be deleted&quot;</span>, HttpStatus.CONFLICT),
+
+    <span class="hljs-comment">// Permission/Authorization Module Errors (2300-2399)</span>
+    PERMISSION_DENIED(<span class="hljs-number">2300</span>, <span class="hljs-string">&quot;Permission denied&quot;</span>, HttpStatus.FORBIDDEN),
+    PERMISSION_NOT_FOUND(<span class="hljs-number">2301</span>, <span class="hljs-string">&quot;Permission not found&quot;</span>, HttpStatus.NOT_FOUND),
+    INSUFFICIENT_PRIVILEGES(<span class="hljs-number">2302</span>, <span class="hljs-string">&quot;Insufficient privileges&quot;</span>, HttpStatus.FORBIDDEN),
+
+    <span class="hljs-comment">// Property Module Errors (3000-3099)</span>
+    PROPERTY_NOT_FOUND(<span class="hljs-number">3000</span>, <span class="hljs-string">&quot;Property not found&quot;</span>, HttpStatus.NOT_FOUND),
+    PROPERTY_ALREADY_EXISTS(<span class="hljs-number">3001</span>, <span class="hljs-string">&quot;Property already exists&quot;</span>, HttpStatus.CONFLICT),
+    INVALID_PROPERTY_DATA(<span class="hljs-number">3002</span>, <span class="hljs-string">&quot;Invalid property data&quot;</span>, HttpStatus.BAD_REQUEST),
+    PROPERTY_IMAGE_UPLOAD_FAILED(<span class="hljs-number">3003</span>, <span class="hljs-string">&quot;Property image upload failed&quot;</span>, HttpStatus.INTERNAL_SERVER_ERROR),
+    PROPERTY_NOT_AVAILABLE(<span class="hljs-number">3004</span>, <span class="hljs-string">&quot;Property is not available&quot;</span>, HttpStatus.CONFLICT),
+    INVALID_PROPERTY_STATUS(<span class="hljs-number">3005</span>, <span class="hljs-string">&quot;Invalid property status&quot;</span>, HttpStatus.BAD_REQUEST),
+    PROPERTY_OPERATION_NOT_ALLOWED(<span class="hljs-number">3006</span>, <span class="hljs-string">&quot;Operation not allowed on this property&quot;</span>, HttpStatus.FORBIDDEN),
+
+    <span class="hljs-comment">// Booking Module Errors (3100-3199)</span>
+    BOOKING_NOT_FOUND(<span class="hljs-number">3100</span>, <span class="hljs-string">&quot;Booking not found&quot;</span>, HttpStatus.NOT_FOUND),
+    INVALID_BOOKING_DATA(<span class="hljs-number">3101</span>, <span class="hljs-string">&quot;Invalid booking data&quot;</span>, HttpStatus.BAD_REQUEST),
+    BOOKING_CONFLICT(<span class="hljs-number">3102</span>, <span class="hljs-string">&quot;Booking dates conflict with existing booking&quot;</span>, HttpStatus.CONFLICT),
+    BOOKING_CANCELLATION_NOT_ALLOWED(<span class="hljs-number">3103</span>, <span class="hljs-string">&quot;Booking cancellation not allowed&quot;</span>, HttpStatus.FORBIDDEN),
+    BOOKING_ALREADY_CONFIRMED(<span class="hljs-number">3104</span>, <span class="hljs-string">&quot;Booking is already confirmed&quot;</span>, HttpStatus.CONFLICT),
+    BOOKING_PAYMENT_REQUIRED(<span class="hljs-number">3105</span>, <span class="hljs-string">&quot;Payment required to confirm booking&quot;</span>, HttpStatus.PAYMENT_REQUIRED),
+    INVALID_BOOKING_STATUS(<span class="hljs-number">3106</span>, <span class="hljs-string">&quot;Invalid booking status&quot;</span>, HttpStatus.BAD_REQUEST),
+
+    <span class="hljs-comment">// Subscription Module Errors (3200-3299)</span>
+    SUBSCRIPTION_NOT_FOUND(<span class="hljs-number">3200</span>, <span class="hljs-string">&quot;Subscription not found&quot;</span>, HttpStatus.NOT_FOUND),
+    SUBSCRIPTION_ALREADY_EXISTS(<span class="hljs-number">3201</span>, <span class="hljs-string">&quot;Subscription already exists&quot;</span>, HttpStatus.CONFLICT),
+    INVALID_SUBSCRIPTION_DATA(<span class="hljs-number">3202</span>, <span class="hljs-string">&quot;Invalid subscription data&quot;</span>, HttpStatus.BAD_REQUEST),
+    SUBSCRIPTION_EXPIRED(<span class="hljs-number">3203</span>, <span class="hljs-string">&quot;Subscription has expired&quot;</span>, HttpStatus.FORBIDDEN),
+    SUBSCRIPTION_LIMIT_REACHED(<span class="hljs-number">3204</span>, <span class="hljs-string">&quot;Subscription limit reached&quot;</span>, HttpStatus.FORBIDDEN),
+    SUBSCRIPTION_PAYMENT_FAILED(<span class="hljs-number">3205</span>, <span class="hljs-string">&quot;Subscription payment failed&quot;</span>, HttpStatus.PAYMENT_REQUIRED),
+    INVALID_SUBSCRIPTION_PLAN(<span class="hljs-number">3206</span>, <span class="hljs-string">&quot;Invalid subscription plan&quot;</span>, HttpStatus.BAD_REQUEST),
+
+    <span class="hljs-comment">// Validation Errors (4000-4099)</span>
+    VALIDATION_ERROR(<span class="hljs-number">4000</span>, <span class="hljs-string">&quot;Validation error&quot;</span>, HttpStatus.BAD_REQUEST),
+    REQUIRED_FIELD_MISSING(<span class="hljs-number">4001</span>, <span class="hljs-string">&quot;Required field is missing&quot;</span>, HttpStatus.BAD_REQUEST),
+    INVALID_EMAIL_FORMAT(<span class="hljs-number">4002</span>, <span class="hljs-string">&quot;Invalid email format&quot;</span>, HttpStatus.BAD_REQUEST),
+    INVALID_PHONE_FORMAT(<span class="hljs-number">4003</span>, <span class="hljs-string">&quot;Invalid phone number format&quot;</span>, HttpStatus.BAD_REQUEST),
+    INVALID_DATE_FORMAT(<span class="hljs-number">4004</span>, <span class="hljs-string">&quot;Invalid date format&quot;</span>, HttpStatus.BAD_REQUEST),
+    INVALID_NUMERIC_VALUE(<span class="hljs-number">4005</span>, <span class="hljs-string">&quot;Invalid numeric value&quot;</span>, HttpStatus.BAD_REQUEST),
+    VALUE_OUT_OF_RANGE(<span class="hljs-number">4006</span>, <span class="hljs-string">&quot;Value out of allowed range&quot;</span>, HttpStatus.BAD_REQUEST),
+
+    <span class="hljs-comment">// External Service Errors (5000-5099)</span>
+    PAYMENT_GATEWAY_ERROR(<span class="hljs-number">5000</span>, <span class="hljs-string">&quot;Payment gateway error&quot;</span>, HttpStatus.BAD_GATEWAY),
+    MAP_SERVICE_ERROR(<span class="hljs-number">5001</span>, <span class="hljs-string">&quot;Map service error&quot;</span>, HttpStatus.BAD_GATEWAY),
+    EMAIL_SERVICE_ERROR(<span class="hljs-number">5002</span>, <span class="hljs-string">&quot;Email service error&quot;</span>, HttpStatus.INTERNAL_SERVER_ERROR),
+    SMS_SERVICE_ERROR(<span class="hljs-number">5003</span>, <span class="hljs-string">&quot;SMS service error&quot;</span>, HttpStatus.INTERNAL_SERVER_ERROR);
+
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> <span class="hljs-type">int</span> code;
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> String message;
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> HttpStatus httpStatus;
+
+    ErrorCode(<span class="hljs-type">int</span> code, String message, HttpStatus httpStatus) {
+        <span class="hljs-built_in">this</span>.code = code;
+        <span class="hljs-built_in">this</span>.message = message;
+        <span class="hljs-built_in">this</span>.httpStatus = httpStatus;
+    }
+
+}
+</div></code></pre>
+<h4 id="best-practices-adhered">Best practices adhered</h4>
+<ul>
+<li><strong>Services should throw exceptions</strong> - Let the global handler manage the response</li>
+<li><strong>Controllers should be lean</strong> - Focus on routing and response formatting</li>
+<li><strong>Use specific exceptions</strong> - Choose the most appropriate exception type</li>
+<li><strong>Include helpful messages</strong> - Error messages should help clients debug issues</li>
+<li><strong>Log exceptions</strong> - Ensure exceptions are properly logged before being handled  (TO DO...)</li>
+</ul>
+
+</body>
+</html>
