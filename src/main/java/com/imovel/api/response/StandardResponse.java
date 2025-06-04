@@ -66,7 +66,7 @@ public class StandardResponse<T> {
      * @param message Error message
      * @return StandardResponse with error details
      */
-    public static <T> StandardResponse<T> error(String code, String message, HttpStatus status) {
+    public static <T> StandardResponse<T> error(long code, String message, HttpStatus status) {
         return new StandardResponse<>(false, null, null, new ErrorCode(code, message,status));
     }
 

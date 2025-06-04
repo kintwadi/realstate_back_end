@@ -1,0 +1,59 @@
+package com.imovel.api.security.aspect;
+
+import com.imovel.api.error.ApiCode;
+import com.imovel.api.error.ErrorCode;
+import com.imovel.api.exception.ApplicationException;
+import com.imovel.api.response.StandardResponse;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
+
+/**
+ * Aspect for handling exceptions thrown by controller methods.
+ * This aspect provides centralized exception handling and converts exceptions
+ * into standardized API responses with appropriate HTTP status codes.
+ */
+@Aspect
+@Component
+public class ExceptionHandlingAspect {
+
+    /**
+     * Advice that wraps around controller methods to handle exceptions.
+     *
+     * @param joinPoint The proceeding join point representing the intercepted method
+     * @return ResponseEntity containing a standardized error response
+     * @throws Throwable if an unexpected error occurs during processing
+     */
+    @Around("com.imovel.api.security.aspect.pointcut.PointCuts.controllerMethods()")
+    public Object handleAuthExceptions(ProceedingJoinPoint joinPoint) throws Throwable {
+        try {
+            // Proceed with the original method execution
+            return joinPoint.proceed();
+
+        } catch (ApplicationException ex) {
+            // Handle known application-specific exceptions
+            ErrorCode errorCode = new ErrorCode(
+                    ex.getErrorResponse().getCode(),
+                    ex.getErrorResponse().getMessage(),
+                    ex.getErrorResponse().getStatus()
+            );
+
+            return ResponseEntity.status(ex.getErrorResponse().getStatus())
+                    .body(StandardResponse.error(errorCode));
+
+        } catch (Exception ex) {
+            // Handle all other unexpected exceptions
+            ErrorCode errorCode = new ErrorCode(
+                    ApiCode.SYSTEM_ERROR.getCode(),
+                    ex.getLocalizedMessage(),
+                    HttpStatus.INTERNAL_SERVER_ERROR
+            );
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(StandardResponse.error(errorCode));
+        }
+    }
+}

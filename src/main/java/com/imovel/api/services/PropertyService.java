@@ -82,7 +82,7 @@ public class PropertyService {
                 .orElseThrow(() -> new ResourceNotFoundException("Property", propertyId));
 
         if (!propertyToUpdate.getCreatedBy().getId().equals(currentUser.getId())) {
-            throw new AuthorizationException(ApiCode.PROPERTY_OPERATION_NOT_ALLOWED.getCode().toString(),
+            throw new AuthorizationException(ApiCode.PROPERTY_OPERATION_NOT_ALLOWED.getCode(),
                     "User not authorized to update this property", HttpStatus.UNAUTHORIZED);
         }
 
@@ -98,7 +98,7 @@ public class PropertyService {
                 .orElseThrow(() -> new ResourceNotFoundException("Property", propertyId));
 
         if (!propertyToDelete.getCreatedBy().getId().equals(currentUser.getId())) {
-            throw new AuthorizationException(ApiCode.PROPERTY_OPERATION_NOT_ALLOWED.getCode().toString(),
+            throw new AuthorizationException(ApiCode.PROPERTY_OPERATION_NOT_ALLOWED.getCode(),
                     "User not authorized to delete this property",HttpStatus.UNAUTHORIZED);
         }
 

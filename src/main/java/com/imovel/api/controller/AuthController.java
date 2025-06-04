@@ -1,5 +1,6 @@
 package com.imovel.api.controller;
 
+import com.imovel.api.error.ApiCode;
 import com.imovel.api.exception.AuthenticationException;
 import com.imovel.api.model.User;
 import com.imovel.api.request.*;
@@ -61,7 +62,7 @@ public class AuthController {
         StandardResponse<User> userResponse = authService.loginUser(loginRequest.getEmail(), loginRequest.getPassword());
 
         if (!userResponse.isSuccess()) {
-            throw new AuthenticationException("INVALID_CREDENTIALS", "Invalid email or password");
+            throw new AuthenticationException(ApiCode.INVALID_CREDENTIALS.getCode(), "Invalid email or password");
         }
 
         StandardResponse<Token>  standardResponse = tokenService.login(userResponse.getData(), request);

@@ -37,7 +37,7 @@ public class AuthService {
      */
     public StandardResponse<User> registerUser(UserRegistrationRequest request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new ConflictException("EMAIL_EXISTS", "Email already registered");
+            throw new ConflictException(ApiCode.INVALID_EMAIL_ALREADY_EXIST.getCode(), "Email already registered");
         }
 
         User newUser = new User();
@@ -59,7 +59,7 @@ public class AuthService {
     public StandardResponse<User> findByEmail(final String email) {
         return userRepository.findByEmail(email)
                 .map(StandardResponse::success)
-                .orElse(StandardResponse.error(ApiCode.USER_NOT_FOUND.getCode().toString(), "User not found with email: " + email, HttpStatus.NOT_FOUND));
+                .orElse(StandardResponse.error(ApiCode.USER_NOT_FOUND.getCode(), "User not found with email: " + email, HttpStatus.NOT_FOUND));
     }
 
     /**
@@ -83,6 +83,6 @@ public class AuthService {
     public StandardResponse<User> changeUserPassword(PasswordChangeRequest changePasswordRequestDto) {
         return userRepository.findByEmail(changePasswordRequestDto.getEmail())
                 .map(user -> StandardResponse.success(user, "Password changed successfully"))
-                .orElse(StandardResponse.error(ApiCode.USER_NOT_FOUND.getCode().toString(), "User not found",HttpStatus.NOT_FOUND));
+                .orElse(StandardResponse.error(ApiCode.USER_NOT_FOUND.getCode(), "User not found",HttpStatus.NOT_FOUND));
     }
 }

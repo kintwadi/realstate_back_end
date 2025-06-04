@@ -6,7 +6,7 @@ import java.util.List;
 public class ValidationException extends ApplicationException {
     private final List<String> details;
 
-    public ValidationException(String code, String message,HttpStatus httpStatus, List<String> details) {
+    public ValidationException(long code, String message,HttpStatus httpStatus, List<String> details) {
         super(code, message, httpStatus);
         this.details = details;
     }

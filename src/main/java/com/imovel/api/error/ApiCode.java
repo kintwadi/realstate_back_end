@@ -21,8 +21,9 @@ public enum ApiCode {
     INVALID_REFRESH_TOKEN(2007, "Invalid refresh token", HttpStatus.UNAUTHORIZED),
     REFRESH_TOKEN_NOT_FOUND(2008, "Refresh token not found", HttpStatus.NOT_FOUND),
     REFRESH_TOKEN_NOT_EXPIRED(2009, "Refresh token not expired", HttpStatus.CONFLICT),
-    REFRESH_TOKEN_NOT_LIMITE_EXCEEDED(2009, "Refresh token limit exceeded", HttpStatus.UNAUTHORIZED),
-    REFRESH_TOKEN_EXPIRED(2009, "Refresh token  expired", HttpStatus.CONFLICT),
+    REFRESH_TOKEN_NOT_LIMITE_EXCEEDED(2010, "Refresh token limit exceeded", HttpStatus.UNAUTHORIZED),
+    REFRESH_TOKEN_EXPIRED(2011, "Refresh token  expired", HttpStatus.CONFLICT),
+    REFRESH_TOKEN_FAILED(2012, "Refresh token  failed", HttpStatus.CONFLICT),
     // User Module Errors (2100-2199)
     USER_NOT_FOUND(2100, "User not found", HttpStatus.NOT_FOUND),
     USER_ALREADY_EXISTS(2101, "User already exists", HttpStatus.CONFLICT),
@@ -89,7 +90,8 @@ public enum ApiCode {
     // Validation
     INVALID_PAYLOAD(600, "invalid payload", HttpStatus.BAD_REQUEST),
     MISSING_FIELDS(601,"Missing required fields",HttpStatus.BAD_REQUEST),
-    INVALID_EMAIL(602,"Invalid email format",HttpStatus.CONFLICT);
+    INVALID_EMAIL(602,"Invalid email format",HttpStatus.CONFLICT),
+    INVALID_EMAIL_ALREADY_EXIST(603,"Email already exist",HttpStatus.CONFLICT);
 
 
     private final Integer code;

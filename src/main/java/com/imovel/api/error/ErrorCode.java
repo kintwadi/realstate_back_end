@@ -5,12 +5,12 @@ import org.springframework.http.HttpStatus;
 import java.time.Instant;
 
 public class ErrorCode {
-    private String code;
+    private long code;
     private String message;
     private Instant timestamp;
     private HttpStatus status;
 
-    public ErrorCode(String code, String message, HttpStatus status) {
+    public ErrorCode(long code, String message, HttpStatus status) {
         this.code = code;
         this.message = message;
         this.timestamp = Instant.now();
@@ -18,7 +18,7 @@ public class ErrorCode {
     }
 
     // Getters
-    public String getCode() {
+    public long getCode() {
         return code;
     }
 

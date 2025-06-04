@@ -91,7 +91,7 @@ public class AuthServiceAspect {
         StandardResponse<User> userResponse = authService.findByEmail(email);
 
         if (!userResponse.isSuccess() || !verifyUserPassword(userResponse.getData().getId(), password)) {
-            throw new AuthenticationException(ApiCode.INVALID_CREDENTIALS.getCode().toString(), "Invalid email or password");
+            throw new AuthenticationException(ApiCode.INVALID_CREDENTIALS.getCode(), "Invalid email or password");
         }
 
         return joinPoint.proceed();
@@ -111,11 +111,11 @@ public class AuthServiceAspect {
         final StandardResponse<User> userResponse = authService.findByEmail(passwordChangeRequest.getEmail());
 
         if (!userResponse.isSuccess()) {
-            return StandardResponse.error(ApiCode.PASSWORD_RESET_FAILED.getCode().toString(), "User not found", HttpStatus.BAD_REQUEST);
+            return StandardResponse.error(ApiCode.PASSWORD_RESET_FAILED.getCode(), "User not found", HttpStatus.BAD_REQUEST);
         }
 
         if (!isPasswordValid(userResponse.getData().getId(), passwordChangeRequest.getOldPassword())) {
-            return StandardResponse.error(ApiCode.PASSWORD_RESET_FAILED.getCode().toString(), "Current password is incorrect",HttpStatus.BAD_REQUEST);
+            return StandardResponse.error(ApiCode.PASSWORD_RESET_FAILED.getCode(), "Current password is incorrect",HttpStatus.BAD_REQUEST);
         }
 
         // Update authentication details

@@ -66,7 +66,7 @@ public class TokenService {
 
             return StandardResponse.success(tokens);
         } catch (Exception ex) {
-            throw new AuthenticationException(ApiCode.AUTHENTICATION_FAILED.getCode().toString(), "Authentication failed: " + ex.getMessage());
+            throw new AuthenticationException(ApiCode.AUTHENTICATION_FAILED.getCode(), "Authentication failed: " + ex.getMessage());
         }
     }
 
@@ -191,7 +191,7 @@ public class TokenService {
      */
     private void validateRefreshToken(String refreshToken) {
         if (!jwtProvider.validateRefreshToken(refreshToken)) {
-            throw new TokenRefreshException(ApiCode.INVALID_REFRESH_TOKEN.getCode().toString(),
+            throw new TokenRefreshException(ApiCode.INVALID_REFRESH_TOKEN.getCode(),
                     "Invalid refresh token signature",
                     HttpStatus.UNAUTHORIZED);
         }
@@ -206,12 +206,12 @@ public class TokenService {
     private RefreshToken getValidRefreshTokenFromDB(String refreshToken) {
         RefreshToken storedToken = refreshTokenRepository
                 .findByTokenAndRevokedFalseAndSupersededFalse(refreshToken)
-                .orElseThrow(() -> new TokenRefreshException(ApiCode.REFRESH_TOKEN_NOT_FOUND.getCode().toString(),
+                .orElseThrow(() -> new TokenRefreshException(ApiCode.REFRESH_TOKEN_NOT_FOUND.getCode(),
                         "Refresh token not found or invalid",
                         HttpStatus.UNAUTHORIZED));
 
         if (storedToken.getExpiresAt().isBefore(Instant.now())) {
-            throw new TokenRefreshException(ApiCode.REFRESH_TOKEN_EXPIRED.getCode().toString(),
+            throw new TokenRefreshException(ApiCode.REFRESH_TOKEN_EXPIRED.getCode(),
                     "Refresh token expired",
                     HttpStatus.UNAUTHORIZED);
         }
@@ -258,7 +258,7 @@ public class TokenService {
 
         if (activeTokenCount >= maxTokens) {
             revokeExcessTokens(userId, activeTokenCount - maxTokens + 1);
-            throw new TokenRefreshException(ApiCode.REFRESH_TOKEN_NOT_LIMITE_EXCEEDED.getCode().toString(),
+            throw new TokenRefreshException(ApiCode.REFRESH_TOKEN_NOT_LIMITE_EXCEEDED.getCode(),
                     "Token limit exceeded. Oldest tokens have been revoked.",
                     HttpStatus.TOO_MANY_REQUESTS);
         }
