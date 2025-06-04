@@ -8,7 +8,7 @@ import org.springframework.context.annotation.EnableLoadTimeWeaving;
 import java.util.TimeZone;
 
 @SpringBootApplication
-@EnableAspectJAutoProxy  // Add this annotation
+@EnableAspectJAutoProxy
 public class ImovelApiApplication {
 
 	public static void main(String[] args) {

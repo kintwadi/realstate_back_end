@@ -78,9 +78,6 @@ public class AuthControllerAspect {
         if (isEmailInvalid(request.getEmail())) {
             return createErrorResponse("Email not valid", ApiCode.INVALID_EMAIL.getCode(), HttpStatus.BAD_REQUEST);
         }
-
-
-
         return joinPoint.proceed();
     }
 

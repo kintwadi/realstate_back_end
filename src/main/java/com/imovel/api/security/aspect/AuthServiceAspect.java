@@ -130,7 +130,6 @@ public class AuthServiceAspect {
 
         return joinPoint.proceed();
     }
-
     /**
      * Verifies if the provided password matches the user's current password.
      *
