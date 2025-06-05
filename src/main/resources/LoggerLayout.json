@@ -1,0 +1,56 @@
+{
+	"timestamp": {
+		"$resolver": "timestamp",
+		"pattern": {
+			"format": "yyyy-MM-dd'T'HH:mm:ssZ",
+			"timeZone": "UTC"
+		}
+	},
+	"level": {
+		"$resolver": "level",
+		"field": "name"
+	},
+	"caller": {
+		"class": {
+			"$resolver": "source",
+			"field": "className"
+		},
+		"method": {
+			"$resolver": "source",
+			"field": "methodName"
+		},
+		"file": {
+			"$resolver": "source",
+			"field": "fileName"
+		},
+		"line": {
+			"$resolver": "source",
+			"field": "lineNumber"
+		}
+	},
+	"exception": {
+		"$resolver": "exception",
+		"field": "stackTrace",
+		"stackTrace": {
+			"stringified": false
+		}
+	},
+	"marker": {
+		"$resolver": "mdc",
+		"key": "marker"
+	},
+	"userName": {
+		"$resolver": "mdc",
+		"key": "userName",
+		"stringified": true
+	},
+	"userEmail": {
+		"$resolver": "mdc",
+		"key": "userEmail",
+		"stringified": true
+	},
+	"response": {
+		"$resolver": "message",
+		"stringified": true
+	}
+}

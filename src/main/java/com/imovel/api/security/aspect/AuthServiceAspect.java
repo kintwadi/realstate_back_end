@@ -15,6 +15,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
@@ -83,7 +84,7 @@ public class AuthServiceAspect {
      * @throws Throwable if an error occurs during processing
      */
     @Around("com.imovel.api.security.aspect.pointcut.PointCuts.loginUser()")
-    public Object verifyPasswordBeforeLogin(final ProceedingJoinPoint joinPoint) throws Throwable {
+    public Object loginUser(final ProceedingJoinPoint joinPoint) throws Throwable {
         Object[] args = joinPoint.getArgs();
         String email = (String) args[0];
         String password = (String) args[1];
