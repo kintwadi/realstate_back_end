@@ -63,7 +63,8 @@ public class AuthControllerAspect {
      * @throws Throwable if proceeding join point throws an exception
      */
 
-    public Object loginValidation(final ProceedingJoinPoint joinPoint) throws Throwable {
+    @Around("com.imovel.api.security.aspect.pointcut.PointCuts.authenticateUser()")
+    public Object authenticateUser(final ProceedingJoinPoint joinPoint) throws Throwable {
         Object[] args = joinPoint.getArgs();
 
         // Validate request payload (implicit in aspect pointcut)
@@ -81,7 +82,7 @@ public class AuthControllerAspect {
         return joinPoint.proceed();
     }
 
-    @Around("com.imovel.api.security.aspect.pointcut.PointCuts.resetPassword()")
+    @Around("com.imovel.api.security.aspect.pointcut.PointCuts.changeUserPassword()")
     public Object resetPassword(final ProceedingJoinPoint joinPoint) throws Throwable {
         Object[] args = joinPoint.getArgs();
 
