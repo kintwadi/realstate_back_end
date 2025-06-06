@@ -27,7 +27,6 @@ public class StandardResponse<T> {
     }
 
     // Factory methods
-
     /**
      * Creates a success response with data only
      * 
@@ -66,7 +65,8 @@ public class StandardResponse<T> {
      * @param message Error message
      * @return StandardResponse with error details
      */
-    public static <T> StandardResponse<T> error(long code, String message, HttpStatus status) {
+    public static <T> StandardResponse<T> error(long code, String message, HttpStatus status)
+    {
         return new StandardResponse<>(false, null, null, new ErrorCode(code, message,status));
     }
 
@@ -101,7 +101,6 @@ public class StandardResponse<T> {
         return timestamp;
     }
 
-    // Setters (if needed for flexibility)
     public void setData(T data) {
         this.data = data;
     }

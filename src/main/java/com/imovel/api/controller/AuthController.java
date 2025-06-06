@@ -108,24 +108,13 @@ public class AuthController {
     }
 
     /**
-     * Initiates password reset process.
-     *
-     * @return StandardResponse indicating initiation status
-     */
-    @PostMapping("/forgot-password")
-    public ResponseEntity<StandardResponse<Void>> initiatePasswordReset() {
-        // TODO: Implement password reset initiation
-        return ResponseEntity.ok(StandardResponse.success(null, "Password reset initiated"));
-    }
-
-    /**
      * Resets user password with new credentials.
      *
      * @param passwordChangeRequest Contains old and new password details
      * @return ResponseEntity with password change status
      */
     @PostMapping("/reset-password")
-    public ResponseEntity<StandardResponse<User>> resetUserPassword(
+    public ResponseEntity<StandardResponse<User>> initiatePasswordReset(
             @RequestBody PasswordChangeRequest passwordChangeRequest) {
         StandardResponse<User> response = authService.changeUserPassword(passwordChangeRequest);
         return ResponseEntity.ok(response);

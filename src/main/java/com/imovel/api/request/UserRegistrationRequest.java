@@ -37,4 +37,6 @@ public class UserRegistrationRequest {
     public void setPhone(String phone) {
         this.phone = phone;
     }
+
+
 }

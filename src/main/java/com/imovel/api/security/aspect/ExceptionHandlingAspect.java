@@ -2,11 +2,12 @@ package com.imovel.api.security.aspect;
 
 import com.imovel.api.error.ApiCode;
 import com.imovel.api.error.ErrorCode;
-import com.imovel.api.exception.ApplicationException;
+import com.imovel.api.exception.ApiException;
 import com.imovel.api.response.StandardResponse;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -33,15 +34,15 @@ public class ExceptionHandlingAspect {
             // Proceed with the original method execution
             return joinPoint.proceed();
 
-        } catch (ApplicationException ex) {
+        } catch (ApiException ex) {
             // Handle known application-specific exceptions
             ErrorCode errorCode = new ErrorCode(
-                    ex.getErrorResponse().getCode(),
-                    ex.getErrorResponse().getMessage(),
-                    ex.getErrorResponse().getStatus()
+                    ex.getErrorCode().getCode(),
+                    ex.getErrorCode().getMessage(),
+                    ex.getErrorCode().getStatus()
             );
 
-            return ResponseEntity.status(ex.getErrorResponse().getStatus())
+            return ResponseEntity.status(ex.getErrorCode().getStatus())
                     .body(StandardResponse.error(errorCode));
 
         } catch (Exception ex) {
