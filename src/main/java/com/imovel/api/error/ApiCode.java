@@ -31,7 +31,7 @@ public enum ApiCode {
     PASSWORD_POLICY_VIOLATION(2103, "Password does not meet policy requirements", HttpStatus.BAD_REQUEST),
     PASSWORD_RESET_FAILED(2104,"Password reset valied",HttpStatus.CONFLICT),
     USER_PROFILE_INCOMPLETE(2105, "User profile is incomplete", HttpStatus.BAD_REQUEST),
-
+    INAVALID_PASSWORD(2106, "Password does not match", HttpStatus.CONFLICT),
 
     // Role Module Errors (2200-2299)
     ROLE_NOT_FOUND(2200, "Role not found", HttpStatus.NOT_FOUND),

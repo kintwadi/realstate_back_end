@@ -1,13 +1,18 @@
 package com.imovel.api.security.aspect;
 
 import com.imovel.api.error.ApiCode;
+import com.imovel.api.logger.ApiLogger;
 import com.imovel.api.request.PasswordChangeRequest;
 import com.imovel.api.request.UserLoginRequest;
 import com.imovel.api.request.UserRegistrationRequest;
 import com.imovel.api.response.StandardResponse;
+import com.imovel.api.security.PasswordManager;
+import com.imovel.api.util.Util;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -21,8 +26,32 @@ import java.util.regex.Pattern;
 @Component
 public class AuthControllerAspect {
 
-    // Regex pattern for validating email format
-    private static final Pattern EMAIL_REGEX_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
+    /**
+     * Pointcut for the user registration endpoint.
+     * Targets the register method in AuthController.
+     *
+     * <p>Usage: Apply advice to validate or process user registration requests.</p>
+     */
+    @Pointcut("execution(* com.imovel.api.controller.AuthController.registerValidation(..))")
+    public static void registerValidation() {
+        // Pointcut method - implementation will be provided by AspectJ
+    }
+
+    /**
+     * Pointcut for the user login endpoint.
+     * Targets the login method in AuthController.
+     *
+     * <p>Usage: Apply advice to validate or process user authentication requests.</p>
+     */
+    @Pointcut("execution(* com.imovel.api.controller.AuthController.authenticateUser(..))")
+    public static void authenticateUser() {
+        // Pointcut method - implementation will be provided by AspectJ
+    }
+
+    @Pointcut("execution(* com.imovel.api.controller.AuthController.initiatePasswordReset(..))")
+    public static void initiatePasswordReset() {
+        // Pointcut method - implementation will be provided by AspectJ
+    }
 
     /**
      * Validates user registration requests before processing.
@@ -31,25 +60,25 @@ public class AuthControllerAspect {
      * @return ResponseEntity with error if validation fails, or proceeds otherwise
      * @throws Throwable if proceeding join point throws an exception
      */
-    @Around("com.imovel.api.security.aspect.pointcut.PointCuts.registerValidation()")
+    @Around("registerValidation()")
     public Object registerValidation(final ProceedingJoinPoint joinPoint) throws Throwable {
         Object[] args = joinPoint.getArgs();
 
         // Validate request payload
         if (args.length == 0 || !(args[0] instanceof UserRegistrationRequest)) {
-            return createErrorResponse("Invalid payload", ApiCode.INVALID_PAYLOAD.getCode(), HttpStatus.CONFLICT);
+            return createErrorResponse(ApiCode.INVALID_PAYLOAD.getMessage(), ApiCode.INVALID_PAYLOAD.getCode(), HttpStatus.CONFLICT);
         }
 
         UserRegistrationRequest request = (UserRegistrationRequest) args[0];
 
         // Validate required fields
         if (areFieldsMissing(request.getEmail(), request.getPassword())) {
-            return createErrorResponse("Missing required fields", ApiCode.REQUIRED_FIELD_MISSING.getCode(), HttpStatus.BAD_REQUEST);
+            return createErrorResponse(ApiCode.REQUIRED_FIELD_MISSING.getMessage(), ApiCode.REQUIRED_FIELD_MISSING.getCode(), HttpStatus.BAD_REQUEST);
         }
 
         // Validate email format
-        if (isEmailInvalid(request.getEmail())) {
-            return createErrorResponse("Email not valid", ApiCode.INVALID_EMAIL.getCode(), HttpStatus.BAD_REQUEST);
+        if (Util.isEmailInvalid(request.getEmail())) {
+            return createErrorResponse(ApiCode.INVALID_EMAIL.getMessage(), ApiCode.INVALID_EMAIL.getCode(), HttpStatus.BAD_REQUEST);
         }
 
         return joinPoint.proceed();
@@ -63,7 +92,7 @@ public class AuthControllerAspect {
      * @throws Throwable if proceeding join point throws an exception
      */
 
-    @Around("com.imovel.api.security.aspect.pointcut.PointCuts.authenticateUser()")
+    @Around("authenticateUser()")
     public Object authenticateUser(final ProceedingJoinPoint joinPoint) throws Throwable {
         Object[] args = joinPoint.getArgs();
 
@@ -72,17 +101,17 @@ public class AuthControllerAspect {
 
         // Validate required fields
         if (areFieldsMissing(request.getEmail(), request.getPassword())) {
-            return createErrorResponse("Missing required fields", ApiCode.REQUIRED_FIELD_MISSING.getCode(), HttpStatus.BAD_REQUEST);
+            return createErrorResponse(ApiCode.REQUIRED_FIELD_MISSING.getMessage(), ApiCode.REQUIRED_FIELD_MISSING.getCode(), HttpStatus.BAD_REQUEST);
         }
 
         // Validate email format
-        if (isEmailInvalid(request.getEmail())) {
-            return createErrorResponse("Email not valid", ApiCode.INVALID_EMAIL.getCode(), HttpStatus.BAD_REQUEST);
+        if (Util.isEmailInvalid(request.getEmail())) {
+            return createErrorResponse(ApiCode.INVALID_EMAIL.getMessage(), ApiCode.INVALID_EMAIL.getCode(), HttpStatus.BAD_REQUEST);
         }
+
         return joinPoint.proceed();
     }
-
-    @Around("com.imovel.api.security.aspect.pointcut.PointCuts.changeUserPassword()")
+    @Around("initiatePasswordReset()")
     public Object resetPassword(final ProceedingJoinPoint joinPoint) throws Throwable {
         Object[] args = joinPoint.getArgs();
 
@@ -90,15 +119,15 @@ public class AuthControllerAspect {
 
         // Validate required fields
         if (areFieldsMissing(request.getEmail(), request.getOldPassword())) {
-            return createErrorResponse("Missing required fields", ApiCode.REQUIRED_FIELD_MISSING.getCode(), HttpStatus.BAD_REQUEST);
+            return createErrorResponse(ApiCode.REQUIRED_FIELD_MISSING.getMessage(), ApiCode.REQUIRED_FIELD_MISSING.getCode(), HttpStatus.BAD_REQUEST);
         }
         // Validate required fields
         if (areFieldsMissing(request.getEmail(), request.getNewPassword())) {
-            return createErrorResponse("Missing required fields", ApiCode.REQUIRED_FIELD_MISSING.getCode(), HttpStatus.BAD_REQUEST);
+            return createErrorResponse(ApiCode.REQUIRED_FIELD_MISSING.getMessage(), ApiCode.REQUIRED_FIELD_MISSING.getCode(), HttpStatus.BAD_REQUEST);
         }
         // Validate email format
-        if (isEmailInvalid(request.getEmail())) {
-            return createErrorResponse("Email not valid", ApiCode.INVALID_EMAIL.getCode(), HttpStatus.BAD_REQUEST);
+        if (Util.isEmailInvalid(request.getEmail())) {
+            return createErrorResponse(ApiCode.INVALID_EMAIL.getMessage(), ApiCode.INVALID_EMAIL.getCode(), HttpStatus.BAD_REQUEST);
         }
 
         return joinPoint.proceed();
@@ -114,16 +143,6 @@ public class AuthControllerAspect {
     private static boolean areFieldsMissing(final String email, final String password) {
         return email == null || email.isEmpty() ||
                 password == null || password.isEmpty();
-    }
-
-    /**
-     * Validates email format against regex pattern.
-     *
-     * @param email The email to validate
-     * @return true if email doesn't match pattern, false otherwise
-     */
-    private static boolean isEmailInvalid(final String email) {
-        return !EMAIL_REGEX_PATTERN.matcher(email).matches();
     }
 
     /**

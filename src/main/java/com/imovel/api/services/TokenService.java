@@ -66,7 +66,7 @@ public class TokenService {
 
             return StandardResponse.success(tokens);
         } catch (Exception ex) {
-            throw new AuthenticationException(ApiCode.AUTHENTICATION_FAILED.getCode(), "Authentication failed: " + ex.getMessage());
+            throw new AuthenticationException(ApiCode.AUTHENTICATION_FAILED.getCode(), ApiCode.AUTHENTICATION_FAILED.getMessage());
         }
     }
 
@@ -192,7 +192,7 @@ public class TokenService {
     private void validateRefreshToken(String refreshToken) {
         if (!jwtProvider.validateRefreshToken(refreshToken)) {
             throw new TokenRefreshException(ApiCode.INVALID_REFRESH_TOKEN.getCode(),
-                    "Invalid refresh token signature",
+                    ApiCode.INVALID_REFRESH_TOKEN.getMessage(),
                     HttpStatus.UNAUTHORIZED);
         }
     }
@@ -207,12 +207,12 @@ public class TokenService {
         RefreshToken storedToken = refreshTokenRepository
                 .findByTokenAndRevokedFalseAndSupersededFalse(refreshToken)
                 .orElseThrow(() -> new TokenRefreshException(ApiCode.REFRESH_TOKEN_NOT_FOUND.getCode(),
-                        "Refresh token not found or invalid",
+                        ApiCode.REFRESH_TOKEN_NOT_FOUND.getMessage(),
                         HttpStatus.UNAUTHORIZED));
 
         if (storedToken.getExpiresAt().isBefore(Instant.now())) {
             throw new TokenRefreshException(ApiCode.REFRESH_TOKEN_EXPIRED.getCode(),
-                    "Refresh token expired",
+                    ApiCode.REFRESH_TOKEN_EXPIRED.getMessage(),
                     HttpStatus.UNAUTHORIZED);
         }
 

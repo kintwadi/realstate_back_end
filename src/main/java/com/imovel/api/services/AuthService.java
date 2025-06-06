@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 /**
  * Service for handling authentication-related operations.
  */
@@ -56,12 +58,11 @@ public class AuthService {
      * @param email The email to search for
      * @return StandardResponse containing the user if found
      */
-    public StandardResponse<User> findByEmail(final String email) {
-        return userRepository.findByEmail(email)
-                .map(StandardResponse::success)
-                .orElse(StandardResponse.error(ApiCode.USER_NOT_FOUND.getCode(), ApiCode.USER_NOT_FOUND.getMessage() + email, HttpStatus.NOT_FOUND));
-    }
+    public Optional<User> findByEmail(final String email) {
 
+        return userRepository.findByEmail(email);
+
+    }
     /**
      * Attempts to log in a user.
      *
@@ -70,7 +71,11 @@ public class AuthService {
      * @return StandardResponse containing the user if credentials are valid
      */
     public StandardResponse<User> loginUser(String email, String password) {
-        return findByEmail(email);
+
+        return findByEmail(email)
+                .map(StandardResponse::success)
+                .orElse(StandardResponse.error(ApiCode.USER_NOT_FOUND.getCode(), ApiCode.USER_NOT_FOUND.getMessage() + email, HttpStatus.NOT_FOUND));
+
     }
 
     /**

@@ -7,6 +7,7 @@ import com.imovel.api.response.StandardResponse;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class ExceptionHandlingAspect {
 
+//    @Pointcut("within(@org.springframework.web.bind.annotation.RestController *)")
+//    public void controllerMethods() {}
+
+    @Pointcut("execution(* (@org.springframework.web.bind.annotation.RestController *).*(..))")
+    public void controllerMethods() {}
     /**
      * Advice that wraps around controller methods to handle exceptions.
      *
@@ -28,7 +34,7 @@ public class ExceptionHandlingAspect {
      * @return ResponseEntity containing a standardized error response
      * @throws Throwable if an unexpected error occurs during processing
      */
-    @Around("com.imovel.api.security.aspect.pointcut.PointCuts.controllerMethods()")
+    @Around("controllerMethods()")
     public Object handleAuthExceptions(ProceedingJoinPoint joinPoint) throws Throwable {
         try {
             // Proceed with the original method execution
