@@ -22,7 +22,7 @@ import org.apache.logging.log4j.message.ObjectMessage;
 public final class ApiLogger
 {
     // Default logger name
-    private static final String  DEFAULT_LOGGER_TYPE = "imovel.api,logger.";
+    private static final String  DEFAULT_LOGGER_TYPE = "com.imovel.api.logger";
     private static final String  SIMPLE_FORMAT       = "[{}] {}";
     private static final String  COMPLETE_FORMAT     = "[{}] {}: {} - {}";
 
