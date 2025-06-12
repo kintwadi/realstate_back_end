@@ -2,7 +2,7 @@
 <Configuration status="WARN" monitorInterval="30">
 	<Properties>
 		<Property name="log.directory">logs</Property>
-		<!-- Disable inheritable ThreadContext (better for async) because AsyncLogger 
+		<!-- Disable inheritable ThreadContext (better for async) because AsyncLogger
 			takes care of it -->
 		<Property name="isThreadContextMapInheritable">false</Property>
 		<!-- Async logger queue size -->
@@ -15,8 +15,8 @@
 		</Property>
 		<Property name="exceptionPattern">$${exception:json:stackTrace.stringified=true:cause.stringified=true}
 		</Property>
-		
-		
+
+
 
 	</Properties>
 
@@ -24,8 +24,8 @@
 		<!-- Console Appender with JSON Layout -->
 		<Console name="Console" target="SYSTEM_OUT">
 			<JsonTemplateLayout
-				eventTemplateUri="classpath:LoggerLayout.json">
-			
+					eventTemplateUri="classpath:LoggerLayout.json">
+
 			</JsonTemplateLayout>
 
 		</Console>
@@ -37,14 +37,14 @@
 
 		<!-- File Appender -->
 		<RollingFile name="File"
-			fileName="${log.directory}/application.log"
-			filePattern="${log.directory}/application-%d{yyyy-MM-dd}-%i.log">
+					 fileName="${log.directory}/application.log"
+					 filePattern="${log.directory}/application-%d{yyyy-MM-dd}-%i.log">
 			<JsonTemplateLayout
-				eventTemplateUri="classpath:LoggerLayout.json">
+					eventTemplateUri="classpath:LoggerLayout.json">
 			</JsonTemplateLayout>
 			<Policies>
 				<TimeBasedTriggeringPolicy interval="1"
-					modulate="true" />
+										   modulate="true" />
 				<SizeBasedTriggeringPolicy size="100 MB" />
 			</Policies>
 			<DefaultRolloverStrategy max="30" />
@@ -53,7 +53,7 @@
 	<Loggers>
 
 		<AsyncLogger name="com.imovel.api.logger" level="info"
-			includeLocation="true">
+					 includeLocation="true">
 			<AppenderRef ref="AsyncAppender" />
 			<AppenderRef ref="File" />
 		</AsyncLogger>

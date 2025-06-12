@@ -12,7 +12,6 @@ import java.util.TimeZone;
 public class ImovelApiApplication {
 
 	public static void main(String[] args) {
-		//TimeZone.setDefault(TimeZone.getTimeZone("Asia/Dhaka"));
 		SpringApplication.run(ImovelApiApplication.class, args);
 	}
 

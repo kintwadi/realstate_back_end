@@ -9,7 +9,6 @@ import com.imovel.api.security.token.JWTProvider;
 import com.imovel.api.security.token.Token;
 import com.imovel.api.services.AuthService;
 import com.imovel.api.services.TokenService;
-import com.imovel.api.util.Util;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -26,15 +25,17 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
-    private final JWTProvider jwtProcessor;
+    private final JWTProvider jwtProvider;
     private final TokenService tokenService;
 
     @Autowired
-    public AuthController(AuthService authService, JWTProvider jwtProcessor, TokenService tokenService) {
+    public AuthController(AuthService authService,
+                          JWTProvider jwtProcessor,
+                          TokenService tokenService) {
         this.authService = authService;
-        this.jwtProcessor = jwtProcessor;
+        this.jwtProvider = jwtProcessor;
         this.tokenService = tokenService;
-        this.jwtProcessor.initialize();
+        this.jwtProvider.initialize();
     }
 
     /**
@@ -60,11 +61,6 @@ public class AuthController {
     public ResponseEntity<StandardResponse<Token>> authenticateUser(
             @RequestBody UserLoginRequest loginRequest, HttpServletRequest request) {
         StandardResponse<User> userResponse = authService.loginUser(loginRequest.getEmail(), loginRequest.getPassword());
-
-        if (!userResponse.isSuccess()) {
-            throw new AuthenticationException(ApiCode.INVALID_CREDENTIALS.getCode(), "Invalid email or password");
-        }
-
         StandardResponse<Token>  standardResponse = tokenService.login(userResponse.getData(), request);
         return ResponseEntity.ok(StandardResponse.success(standardResponse.getData()));
     }

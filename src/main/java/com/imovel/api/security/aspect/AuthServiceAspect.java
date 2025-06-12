@@ -11,9 +11,11 @@ import com.imovel.api.response.StandardResponse;
 import com.imovel.api.security.PasswordManager;
 import com.imovel.api.services.AuthDetailsService;
 import com.imovel.api.services.AuthService;
+import com.imovel.api.util.Util;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -49,6 +51,21 @@ public class AuthServiceAspect {
         this.authService = authService;
     }
 
+    @Pointcut("execution(* com.imovel.api.services.AuthService.loginUser(..))")
+    public static void loginUser() {
+        // Pointcut method - implementation will be provided by AspectJ
+    }
+
+    @Pointcut("execution(* com.imovel.api.services.AuthService.registerUser(..))")
+    public static void registerUser() {
+        // Pointcut method - implementation will be provided by AspectJ
+    }
+
+    @Pointcut("execution(* com.imovel.api.services.AuthService.changeUserPassword(..))")
+    public static void changeUserPassword() {
+        // Pointcut method - implementation will be provided by AspectJ
+    }
+
     /**
      * Around advice for user registration process.
      * Handles creation of authentication details after successful user registration.
@@ -57,9 +74,15 @@ public class AuthServiceAspect {
      * @return StandardResponse containing the registered user if successful
      * @throws Throwable if an error occurs during processing
      */
-    @Around("com.imovel.api.security.aspect.pointcut.PointCuts.registerUser()")
+    @Around("registerUser()")
     public Object registerUser(final ProceedingJoinPoint joinPoint) throws Throwable {
         UserRegistrationRequest request = (UserRegistrationRequest) joinPoint.getArgs()[0];
+
+        // Validate email format
+        if (Util.isEmailInvalid(request.getEmail())) {
+
+            return StandardResponse.error(ApiCode.INVALID_EMAIL.getCode(), ApiCode.INVALID_EMAIL.getMessage(), HttpStatus.BAD_REQUEST);
+        }
 
         StandardResponse<User> response = (StandardResponse<User>) joinPoint.proceed();
 
@@ -83,16 +106,16 @@ public class AuthServiceAspect {
      * @return StandardResponse with login result if credentials are valid
      * @throws Throwable if an error occurs during processing
      */
-    @Around("com.imovel.api.security.aspect.pointcut.PointCuts.loginUser()")
+    @Around("loginUser()")
     public Object loginUser(final ProceedingJoinPoint joinPoint) throws Throwable {
         Object[] args = joinPoint.getArgs();
         String email = (String) args[0];
         String password = (String) args[1];
 
-        StandardResponse<User> userResponse = authService.findByEmail(email);
+        Optional<User> optionalUser = authService.findByEmail(email);
 
-        if (!userResponse.isSuccess() || !verifyUserPassword(userResponse.getData().getId(), password)) {
-            throw new AuthenticationException(ApiCode.INVALID_CREDENTIALS.getCode(), "Invalid email or password");
+        if (!optionalUser.isPresent() || !verifyUserPassword(optionalUser.get().getId(), password)) {
+            throw new AuthenticationException(ApiCode.INVALID_CREDENTIALS.getCode(), ApiCode.INVALID_CREDENTIALS.getMessage());
         }
 
         return joinPoint.proceed();
@@ -105,23 +128,23 @@ public class AuthServiceAspect {
      * @return StandardResponse indicating the result of the password change operation
      * @throws Throwable if an error occurs during processing
      */
-    @Around("com.imovel.api.security.aspect.pointcut.PointCuts.changeUserPassword()")
+    @Around("changeUserPassword()")
     public Object verifyPasswordBeforeChange(final ProceedingJoinPoint joinPoint) throws Throwable {
         final PasswordChangeRequest passwordChangeRequest = (PasswordChangeRequest) joinPoint.getArgs()[0];
 
-        final StandardResponse<User> userResponse = authService.findByEmail(passwordChangeRequest.getEmail());
+        final Optional<User> optionalUser = authService.findByEmail(passwordChangeRequest.getEmail());
 
-        if (!userResponse.isSuccess()) {
-            return StandardResponse.error(ApiCode.PASSWORD_RESET_FAILED.getCode(), "User not found", HttpStatus.BAD_REQUEST);
+        if (!optionalUser.isPresent()) {
+            return StandardResponse.error(ApiCode.PASSWORD_RESET_FAILED.getCode(), ApiCode.PASSWORD_RESET_FAILED.getMessage(), HttpStatus.BAD_REQUEST);
         }
 
-        if (!isPasswordValid(userResponse.getData().getId(), passwordChangeRequest.getOldPassword())) {
-            return StandardResponse.error(ApiCode.PASSWORD_RESET_FAILED.getCode(), "Current password is incorrect",HttpStatus.BAD_REQUEST);
+        if (!isPasswordValid(optionalUser.get().getId(), passwordChangeRequest.getOldPassword())) {
+            return StandardResponse.error(ApiCode.PASSWORD_RESET_FAILED.getCode(), ApiCode.PASSWORD_RESET_FAILED.getMessage(),HttpStatus.BAD_REQUEST);
         }
 
         // Update authentication details
         final AuthDetails newAuthDetails = passwordManager.createAuthDetails(passwordChangeRequest.getNewPassword());
-        final AuthDetails currentAuthDetails = authDetailsService.findByUserId(userResponse.getData().getId())
+        final AuthDetails currentAuthDetails = authDetailsService.findByUserId(optionalUser.get().getId())
                 .getData();
 
         currentAuthDetails.setHash(newAuthDetails.getHash());
