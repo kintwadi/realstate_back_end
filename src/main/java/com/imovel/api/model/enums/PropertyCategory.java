@@ -1,9 +1,10 @@
 package com.imovel.api.model.enums;
 
 public enum PropertyCategory {
-    APARTMENT,
     HOUSE,
+    APARTMENT,
+    HOTEL,
     VILLA,
-    COMMERCIAL,
+    OFFICE,
     LAND
 }

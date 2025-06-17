@@ -21,7 +21,7 @@ public enum ApiCode {
     INVALID_REFRESH_TOKEN(2007, "Invalid refresh token", HttpStatus.UNAUTHORIZED),
     REFRESH_TOKEN_NOT_FOUND(2008, "Refresh token not found", HttpStatus.NOT_FOUND),
     REFRESH_TOKEN_NOT_EXPIRED(2009, "Refresh token not expired", HttpStatus.CONFLICT),
-    REFRESH_TOKEN_NOT_LIMITE_EXCEEDED(2010, "Refresh token limit exceeded", HttpStatus.UNAUTHORIZED),
+    REFRESH_TOKEN_NOT_LIMITE_EXCEEDED(2010, "Token limit exceeded. Oldest tokens have been revoked.", HttpStatus.UNAUTHORIZED),
     REFRESH_TOKEN_EXPIRED(2011, "Refresh token  expired", HttpStatus.CONFLICT),
     REFRESH_TOKEN_FAILED(2012, "Refresh token  failed", HttpStatus.CONFLICT),
     // User Module Errors (2100-2199)
@@ -31,7 +31,7 @@ public enum ApiCode {
     PASSWORD_POLICY_VIOLATION(2103, "Password does not meet policy requirements", HttpStatus.BAD_REQUEST),
     PASSWORD_RESET_FAILED(2104,"Password reset valied",HttpStatus.CONFLICT),
     USER_PROFILE_INCOMPLETE(2105, "User profile is incomplete", HttpStatus.BAD_REQUEST),
-
+    INAVALID_PASSWORD(2106, "Password does not match", HttpStatus.CONFLICT),
 
     // Role Module Errors (2200-2299)
     ROLE_NOT_FOUND(2200, "Role not found", HttpStatus.NOT_FOUND),
