@@ -1,5 +1,7 @@
 package com.imovel.api.model.enums;
 
 public enum PropertyType {
-    SALE, RENT, LEASE
+    SALE,
+    RENT,
+    COMMERCIAL
 }

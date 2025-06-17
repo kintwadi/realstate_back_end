@@ -1,14 +1,23 @@
 package com.imovel.api.model;
 
+import com.imovel.api.model.embeddable.AccordionItem;
+import com.imovel.api.model.embeddable.NearbyPlace;
 import com.imovel.api.model.enums.PropertyCategory;
 import com.imovel.api.model.enums.PropertyStatus;
 import com.imovel.api.model.enums.PropertyType;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.Objects;
 
 @Entity
 @Table(name = "properties")
@@ -18,35 +27,88 @@ public class Property {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String title;
-
-    @Lob
-    private String description;
-
-    @Column(nullable = false)
-    private Double price;
+    @Column(nullable = false, length = 255)
+    private String mainTitle; // Was 'title'
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private PropertyType type;
+    @Column(name = "property_type", nullable = false)
+    private PropertyType type; // e.g., SALE, RENT, COMMERCIAL
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private PropertyCategory category;
+    @Column(name = "property_category", nullable = false)
+    private PropertyCategory category; // e.g., HOUSE, APARTMENT, HOTEL, VILLA, OFFICE
 
-    private Integer bedrooms;
-    private Integer bathrooms;
-    private Double area;
+    @Column(nullable = false, precision = 19, scale = 4) // Precision for BigDecimal
+    private BigDecimal price; // Changed from Double to BigDecimal
+
+    @Column(name = "keywords", length = 500)
+    private String keywords; // Comma-separated
 
     @Embedded
     private Location location;
 
-    @ElementCollection
-    @CollectionTable(name = "property_amenities", joinColumns = @JoinColumn(name = "property_id"))
-    @Column(name = "amenity")
+    @Column(name = "contact_phone", length = 50)
+    private String contactPhone;
+
+    @Email
+    @Column(name = "contact_email", length = 100)
+    private String contactEmail;
+
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "property_nearby_places", joinColumns = @JoinColumn(name = "property_id"))
+    @OrderBy("placeType ASC") // Optional: order the collection
+    private List<NearbyPlace> nearbyPlaces = new ArrayList<>();
+
+    @Column(name = "area_description", length = 100)
+    private String area;
+
+    @Column(name = "bedrooms")
+    private Integer bedrooms;
+
+    @Column(name = "bathrooms")
+    private Integer bathrooms;
+
+    @Column(name = "parking_spots")
+    private Integer parkingSpots; // For number of parking spots
+
+    @Column(name = "max_adults_accommodation")
+    private Integer maxAdultsAccommodation;
+
+    @Column(name = "max_children_accommodation")
+    private Integer maxChildrenAccommodation;
+
+    @Column(name = "website_url", length = 2048)
+    private String website;
+
+    @Lob
+    @Column(name = "property_details_text", columnDefinition = "TEXT") // Renamed from 'description'
+    private String description; // This is for "Property Details Text"
+
+    @ElementCollection(fetch = FetchType.LAZY) // For Amenities
+    @CollectionTable(name = "property_amenities_new", joinColumns = @JoinColumn(name = "property_id")) // Renamed table to avoid conflict if old one exists
+    @Column(name = "amenity_name")
     private Set<String> amenities = new HashSet<>();
 
+    @Column(name = "enable_accordion_widget")
+    private boolean enableAccordionWidget;
+
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(name = "property_accordion_items", joinColumns = @JoinColumn(name = "property_id"))
+    @OrderBy("title ASC") // Optional
+    private List<AccordionItem> accordionItems = new ArrayList<>();
+
+    // 5. Premium Options (Display/Feature Flags - original section 7):
+    @Column(name = "show_similar_properties")
+    private boolean showSimilarProperties;
+
+    @Column(name = "show_price_change_dynamics")
+    private boolean showPriceChangeDynamics;
+
+    @Column(name = "show_Maps")
+    private boolean showGoogleMaps;
+
+    // Standard Fields (already existed, ensure they are still relevant)
+    @NotNull
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PropertyStatus status;
@@ -63,178 +125,103 @@ public class Property {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Media> images = new ArrayList<>();
-
-    @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Review> reviews = new ArrayList<>();
-
-    @ManyToMany(mappedBy = "properties")
-    private List<Wishlist> wishlists = new ArrayList<>();
 
     // Constructors
-    public Property() {}
-
-    public Property(Long id, String title, Double price, PropertyType type, PropertyCategory category, User createdBy) {
-        this();
-        this.id = id;
-        this.title = title;
-        this.price = price;
-        this.type = type;
-        this.category = category;
-        this.createdBy = createdBy;
-        this.status = PropertyStatus.PENDING; // Default status
+    public Property() {
+        // Initialization of collections
+        this.amenities = new HashSet<>();
+        this.nearbyPlaces = new ArrayList<>();
+        this.accordionItems = new ArrayList<>();
+        this.enableAccordionWidget = false;
+        this.showSimilarProperties = false;
+        this.showPriceChangeDynamics = false;
+        this.showGoogleMaps = true;
     }
 
-    // Getters and Setters
-    public Long getId() {
-        return id;
-    }
+    // Getters and Setters for all fields
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getMainTitle() { return mainTitle; }
+    public void setMainTitle(String mainTitle) { this.mainTitle = mainTitle; }
 
-    public String getTitle() {
-        return title;
-    }
+    public PropertyType getType() { return type; }
+    public void setType(PropertyType type) { this.type = type; }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
+    public PropertyCategory getCategory() { return category; }
+    public void setCategory(PropertyCategory category) { this.category = category; }
 
-    public String getDescription() {
-        return description;
-    }
+    public BigDecimal getPrice() { return price; }
+    public void setPrice(BigDecimal price) { this.price = price; }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+    public String getKeywords() { return keywords; }
+    public void setKeywords(String keywords) { this.keywords = keywords; }
 
-    public Double getPrice() {
-        return price;
-    }
+    public Location getLocation() { return location; }
+    public void setLocation(Location location) { this.location = location; }
 
-    public void setPrice(Double price) {
-        this.price = price;
-    }
+    public String getContactPhone() { return contactPhone; }
+    public void setContactPhone(String contactPhone) { this.contactPhone = contactPhone; }
 
-    public PropertyType getType() {
-        return type;
-    }
+    public String getContactEmail() { return contactEmail; }
+    public void setContactEmail(String contactEmail) { this.contactEmail = contactEmail; }
 
-    public void setType(PropertyType type) {
-        this.type = type;
-    }
+    public List<NearbyPlace> getNearbyPlaces() { return nearbyPlaces; }
+    public void setNearbyPlaces(List<NearbyPlace> nearbyPlaces) { this.nearbyPlaces = nearbyPlaces; }
 
-    public PropertyCategory getCategory() {
-        return category;
-    }
+    public String getArea() { return area; }
+    public void setArea(String area) { this.area = area; }
 
-    public void setCategory(PropertyCategory category) {
-        this.category = category;
-    }
+    public Integer getBedrooms() { return bedrooms; }
+    public void setBedrooms(Integer bedrooms) { this.bedrooms = bedrooms; }
 
-    public Integer getBedrooms() {
-        return bedrooms;
-    }
+    public Integer getBathrooms() { return bathrooms; }
+    public void setBathrooms(Integer bathrooms) { this.bathrooms = bathrooms; }
 
-    public void setBedrooms(Integer bedrooms) {
-        this.bedrooms = bedrooms;
-    }
+    public Integer getParkingSpots() { return parkingSpots; }
+    public void setParkingSpots(Integer parkingSpots) { this.parkingSpots = parkingSpots; }
 
-    public Integer getBathrooms() {
-        return bathrooms;
-    }
+    public Integer getMaxAdultsAccommodation() { return maxAdultsAccommodation; }
+    public void setMaxAdultsAccommodation(Integer maxAdultsAccommodation) { this.maxAdultsAccommodation = maxAdultsAccommodation; }
 
-    public void setBathrooms(Integer bathrooms) {
-        this.bathrooms = bathrooms;
-    }
+    public Integer getMaxChildrenAccommodation() { return maxChildrenAccommodation; }
+    public void setMaxChildrenAccommodation(Integer maxChildrenAccommodation) { this.maxChildrenAccommodation = maxChildrenAccommodation; }
 
-    public Double getArea() {
-        return area;
-    }
+    public String getWebsite() { return website; }
+    public void setWebsite(String website) { this.website = website; }
 
-    public void setArea(Double area) {
-        this.area = area;
-    }
+    public String getDescription() { return description; } // For "Property Details Text"
+    public void setDescription(String description) { this.description = description; }
 
-    public Location getLocation() {
-        return location;
-    }
+    public Set<String> getAmenities() { return amenities; }
+    public void setAmenities(Set<String> amenities) { this.amenities = amenities; }
 
-    public void setLocation(Location location) {
-        this.location = location;
-    }
+    public boolean isEnableAccordionWidget() { return enableAccordionWidget; }
+    public void setEnableAccordionWidget(boolean enableAccordionWidget) { this.enableAccordionWidget = enableAccordionWidget; }
 
-    public Set<String> getAmenities() { // CHANGED return type
-        return amenities;
-    }
+    public List<AccordionItem> getAccordionItems() { return accordionItems; }
+    public void setAccordionItems(List<AccordionItem> accordionItems) { this.accordionItems = accordionItems; }
 
-    public void setAmenities(Set<String> amenities) { // CHANGED parameter type
-        this.amenities = amenities;
-    }
+    public boolean isShowSimilarProperties() { return showSimilarProperties; }
+    public void setShowSimilarProperties(boolean showSimilarProperties) { this.showSimilarProperties = showSimilarProperties; }
 
-    public PropertyStatus getStatus() {
-        return status;
-    }
+    public boolean isShowPriceChangeDynamics() { return showPriceChangeDynamics; }
+    public void setShowPriceChangeDynamics(boolean showPriceChangeDynamics) { this.showPriceChangeDynamics = showPriceChangeDynamics; }
 
-    public void setStatus(PropertyStatus status) {
-        this.status = status;
-    }
+    public boolean isShowGoogleMaps() { return showGoogleMaps; }
+    public void setShowGoogleMaps(boolean showGoogleMaps) { this.showGoogleMaps = showGoogleMaps; }
 
-    public User getCreatedBy() {
-        return createdBy;
-    }
+    public PropertyStatus getStatus() { return status; }
+    public void setStatus(PropertyStatus status) { this.status = status; }
 
-    public void setCreatedBy(User createdBy) {
-        this.createdBy = createdBy;
-    }
+    public User getCreatedBy() { return createdBy; }
+    public void setCreatedBy(User createdBy) { this.createdBy = createdBy; }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; } // Should be handled by @CreationTimestamp
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    public List<Media> getImages() {
-        return images;
-    }
-
-    public void setImages(List<Media> images) {
-        this.images = images;
-    }
-
-    public List<Review> getReviews() {
-        return reviews;
-    }
-
-    public void setReviews(List<Review> reviews) {
-        this.reviews = reviews;
-    }
-
-    public List<Wishlist> getWishlists() {
-        return wishlists;
-    }
-
-    public void setWishlists(List<Wishlist> wishlists) {
-        this.wishlists = wishlists;
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; } // Should be handled by @UpdateTimestamp
 
     @Override
     public boolean equals(Object o) {
@@ -252,8 +239,10 @@ public class Property {
     @Override
     public String toString() {
         return "Property{" +
-                "id='" + id + '\'' +
-                ", title='" + title + '\'' +
+                "id=" + id +
+                ", mainTitle='" + mainTitle + '\'' +
+                ", type=" + type +
+                ", category=" + category +
                 ", price=" + price +
                 '}';
     }

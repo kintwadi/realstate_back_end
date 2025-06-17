@@ -18,7 +18,7 @@ public class StandardResponse<T> {
     private Instant timestamp;
 
     // Private constructor to enforce use of factory methods
-    private StandardResponse(boolean success, T data, String message, ErrorCode error) {
+    public StandardResponse(boolean success, T data, String message, ErrorCode error) {
         this.success = success;
         this.data = data;
         this.message = message;

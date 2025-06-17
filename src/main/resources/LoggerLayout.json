@@ -39,15 +39,124 @@
 		"$resolver": "mdc",
 		"key": "marker"
 	},
-	"userName": {
-		"$resolver": "mdc",
-		"key": "userName",
-		"stringified": true
+	"user": {
+		"id": "user-12345",
+		"name": {
+			"$resolver": "mdc",
+			"key": "userName",
+			"stringified": true
+		},
+		"email": {
+			"$resolver": "mdc",
+			"key": "userEmail",
+			"stringified": true
+		},
+		"role": "PropertyManager",
+		"ipAddress": "203.0.113.42"
 	},
-	"userEmail": {
-		"$resolver": "mdc",
-		"key": "userEmail",
-		"stringified": true
+
+	"property": {
+		"$resolver": "propertyContext",
+		"id": {
+			"$resolver": "mdc",
+			"key": "propertyId",
+			"fallback": "prop-67890"
+		},
+		"address": {
+			"$resolver": "propertyAddress",
+			"street": {
+				"$resolver": "mdc",
+				"key": "propertyStreet",
+				"fallback": "123 Main St"
+			},
+			"city": {
+				"$resolver": "mdc",
+				"key": "propertyCity",
+				"fallback": "Metropolis"
+			},
+			"state": {
+				"$resolver": "mdc",
+				"key": "propertyState",
+				"fallback": "CA"
+			},
+			"zip": {
+				"$resolver": "mdc",
+				"key": "propertyZip",
+				"fallback": "12345"
+			}
+		}
+	},
+	"financial": {
+		"$resolver": "financialContext",
+		"transactionId": {
+			"$resolver": "mdc",
+			"key": "transactionId",
+			"fallback": "txn-pqr456"
+		},
+		"amount": {
+			"$resolver": "mdc",
+			"key": "transactionAmount",
+			"transform": {
+				"type": "number",
+				"fallback": 2700.00
+			}
+		},
+		"currency": {
+			"$resolver": "mdc",
+			"key": "transactionCurrency",
+			"fallback": "USD"
+		},
+		"paymentMethod": {
+			"$resolver": "mdc",
+			"key": "paymentMethod",
+			"fallback": "ACH"
+		},
+		"invoiceNumber": {
+			"$resolver": "mdc",
+			"key": "invoiceNumber",
+			"optional": true
+		}
+	},
+	"maintenance": {
+		"$resolver": "maintenanceContext",
+		"workOrderId": {
+			"$resolver": "mdc",
+			"key": "workOrderId",
+			"fallback": "wo-13579"
+		},
+		"issueType": {
+			"$resolver": "mdc",
+			"key": "maintenanceIssueType",
+			"fallback": "HVAC Repair"
+		},
+		"vendor": {
+			"$resolver": "mdc",
+			"key": "maintenanceVendor",
+			"fallback": "ACME HVAC Services"
+		},
+		"cost": {
+			"$resolver": "mdc",
+			"key": "maintenanceCost",
+			"transform": {
+				"type": "number",
+				"fallback": 425.00
+			}
+		},
+		"priority": {
+			"$resolver": "mdc",
+			"key": "maintenancePriority",
+			"optional": true,
+			"fallback": "Medium"
+		},
+		"completionDate": {
+			"$resolver": "timestamp",
+			"key": "maintenanceCompletionDate",
+			"optional": true,
+			"pattern": {
+				"format": "yyyy-MM-dd'T'HH:mm:ssZ",
+				"timeZone": "UTC"
+			}
+		}
 	},
 	"response": {
 		"$resolver": "message",
