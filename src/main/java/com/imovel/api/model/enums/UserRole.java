@@ -1,5 +1,5 @@
 package com.imovel.api.model.enums;
 
 public enum UserRole {
-    ADMIN, AGENT, CLIENT
+    ADMIN, AGENT, CLIENT,TENANT
 }

@@ -27,6 +27,8 @@ public class Property {
     @Column(nullable = false)
     private Double price;
 
+    private boolean active;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PropertyType type;
@@ -229,6 +231,14 @@ public class Property {
 
     public void setWishlists(List<Wishlist> wishlists) {
         this.wishlists = wishlists;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
     @PreUpdate

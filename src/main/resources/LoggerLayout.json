@@ -67,7 +67,7 @@
 			"street": {
 				"$resolver": "mdc",
 				"key": "propertyStreet",
-				"fallback": "123 Main St"
+				"fallback": "NONE"
 			},
 			"city": {
 				"$resolver": "mdc",
@@ -77,7 +77,7 @@
 			"state": {
 				"$resolver": "mdc",
 				"key": "propertyState",
-				"fallback": "CA"
+				"fallback": "NONE"
 			},
 			"zip": {
 				"$resolver": "mdc",
@@ -98,7 +98,7 @@
 			"key": "transactionAmount",
 			"transform": {
 				"type": "number",
-				"fallback": 2700.00
+				"fallback": 0.00
 			}
 		},
 		"currency": {
@@ -127,19 +127,19 @@
 		"issueType": {
 			"$resolver": "mdc",
 			"key": "maintenanceIssueType",
-			"fallback": "HVAC Repair"
+			"fallback": "Repair"
 		},
 		"vendor": {
 			"$resolver": "mdc",
 			"key": "maintenanceVendor",
-			"fallback": "ACME HVAC Services"
+			"fallback": "Services"
 		},
 		"cost": {
 			"$resolver": "mdc",
 			"key": "maintenanceCost",
 			"transform": {
 				"type": "number",
-				"fallback": 425.00
+				"fallback": 0.00
 			}
 		},
 		"priority": {
