@@ -1,6 +1,5 @@
 package com.imovel.api.model;
 
-import com.imovel.api.model.enums.UserRole;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -29,8 +28,12 @@ public class User {
 
     private String avatar;
 
-    @Enumerated(EnumType.STRING)
-    private UserRole role;
+    //@Enumerated(EnumType.STRING)
+    //private UserRole role;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "role_id", nullable = false)
+    private Role role;
 
     @ElementCollection
     @CollectionTable(name = "user_social_links", joinColumns = @JoinColumn(name = "user_id"))
@@ -56,7 +59,7 @@ public class User {
 
     public User() {}
 
-    public User(Long id, String name, String email, UserRole role) {
+    public User(Long id, String name, String email, Role role) {
         this();
         this.id = id;
         this.name = name;
@@ -105,11 +108,11 @@ public class User {
         this.avatar = avatar;
     }
 
-    public UserRole getRole() {
+    public Role getRole() {
         return role;
     }
 
-    public void setRole(UserRole role) {
+    public void setRole(Role role) {
         this.role = role;
     }
 

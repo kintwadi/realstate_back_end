@@ -43,6 +43,7 @@ public enum ApiCode {
     PERMISSION_DENIED(2300, "Permission denied", HttpStatus.FORBIDDEN),
     PERMISSION_NOT_FOUND(2301, "Permission not found", HttpStatus.NOT_FOUND),
     INSUFFICIENT_PRIVILEGES(2302, "Insufficient privileges", HttpStatus.FORBIDDEN),
+    PERMISSION_OR_ROLE_NOT_FOUND(2303, "Permission or Role not found", HttpStatus.NOT_FOUND),
 
     // Property Module Errors (3000-3099)
     PROPERTY_NOT_FOUND(3000, "Property not found", HttpStatus.NOT_FOUND),
@@ -91,7 +92,17 @@ public enum ApiCode {
     INVALID_PAYLOAD(600, "invalid payload", HttpStatus.BAD_REQUEST),
     MISSING_FIELDS(601,"Missing required fields",HttpStatus.BAD_REQUEST),
     INVALID_EMAIL(602,"Invalid email format",HttpStatus.CONFLICT),
-    INVALID_EMAIL_ALREADY_EXIST(603,"Email already exist",HttpStatus.CONFLICT);
+    INVALID_EMAIL_ALREADY_EXIST(603,"Email already exist",HttpStatus.CONFLICT),
+
+    // Permission/Authorization Module Errors section (2300-2399)
+    ROLE_CREATION_FAILED(2303, "Failed to create role", HttpStatus.INTERNAL_SERVER_ERROR),
+    PERMISSION_CREATION_FAILED(2304, "Failed to create permission", HttpStatus.INTERNAL_SERVER_ERROR),
+    PERMISSION_ASSIGNMENT_FAILED(2305, "Failed to assign permission to role", HttpStatus.INTERNAL_SERVER_ERROR),
+    PERMISSION_REMOVAL_FAILED(2306, "Failed to remove permission from role", HttpStatus.INTERNAL_SERVER_ERROR),
+    ROLE_ASSIGNMENT_FAILED(2307, "Failed to assign role to user", HttpStatus.INTERNAL_SERVER_ERROR),
+    ROLE_REMOVAL_FAILED(2308, "Failed to remove role from user", HttpStatus.INTERNAL_SERVER_ERROR),
+    PERMISSION_RETRIEVAL_FAILED(2309, "Failed to retrieve permissions", HttpStatus.INTERNAL_SERVER_ERROR),
+    INITIALIZATION_FAILED(2310, "Failed to initialize default roles and permissions", HttpStatus.INTERNAL_SERVER_ERROR);
 
 
     private final Integer code;

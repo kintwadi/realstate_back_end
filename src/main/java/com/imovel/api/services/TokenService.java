@@ -150,7 +150,7 @@ public class TokenService {
     private Token generateTokensForUser(User user) {
         jwtProvider.addClaim("userId", user.getId().toString());
         jwtProvider.addClaim("username", user.getName());
-        jwtProvider.addClaim("role", user.getRole().name());
+        jwtProvider.addClaim("role", user.getRole().getRoleName());
         return jwtProvider.generateToken();
     }
 
