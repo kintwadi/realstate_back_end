@@ -2,8 +2,10 @@ package com.imovel.api.services;
 
 import com.imovel.api.error.ApiCode;
 import com.imovel.api.exception.ConflictException;
+import com.imovel.api.model.Role;
 import com.imovel.api.model.User;
-import com.imovel.api.model.enums.UserRole;
+import com.imovel.api.model.enums.RoleReference;
+import com.imovel.api.repository.RoleRepository;
 import com.imovel.api.repository.UserRepository;
 import com.imovel.api.request.PasswordChangeRequest;
 import com.imovel.api.request.UserRegistrationRequest;
@@ -22,11 +24,16 @@ import java.util.Optional;
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final AuthDetailsService authDetailsService;
 
     @Autowired
-    public AuthService(UserRepository userRepository, AuthDetailsService authDetailsService) {
+    public AuthService(UserRepository userRepository,
+                       RoleRepository roleRepository,
+                       AuthDetailsService authDetailsService)
+    {
         this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
         this.authDetailsService = authDetailsService;
     }
 
@@ -42,11 +49,21 @@ public class AuthService {
             throw new ConflictException(ApiCode.INVALID_EMAIL_ALREADY_EXIST.getCode(),ApiCode.INVALID_EMAIL_ALREADY_EXIST.getMessage());
         }
 
+        Role role = new Role();
+        role.setRoleName(RoleReference.TENANT.name());
+        Optional<Role> roleOptional = roleRepository.findByRoleName(RoleReference.TENANT.name());
+        if(!roleOptional.isPresent()){
+            roleRepository.save(role);
+        }else{
+            role = roleOptional.get();
+        }
+
+
         User newUser = new User();
         newUser.setName(request.getName());
         newUser.setEmail(request.getEmail());
         newUser.setPhone(request.getPhone());
-        newUser.setRole(UserRole.CLIENT);
+        newUser.setRole(role);
 
         User savedUser = userRepository.save(newUser);
         return StandardResponse.success(savedUser);
