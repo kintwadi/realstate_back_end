@@ -222,7 +222,6 @@ public class Property {
 
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; } // Should be handled by @UpdateTimestamp
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
