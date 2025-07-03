@@ -10,6 +10,7 @@ public class SubscriptionInitializer {
 
     public static void init(SubscriptionPlanRepository repository) {
 
+        if(!repository.findAllByOrderByIdAsc().isEmpty())return;
         // Free Plan
         SubscriptionPlan free = new SubscriptionPlan();
         free.setName("Free");
