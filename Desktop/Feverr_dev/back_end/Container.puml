@@ -1,0 +1,26 @@
+@startuml Containers
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title Container Diagram for Real Estate Management System
+
+Person(tenant, "Tenant", "Regular user who rents/buys properties")
+Person(agent, "Agent", "User who lists and manages properties")
+Person(admin, "Admin", "System administrator with full access")
+
+System_Boundary(system_boundary, "Real Estate Management System") {
+    Container(spa, "Single Page Application", "Angular", "Provides UI for all user interactions")
+    Container(api, "REST API", "java/Spring Boot", "Handles business logic and data access")
+    Container(db, "Database", "SQL Database", "Stores properties, users, transactions, etc.")
+}
+
+System_Ext(payment_gateway, "Payment Gateway", "External payment processing system")
+
+Rel(tenant, spa, "Uses", "HTTPS")
+Rel(agent, spa, "Uses", "HTTPS")
+Rel(admin, spa, "Uses", "HTTPS")
+
+Rel(spa, api, "API calls", "REST/HTTPS")
+Rel(api, db, "Reads/Writes", "JDBC")
+Rel(api, payment_gateway, "Process payments", "HTTPS")
+
+@enduml
