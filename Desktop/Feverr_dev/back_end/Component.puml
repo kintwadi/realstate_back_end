@@ -1,0 +1,55 @@
+@startuml Components
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title Component Diagram for Real Estate Management System API
+
+Container(api, "REST API", "Java/Spring Boot", "Handles business logic and data access")
+
+Container_Boundary(api_boundary, "API Components") {
+    Component(auth_controller, "Authentication Controller", "Spring REST Controller", "Handles user login, registration, JWT")
+    Component(user_controller, "User Management Controller", "Spring REST Controller", "Manages user profiles, roles")
+    Component(property_controller, "Property Controller", "Spring REST Controller", "Handles property CRUD operations")
+    Component(booking_controller, "Booking Controller", "[Spring REST Controller - NOT YET IMPLEMENTED]", "Manages rental/bookings")
+    Component(purchase_controller, "Purchase Controller", "[Spring REST Controller - NOT YET IMPLEMENTED]", "Handles property purchases")
+    Component(subscription_controller, "Subscription Controller", "Spring REST Controller", "Manages user subscriptions")
+    Component(payment_service, "Payment Service", "[Service - NOT YET IMPLEMENTED]", "Integrates with payment gateway")
+    
+    Component(auth_service, "Authentication Service", "Handles auth logic")
+    Component(user_service, "User Service","Manages user operations")
+    Component(property_service, "Property Service", "Business logic for properties")
+    Component(booking_service, "Booking Service", "[Service - NOT YET IMPLEMENTED]", "Booking logic")
+    Component(subscription_service, "Subscription Service", "[Service - NOT YET IMPLEMENTED]", "Subscription plans logic")
+
+    Component(repository, "Repository Layer", "Spring Data JPA", "Data access layer")
+    
+}
+
+Container(spa, "Single Page Application", "Angular", "Provides UI for all user interactions")
+Container(db, "Database", "SQL Database", "Stores properties, users, transactions, etc.")
+System_Ext(payment_gateway, "Payment Gateway", "External payment processing system")
+
+Rel(spa, auth_controller, "API calls", "HTTPS")
+Rel(spa, user_controller, "API calls", "HTTPS")
+Rel(spa, property_controller, "API calls", "HTTPS")
+Rel(spa, booking_controller, "API calls", "HTTPS")
+Rel(spa, purchase_controller, "API calls", "HTTPS")
+Rel(spa, subscription_controller, "API calls", "HTTPS")
+
+Rel(auth_controller, auth_service, "Uses")
+Rel(user_controller, user_service, "Uses")
+Rel(property_controller, property_service, "Uses")
+Rel(booking_controller, booking_service, "Uses")
+Rel(subscription_controller, subscription_service, "Uses")
+
+Rel(auth_service, repository, "Reads/Writes")
+Rel(user_service, repository, "Reads/Writes")
+Rel(property_service, repository, "Reads/Writes")
+Rel(booking_service, repository, "Reads/Writes")
+Rel(subscription_service, repository, "Reads/Writes")
+
+Rel(payment_service, payment_gateway, "Process payments", "HTTPS")
+Rel(subscription_service, payment_service, "Uses")
+
+Rel(repository, db, "Reads/Writes", "JDBC")
+
+@enduml

@@ -1,6 +1,6 @@
 package com.imovel.api.response;
 
-import com.imovel.api.model.enums.UserRole;
+import com.imovel.api.model.Role;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -11,7 +11,7 @@ public class UserProfileResponseDto {
     private String email;
     private String phone;
     private String avatar;
-    private UserRole role;
+    private Role role;
     private List<String> socialLinks;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -59,11 +59,11 @@ public class UserProfileResponseDto {
         this.avatar = avatar;
     }
 
-    public UserRole getRole() {
+    public Role getRole() {
         return role;
     }
 
-    public void setRole(UserRole role) {
+    public void setRole(Role role) {
         this.role = role;
     }
 

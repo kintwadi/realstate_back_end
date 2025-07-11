@@ -1,0 +1,21 @@
+@startuml SystemContext
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+title System Context Diagram for Real Estate Management System
+
+Person(tenant, "Tenant", "Regular user who rents/buys properties")
+Person(agent, "Agent", "User who lists and manages properties")
+Person(admin, "Admin", "System administrator with full access")
+
+System(real_estate_system, "Real Estate Management System", "Allows property listing, management, and transactions")
+
+System_Ext(payment_gateway, "Payment Gateway", "External payment processing system")
+
+Rel(tenant, real_estate_system, "Browse, rent/buy properties")
+Rel(agent, real_estate_system, "List/manage properties")
+Rel(admin, real_estate_system, "Manage users, system configuration")
+
+Rel(real_estate_system, payment_gateway, "Process subscription payments")
+
+
+@enduml

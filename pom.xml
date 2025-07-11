@@ -129,6 +129,14 @@
             <artifactId>spring-boot-devtools</artifactId>
             <optional>true</optional>
         </dependency>
+
+        <!-- Stripe Java SDK -->
+        <dependency>
+            <groupId>com.stripe</groupId>
+            <artifactId>stripe-java</artifactId>
+            <version>24.4.0</version> <!-- Use latest version -->
+        </dependency>
+
     </dependencies>
 
     <build>
