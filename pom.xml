@@ -30,18 +30,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-logging</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
@@ -88,41 +76,6 @@
 
         <!-- Development Tools -->
         <dependency>
-            <groupId>org.hibernate.orm</groupId>
-            <artifactId>hibernate-core</artifactId>
-            <version>6.2.0.Final</version>
-        </dependency>
-
-        <dependency>
-            <groupId>jakarta.persistence</groupId>
-            <artifactId>jakarta.persistence-api</artifactId>
-            <version>3.1.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-            <version>2.24.3</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <version>2.24.3</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-layout-template-json</artifactId>
-            <version>2.24.3</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.lmax</groupId>
-            <artifactId>disruptor</artifactId>
-            <version>3.4.4</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
             <optional>true</optional>
@@ -165,18 +118,10 @@
                             <version>1.18.30</version>
                         </path>
                     </annotationProcessorPaths>
-                    <!-- Disable annotation processing for main compilation -->
                     <proc>none</proc>
                 </configuration>
-                <executions>
-                    <execution>
-                        <id>default-compile</id>
-                        <phase>process-sources</phase>
-                    </execution>
-                </executions>
             </plugin>
 
-            <!-- Standard AspectJ Maven Plugin -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>aspectj-maven-plugin</artifactId>
@@ -188,15 +133,7 @@
                     <showWeaveInfo>true</showWeaveInfo>
                     <verbose>true</verbose>
                     <Xlint>ignore</Xlint>
-                    <proc>none</proc> <!-- Important for Lombok compatibility -->
-                    <sources>
-                        <source>
-                            <basedir>${project.basedir}/src/main/java</basedir>
-                            <includes>
-                                <include>**/*.java</include>
-                            </includes>
-                        </source>
-                    </sources>
+                    <proc>none</proc>
                 </configuration>
                 <executions>
                     <execution>
