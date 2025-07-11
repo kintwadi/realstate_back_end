@@ -1,353 +1,189 @@
-
 package com.imovel.api.logger;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.logging.log4j.CloseableThreadContext;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
-import org.apache.logging.log4j.message.ObjectMessage;
-
-
-
 /**
- * 
- * A thread-safe logging utility class that provides structured logging with
- * context information.
- * Uses Log4j2 with CloseableThreadContext for automatic resource management.
+ * Thread-safe logging utility using SLF4J with MDC for context
  */
-public final class ApiLogger
-{
-    // Default logger name
-    private static final String  DEFAULT_LOGGER_TYPE = "com.imovel.api.logger";
-    private static final String  SIMPLE_FORMAT       = "[{}] {}";
-    private static final String  COMPLETE_FORMAT     = "[{}] {}: {} - {}";
+public final class ApiLogger {
+    private static final String DEFAULT_LOGGER_TYPE = "com.imovel.api.logger";
+    private static final String SIMPLE_FORMAT = "[{}] {}";
+    private static final String COMPLETE_FORMAT = "[{}] {}: {} - {}";
 
-    // Immutable snapshot for global headers
-    private static volatile ConcurrentHashMap< String, String > globalHeaders = new ConcurrentHashMap<>();
-    private static Logger logger = LogManager.getLogger( DEFAULT_LOGGER_TYPE );
+    private static volatile ConcurrentHashMap<String, String> globalHeaders = new ConcurrentHashMap<>();
+    private static Logger logger = LoggerFactory.getLogger(DEFAULT_LOGGER_TYPE);
 
-    /**
-     * Private constructor to prevent instantiation of this BaseLogger class.
-     */
-    private ApiLogger()
-    {
-    }
-    /**
-     * Sets the logger type/name to be used for logging.
-     * 
-     * @param type The logger name to use
-     */
-    public static void setLoggerType( String type )
-    {
-        logger = LogManager.getLogger( type );
+    private ApiLogger() {}
+
+    public static void setLoggerType(String type) {
+        logger = LoggerFactory.getLogger(type);
     }
 
-    /**
-     * Sets a global header that will be included in all log messages.
-     * 
-     * @param key The header key
-     * @param value The header value
-     */
-    public static synchronized void setContext(String key,
-                                               String value )
-    {
-        if(ThreadContext.isEmpty()){
-            ThreadContext.put(key,value);
-        }else{
-            ConcurrentHashMap< String, String > newHeaders = new ConcurrentHashMap<>( globalHeaders );
-            newHeaders.put( key,value );
-            newHeaders.forEach((k,v)->globalHeaders.putIfAbsent(k,v));
+    public static synchronized void setContext(String key, String value) {
+        if (MDC.getCopyOfContextMap() == null || MDC.getCopyOfContextMap().isEmpty()) {
+            MDC.put(key, value);
+        } else {
+            ConcurrentHashMap<String, String> newHeaders = new ConcurrentHashMap<>(globalHeaders);
+            newHeaders.put(key, value);
+            newHeaders.forEach((k, v) -> globalHeaders.putIfAbsent(k, v));
         }
     }
-    /**
-     * Combines global and thread-local headers into a single context map.
-     * 
-     * @return An immutable map containing all context information
-     */
-    private static Map< String, String > getContext()
-    {
-        ThreadContext.clearMap();
 
-        // Safe publication via volatile read - no synchronization needed
-        Map< String, String > globalSnapshot = globalHeaders;
-        globalSnapshot.forEach( ThreadContext::put );
-        return Map.copyOf( ThreadContext.getImmutableContext() );
+    private static Map<String, String> getContext() {
+        Map<String, String> globalSnapshot = globalHeaders;
+        globalSnapshot.forEach(MDC::put);
+        return MDC.getCopyOfContextMap();
     }
 
-    /**
-     * ThreadContext (Hash Map) is not a Thread.  This is  needed by log4j to map the key value in the JSON
-     * layout.
-     * Logs a debug level message with context information.
-     * Uses CloseableThreadContext for automatic resource cleanup.
-     * CloseableThreadContext is log4j recommended when using ThreadContext hash maps
-     * 
-     * @param message The message to log
-     */
-    public static void debug(final String message) {
-         try (CloseableThreadContext.Instance ignored = CloseableThreadContext.putAll(getContext()))
-        {
+    // Debug Methods
+    public static void debug(String message) {
+        try {
+            getContext().forEach(MDC::put);
             logger.debug(message);
+        } finally {
+            MDC.clear();
         }
     }
 
-    /**
-     * ThreadContext (Hash Map) is not a Thread.  This is  needed by log4j to map the key value in the JSON
-     * layout.
-     * Logs a debug level message with location context.
-     * 
-     * @param location The code location
-     * @param message The message to log
-     */
-    public static void debug(final String location, final String message) {
-        try (CloseableThreadContext.Instance ignored = CloseableThreadContext.putAll(getContext()))
-        {
-            logger.debug( SIMPLE_FORMAT,
-                          location,
-                          message );
+    public static void debug(String location, String message) {
+        try {
+            getContext().forEach(MDC::put);
+            logger.debug(SIMPLE_FORMAT, location, message);
+        } finally {
+            MDC.clear();
         }
     }
 
-    /**
-     * Logs a debug level message with response object.
-     * 
-     * @param message The message to log
-     * @param response The response object to include
-     */
-    public static void debug(final String message, final Object response) {
-        try (CloseableThreadContext.Instance ignored = CloseableThreadContext.putAll(getContext()))
-        {
-            logger.debug( SIMPLE_FORMAT,
-                          message,
-                    new ObjectMessage( response )  );
+    public static void debug(String message, Object response) {
+        try {
+            getContext().forEach(MDC::put);
+            logger.debug(SIMPLE_FORMAT, message, response);
+        } finally {
+            MDC.clear();
         }
     }
 
-    /**
-     * Logs a debug level message with location and response object.
-     * 
-     * @param location The code location
-     * @param message The message to log
-     * @param response The response object to include
-     */
-    public static void debug(final String location, final String message, final Object response) {
-        try (CloseableThreadContext.Instance ignored = CloseableThreadContext.putAll(getContext()))
-        {
-            logger.debug( COMPLETE_FORMAT,
-                          location,
-                          message,
-                          new ObjectMessage( response )  );
+    public static void debug(String location, String message, Object response) {
+        try {
+            getContext().forEach(MDC::put);
+            logger.debug(COMPLETE_FORMAT, location, message, response);
+        } finally {
+            MDC.clear();
         }
     }
-    /**
-     * Logs an info level message with context information.
-     * 
-     * @param message The message to log
-     */
-    public static void info(final String message) {
-        try (CloseableThreadContext.Instance ignored = CloseableThreadContext.putAll(getContext()))
-        {
+
+    // Info Methods
+    public static void info(String message) {
+        try {
+            getContext().forEach(MDC::put);
             logger.info(message);
+        } finally {
+            MDC.clear();
         }
     }
 
-    /**
-     * Logs an info level message with location context.
-     * 
-     * @param location The code location
-     * @param message The message to log
-     */
-    public static void info(final String location, final String message) {
-        try (CloseableThreadContext.Instance ignored = CloseableThreadContext.putAll(getContext()))
-        {
-            logger.info( SIMPLE_FORMAT,
-                         location,
-                         message );
+    public static void info(String location, String message) {
+        try {
+            getContext().forEach(MDC::put);
+            logger.info(SIMPLE_FORMAT, location, message);
+        } finally {
+            MDC.clear();
         }
     }
 
-    /**
-     * Logs an info level message with response object.
-     * 
-     * @param message The message to log
-     * @param response The response object to include
-     */
-    public static void info( final String message,
-                             final Object response )
-    {
-         try (CloseableThreadContext.Instance ignored = CloseableThreadContext.putAll( getContext() ))
-        {
-            logger.info( SIMPLE_FORMAT,
-                         message,new ObjectMessage( response ) );
-        }
-    }
-    /**
-     * Logs an info level message with location and response object.
-     * 
-     * @param location The code location
-     * @param message The message to log
-     * @param response The response object to include
-     */
-    public static void info(final String location, final String message, final Object response) {
-         try (CloseableThreadContext.Instance ignored = CloseableThreadContext.putAll(getContext()))
-        {
-            logger.info( COMPLETE_FORMAT,
-                         location,
-                         message,
-                         new ObjectMessage( response ) );
-        }
-    }
-    /**
-     * Logs an error level message with context information.
-     * 
-     * @param message The message to log
-     */
-    public static void error( final String message )
-    {
-        try (CloseableThreadContext.Instance ignored = CloseableThreadContext.putAll( getContext() ))
-        {
-            logger.error( message );
+    public static void info(String message, Object response) {
+        try {
+            getContext().forEach(MDC::put);
+            logger.info(SIMPLE_FORMAT, message, response);
+        } finally {
+            MDC.clear();
         }
     }
 
-    /**
-     * Logs an error level message with location context.
-     * 
-     * @param location The code location
-     * @param message The message to log
-     */
-    public static void error( final String location,
-                              final String message )
-    {
-        try (CloseableThreadContext.Instance ignored = CloseableThreadContext.putAll( getContext() ))
-        {
-            logger.error( SIMPLE_FORMAT,
-                          location,
-                          message );
+    public static void info(String location, String message, Object response) {
+        try {
+            getContext().forEach(MDC::put);
+            logger.info(COMPLETE_FORMAT, location, message, response);
+        } finally {
+            MDC.clear();
         }
     }
 
-    /**
-     * Logs an error level message with response object.
-     * 
-     * @param message The message to log
-     * @param response The response object to include
-     */
-    public static void error( final String message,
-                              final Object response )
-    {
-        try (CloseableThreadContext.Instance ignored = CloseableThreadContext.putAll( getContext() ))
-        {
-            logger.error( SIMPLE_FORMAT,
-                          message,
-                          new ObjectMessage( response )  );
+    // Error Methods
+    public static void error(String message) {
+        try {
+            getContext().forEach(MDC::put);
+            logger.error(message);
+        } finally {
+            MDC.clear();
         }
     }
 
-    /**
-     * Logs an error level message with location and response object.
-     * 
-     * @param location The code location
-     * @param message The message to log
-     * @param response The response object to include
-     */
-    public static void error( final String location,
-                              final String message,
-                              final Object response )
-    {
-        try (CloseableThreadContext.Instance ignored = CloseableThreadContext.putAll( getContext() ))
-        {
-            logger.error( COMPLETE_FORMAT,
-                          location,
-                          message,
-                          new ObjectMessage( response )  );
+    public static void error(String location, String message) {
+        try {
+            getContext().forEach(MDC::put);
+            logger.error(SIMPLE_FORMAT, location, message);
+        } finally {
+            MDC.clear();
         }
     }
 
-    /**
-     * Logs an error level message with throwable.
-     * 
-     * @param message The message to log
-     * @param throwable The exception/throwable to include
-     */
-    public static void error( final String message,
-                              final Throwable throwable )
-    {
-        try (CloseableThreadContext.Instance ignored = CloseableThreadContext.putAll( getContext() ))
-        {
-            logger.error( SIMPLE_FORMAT,
-                          message,
-                          throwable );
+    public static void error(String message, Object response) {
+        try {
+            getContext().forEach(MDC::put);
+            logger.error(SIMPLE_FORMAT, message, response);
+        } finally {
+            MDC.clear();
         }
     }
 
-    /**
-     * Logs an error level message with location and throwable.
-     * 
-     * @param location The code location
-     * @param message The message to log
-     * @param throwable The exception/throwable to include
-     */
-    public static void error( final String location,
-                              final String message,
-                              final Throwable throwable )
-    {
-        try (CloseableThreadContext.Instance ignored = CloseableThreadContext.putAll( getContext() ))
-        {
-            logger.error( SIMPLE_FORMAT,
-                          location,
-                          message,
-                          throwable );
+    public static void error(String location, String message, Object response) {
+        try {
+            getContext().forEach(MDC::put);
+            logger.error(COMPLETE_FORMAT, location, message, response);
+        } finally {
+            MDC.clear();
         }
     }
 
-    /**
-     * Logs an error level message with throwable and response object.
-     * 
-     * @param message The message to log
-     * @param throwable The exception/throwable to include
-     * @param response The response object to include
-     */
-    public static void error( final String message,
-                              final Throwable throwable,
-                              final Object response )
-    {
-        try (CloseableThreadContext.Instance ignored = CloseableThreadContext.putAll( getContext() ))
-        {
-            logger.error( SIMPLE_FORMAT,
-                          message,
-                          new ObjectMessage( response ) ,
-                          throwable );
-
+    public static void error(String message, Throwable throwable) {
+        try {
+            getContext().forEach(MDC::put);
+            logger.error(message, throwable);
+        } finally {
+            MDC.clear();
         }
     }
 
-    /**
-     * Logs an error level message with location, throwable and response
-     * object.
-     * 
-     * @param location The code location
-     * @param message The message to log
-     * @param throwable The exception/throwable to include
-     * @param response The response object to include
-     */
-    public static void error( final String location,
-                              final String message,
-                              final Throwable throwable,
-                              final Object response )
-    {
-        try (CloseableThreadContext.Instance ignored = CloseableThreadContext.putAll( getContext() ))
-        {
-            logger.error( COMPLETE_FORMAT,
-                          location,
-                          message,
-                          new ObjectMessage( response ) ,
-                          throwable );
-
+    public static void error(String location, String message, Throwable throwable) {
+        try {
+            getContext().forEach(MDC::put);
+            logger.error(SIMPLE_FORMAT, location, message, throwable);
+        } finally {
+            MDC.clear();
         }
     }
 
+    public static void error(String message, Throwable throwable, Object response) {
+        try {
+            getContext().forEach(MDC::put);
+            logger.error(SIMPLE_FORMAT, message, response, throwable);
+        } finally {
+            MDC.clear();
+        }
+    }
+
+    public static void error(String location, String message, Throwable throwable, Object response) {
+        try {
+            getContext().forEach(MDC::put);
+            logger.error(COMPLETE_FORMAT, location, message, response, throwable);
+        } finally {
+            MDC.clear();
+        }
+    }
 }
