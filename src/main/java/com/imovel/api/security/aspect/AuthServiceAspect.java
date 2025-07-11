@@ -115,7 +115,9 @@ public class AuthServiceAspect {
         Optional<User> optionalUser = authService.findByEmail(email);
 
         if (!optionalUser.isPresent() || !verifyUserPassword(optionalUser.get().getId(), password)) {
-            throw new AuthenticationException(ApiCode.INVALID_CREDENTIALS.getCode(), ApiCode.INVALID_CREDENTIALS.getMessage());
+
+
+            return StandardResponse.error(ApiCode.INVALID_CREDENTIALS.getCode(), ApiCode.PASSWORD_RESET_FAILED.getMessage(), HttpStatus.BAD_REQUEST);
         }
 
         return joinPoint.proceed();

@@ -66,7 +66,8 @@ public class TokenService {
 
             return StandardResponse.success(tokens);
         } catch (Exception ex) {
-            throw new AuthenticationException(ApiCode.AUTHENTICATION_FAILED.getCode(), ApiCode.AUTHENTICATION_FAILED.getMessage());
+
+            return StandardResponse.error(ApiCode.AUTHENTICATION_FAILED.getCode(), ApiCode.AUTHENTICATION_FAILED.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
