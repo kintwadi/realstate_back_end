@@ -59,7 +59,7 @@
 		</AsyncLogger>
 
 		<!-- Root Logger -->
-		<Root level="debug" includeLocation="true">
+		<Root level="error" includeLocation="true">
 			<AppenderRef ref="AsyncAppender" />
 			<AppenderRef ref="File" />
 		</Root>
