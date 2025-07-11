@@ -17,7 +17,6 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
@@ -81,7 +80,7 @@ public class AuthServiceAspect {
         // Validate email format
         if (Util.isEmailInvalid(request.getEmail())) {
 
-            return StandardResponse.error(ApiCode.INVALID_EMAIL.getCode(), ApiCode.INVALID_EMAIL.getMessage(), HttpStatus.BAD_REQUEST);
+            return AspectErrorResponse.createErrorResponse(ApiCode.INVALID_EMAIL.getMessage(), ApiCode.INVALID_EMAIL.getCode(), HttpStatus.BAD_REQUEST);
         }
 
         StandardResponse<User> response = (StandardResponse<User>) joinPoint.proceed();
@@ -116,8 +115,8 @@ public class AuthServiceAspect {
 
         if (!optionalUser.isPresent() || !verifyUserPassword(optionalUser.get().getId(), password)) {
 
+            return AspectErrorResponse.createErrorResponse(ApiCode.INVALID_CREDENTIALS.getMessage(), ApiCode.PASSWORD_RESET_FAILED.getCode(), HttpStatus.BAD_REQUEST);
 
-            return StandardResponse.error(ApiCode.INVALID_CREDENTIALS.getCode(), ApiCode.PASSWORD_RESET_FAILED.getMessage(), HttpStatus.BAD_REQUEST);
         }
 
         return joinPoint.proceed();
@@ -137,11 +136,13 @@ public class AuthServiceAspect {
         final Optional<User> optionalUser = authService.findByEmail(passwordChangeRequest.getEmail());
 
         if (!optionalUser.isPresent()) {
-            return StandardResponse.error(ApiCode.PASSWORD_RESET_FAILED.getCode(), ApiCode.PASSWORD_RESET_FAILED.getMessage(), HttpStatus.BAD_REQUEST);
+            return AspectErrorResponse.createErrorResponse(ApiCode.PASSWORD_RESET_FAILED.getMessage(), ApiCode.PASSWORD_RESET_FAILED.getCode(), HttpStatus.BAD_REQUEST);
+
         }
 
         if (!isPasswordValid(optionalUser.get().getId(), passwordChangeRequest.getOldPassword())) {
-            return StandardResponse.error(ApiCode.PASSWORD_RESET_FAILED.getCode(), ApiCode.PASSWORD_RESET_FAILED.getMessage(),HttpStatus.BAD_REQUEST);
+            return AspectErrorResponse.createErrorResponse(ApiCode.PASSWORD_RESET_FAILED.getMessage(), ApiCode.PASSWORD_RESET_FAILED.getCode(), HttpStatus.BAD_REQUEST);
+
         }
 
         // Update authentication details
@@ -179,8 +180,8 @@ public class AuthServiceAspect {
         if (!authDetailsResponse.isSuccess()) {
             return false;
         }
-
         AuthDetails authDetails = authDetailsResponse.getData();
         return passwordManager.verifyPassword(password, authDetails.getHash(), authDetails.getSalt());
     }
+
 }

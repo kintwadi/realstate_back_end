@@ -66,19 +66,19 @@ public class AuthControllerAspect {
 
         // Validate request payload
         if (args.length == 0 || !(args[0] instanceof UserRegistrationRequest)) {
-            return createErrorResponse(ApiCode.INVALID_PAYLOAD.getMessage(), ApiCode.INVALID_PAYLOAD.getCode(), HttpStatus.CONFLICT);
+            return AspectErrorResponse.createErrorResponse(ApiCode.INVALID_PAYLOAD.getMessage(), ApiCode.INVALID_PAYLOAD.getCode(), HttpStatus.CONFLICT);
         }
 
         UserRegistrationRequest request = (UserRegistrationRequest) args[0];
 
         // Validate required fields
         if (areFieldsMissing(request.getEmail(), request.getPassword())) {
-            return createErrorResponse(ApiCode.REQUIRED_FIELD_MISSING.getMessage(), ApiCode.REQUIRED_FIELD_MISSING.getCode(), HttpStatus.BAD_REQUEST);
+            return AspectErrorResponse.createErrorResponse(ApiCode.REQUIRED_FIELD_MISSING.getMessage(), ApiCode.REQUIRED_FIELD_MISSING.getCode(), HttpStatus.BAD_REQUEST);
         }
 
         // Validate email format
         if (Util.isEmailInvalid(request.getEmail())) {
-            return createErrorResponse(ApiCode.INVALID_EMAIL.getMessage(), ApiCode.INVALID_EMAIL.getCode(), HttpStatus.BAD_REQUEST);
+            return AspectErrorResponse.createErrorResponse(ApiCode.INVALID_EMAIL.getMessage(), ApiCode.INVALID_EMAIL.getCode(), HttpStatus.BAD_REQUEST);
         }
 
         return joinPoint.proceed();
@@ -101,12 +101,12 @@ public class AuthControllerAspect {
 
         // Validate required fields
         if (areFieldsMissing(request.getEmail(), request.getPassword())) {
-            return createErrorResponse(ApiCode.REQUIRED_FIELD_MISSING.getMessage(), ApiCode.REQUIRED_FIELD_MISSING.getCode(), HttpStatus.BAD_REQUEST);
+            return AspectErrorResponse.createErrorResponse(ApiCode.REQUIRED_FIELD_MISSING.getMessage(), ApiCode.REQUIRED_FIELD_MISSING.getCode(), HttpStatus.BAD_REQUEST);
         }
 
         // Validate email format
         if (Util.isEmailInvalid(request.getEmail())) {
-            return createErrorResponse(ApiCode.INVALID_EMAIL.getMessage(), ApiCode.INVALID_EMAIL.getCode(), HttpStatus.BAD_REQUEST);
+            return AspectErrorResponse.createErrorResponse(ApiCode.INVALID_EMAIL.getMessage(), ApiCode.INVALID_EMAIL.getCode(), HttpStatus.BAD_REQUEST);
         }
 
         return joinPoint.proceed();
@@ -119,15 +119,15 @@ public class AuthControllerAspect {
 
         // Validate required fields
         if (areFieldsMissing(request.getEmail(), request.getOldPassword())) {
-            return createErrorResponse(ApiCode.REQUIRED_FIELD_MISSING.getMessage(), ApiCode.REQUIRED_FIELD_MISSING.getCode(), HttpStatus.BAD_REQUEST);
+            return AspectErrorResponse.createErrorResponse(ApiCode.REQUIRED_FIELD_MISSING.getMessage(), ApiCode.REQUIRED_FIELD_MISSING.getCode(), HttpStatus.BAD_REQUEST);
         }
         // Validate required fields
         if (areFieldsMissing(request.getEmail(), request.getNewPassword())) {
-            return createErrorResponse(ApiCode.REQUIRED_FIELD_MISSING.getMessage(), ApiCode.REQUIRED_FIELD_MISSING.getCode(), HttpStatus.BAD_REQUEST);
+            return AspectErrorResponse.createErrorResponse(ApiCode.REQUIRED_FIELD_MISSING.getMessage(), ApiCode.REQUIRED_FIELD_MISSING.getCode(), HttpStatus.BAD_REQUEST);
         }
         // Validate email format
         if (Util.isEmailInvalid(request.getEmail())) {
-            return createErrorResponse(ApiCode.INVALID_EMAIL.getMessage(), ApiCode.INVALID_EMAIL.getCode(), HttpStatus.BAD_REQUEST);
+            return AspectErrorResponse.createErrorResponse(ApiCode.INVALID_EMAIL.getMessage(), ApiCode.INVALID_EMAIL.getCode(), HttpStatus.BAD_REQUEST);
         }
 
         return joinPoint.proceed();
@@ -145,18 +145,4 @@ public class AuthControllerAspect {
                 password == null || password.isEmpty();
     }
 
-    /**
-     * Creates a standardized error response.
-     *
-     * @param message The error message
-     * @param code The error code
-     * @param status The HTTP status
-     * @return ResponseEntity containing the error response
-     */
-    private ResponseEntity<StandardResponse<String>> createErrorResponse(
-            final String message, final long code, final HttpStatus status)
-    {
-        StandardResponse<String> standardResponse = StandardResponse.error(code,message,status);
-        return new ResponseEntity<>(standardResponse,status);
-    }
 }
