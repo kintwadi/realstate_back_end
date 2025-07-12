@@ -1,22 +1,16 @@
 package com.imovel.api.security.aspect;
 
 import com.imovel.api.error.ApiCode;
-import com.imovel.api.logger.ApiLogger;
 import com.imovel.api.request.PasswordChangeRequest;
 import com.imovel.api.request.UserLoginRequest;
 import com.imovel.api.request.UserRegistrationRequest;
-import com.imovel.api.response.StandardResponse;
-import com.imovel.api.security.PasswordManager;
 import com.imovel.api.util.Util;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import java.util.regex.Pattern;
 
 /**
  * Aspect for handling validation logic for authentication endpoints.

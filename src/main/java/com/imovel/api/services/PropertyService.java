@@ -16,7 +16,7 @@ import com.imovel.api.request.LocationDto;
 import com.imovel.api.request.NearbyPlaceDto;
 import com.imovel.api.request.PropertyRequestDto;
 import com.imovel.api.response.PropertyResponseDto;
-import com.imovel.api.response.StandardResponse;
+import com.imovel.api.response.ApplicationResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -42,7 +42,7 @@ public class PropertyService {
     }
 
     @Transactional
-    public StandardResponse<PropertyResponseDto> createProperty(PropertyRequestDto propertyRequestDto, Long currentUserId) {
+    public ApplicationResponse<PropertyResponseDto> createProperty(PropertyRequestDto propertyRequestDto, Long currentUserId) {
         final String TAG = "createProperty";
         ApiLogger.info(buildLogTag(TAG), "Attempting to create a new property.", propertyRequestDto);
         try {
@@ -56,33 +56,33 @@ public class PropertyService {
             property.setCreatedBy(currentUser);
             Property savedProperty = propertyRepository.save(property);
             ApiLogger.info(buildLogTag(TAG), "Successfully created property with ID: " + savedProperty.getId());
-            return StandardResponse.success(mapToResponseDto(savedProperty), "Property created successfully.");
+            return ApplicationResponse.success(mapToResponseDto(savedProperty), "Property created successfully.");
         } catch (Exception e) {
             ApiLogger.error(buildLogTag(TAG), "Error creating property.", e, propertyRequestDto);
-            return StandardResponse.error(ApiCode.SYSTEM_ERROR.getCode(), e.getMessage(), ApiCode.SYSTEM_ERROR.getHttpStatus());
+            return ApplicationResponse.error(ApiCode.SYSTEM_ERROR.getCode(), e.getMessage(), ApiCode.SYSTEM_ERROR.getHttpStatus());
         }
     }
 
     @Transactional(readOnly = true)
-    public StandardResponse<PropertyResponseDto> getPropertyById(Long id) {
+    public ApplicationResponse<PropertyResponseDto> getPropertyById(Long id) {
         final String TAG = "getPropertyById";
         ApiLogger.info(buildLogTag(TAG), "Attempting to retrieve property with ID: " + id);
         try {
             Property property = propertyRepository.findById(id)
                     .orElseThrow(() -> new ResourceNotFoundException("Property", id));
             ApiLogger.info(buildLogTag(TAG), "Successfully retrieved property with ID: " + id);
-            return StandardResponse.success(mapToResponseDto(property), "Property retrieved successfully.");
+            return ApplicationResponse.success(mapToResponseDto(property), "Property retrieved successfully.");
         } catch (ResourceNotFoundException e) {
             ApiLogger.error(buildLogTag(TAG), e.getMessage());
-            return StandardResponse.error(ApiCode.PROPERTY_NOT_FOUND.getCode(), e.getMessage(), ApiCode.PROPERTY_NOT_FOUND.getHttpStatus());
+            return ApplicationResponse.error(ApiCode.PROPERTY_NOT_FOUND.getCode(), e.getMessage(), ApiCode.PROPERTY_NOT_FOUND.getHttpStatus());
         } catch (Exception e) {
             ApiLogger.error(buildLogTag(TAG), "Error retrieving property with ID: " + id, e);
-            return StandardResponse.error(ApiCode.SYSTEM_ERROR.getCode(), e.getMessage(), ApiCode.SYSTEM_ERROR.getHttpStatus());
+            return ApplicationResponse.error(ApiCode.SYSTEM_ERROR.getCode(), e.getMessage(), ApiCode.SYSTEM_ERROR.getHttpStatus());
         }
     }
 
     @Transactional(readOnly = true)
-    public StandardResponse<Page<PropertyResponseDto>> getAllProperties(Pageable pageable) {
+    public ApplicationResponse<Page<PropertyResponseDto>> getAllProperties(Pageable pageable) {
         final String TAG = "getAllProperties";
         ApiLogger.info(buildLogTag(TAG), "Attempting to retrieve all properties for page: " + pageable.getPageNumber());
         try {
@@ -92,15 +92,15 @@ public class PropertyService {
                     .collect(Collectors.toList());
             Page<PropertyResponseDto> responsePage = new PageImpl<>(dtos, pageable, propertiesPage.getTotalElements());
             ApiLogger.info(buildLogTag(TAG), "Successfully retrieved " + responsePage.getNumberOfElements() + " properties.");
-            return StandardResponse.success(responsePage, "Properties retrieved successfully.");
+            return ApplicationResponse.success(responsePage, "Properties retrieved successfully.");
         } catch (Exception e) {
             ApiLogger.error(buildLogTag(TAG), "Error retrieving properties.", e);
-            return StandardResponse.error(ApiCode.SYSTEM_ERROR.getCode(), e.getMessage(), ApiCode.SYSTEM_ERROR.getHttpStatus());
+            return ApplicationResponse.error(ApiCode.SYSTEM_ERROR.getCode(), e.getMessage(), ApiCode.SYSTEM_ERROR.getHttpStatus());
         }
     }
 
     @Transactional
-    public StandardResponse<PropertyResponseDto> updateProperty(Long propertyId, PropertyRequestDto propertyRequestDto, Long currentUserId) {
+    public ApplicationResponse<PropertyResponseDto> updateProperty(Long propertyId, PropertyRequestDto propertyRequestDto, Long currentUserId) {
         final String TAG = "updateProperty";
         ApiLogger.info(buildLogTag(TAG), "Attempting to update property with ID: " + propertyId, propertyRequestDto);
         try {
@@ -123,21 +123,21 @@ public class PropertyService {
             mapToEntity(propertyRequestDto, propertyToUpdate);
             Property updatedProperty = propertyRepository.save(propertyToUpdate);
             ApiLogger.info(buildLogTag(TAG), "Successfully updated property with ID: " + propertyId);
-            return StandardResponse.success(mapToResponseDto(updatedProperty), "Property updated successfully.");
+            return ApplicationResponse.success(mapToResponseDto(updatedProperty), "Property updated successfully.");
         } catch (ResourceNotFoundException e) {
             ApiLogger.error(buildLogTag(TAG), e.getMessage());
-            return StandardResponse.error(ApiCode.PROPERTY_NOT_FOUND.getCode(), e.getMessage(), ApiCode.PROPERTY_NOT_FOUND.getHttpStatus());
+            return ApplicationResponse.error(ApiCode.PROPERTY_NOT_FOUND.getCode(), e.getMessage(), ApiCode.PROPERTY_NOT_FOUND.getHttpStatus());
         } catch (AuthorizationException e) {
             ApiLogger.error(buildLogTag(TAG), e.getMessage());
-            return StandardResponse.error(ApiCode.PERMISSION_DENIED.getCode(), e.getMessage(), ApiCode.PERMISSION_DENIED.getHttpStatus());
+            return ApplicationResponse.error(ApiCode.PERMISSION_DENIED.getCode(), e.getMessage(), ApiCode.PERMISSION_DENIED.getHttpStatus());
         } catch (Exception e) {
             ApiLogger.error(buildLogTag(TAG), "Error updating property with ID: " + propertyId, e);
-            return StandardResponse.error(ApiCode.SYSTEM_ERROR.getCode(), e.getMessage(), ApiCode.SYSTEM_ERROR.getHttpStatus());
+            return ApplicationResponse.error(ApiCode.SYSTEM_ERROR.getCode(), e.getMessage(), ApiCode.SYSTEM_ERROR.getHttpStatus());
         }
     }
 
     @Transactional
-    public StandardResponse<Void> deleteProperty(Long propertyId, Long currentUserId) {
+    public ApplicationResponse<Void> deleteProperty(Long propertyId, Long currentUserId) {
         final String TAG = "deleteProperty";
         ApiLogger.info(buildLogTag(TAG), "Attempting to delete property with ID: " + propertyId);
         try {
@@ -158,16 +158,16 @@ public class PropertyService {
             }
             propertyRepository.delete(propertyToDelete);
             ApiLogger.info(buildLogTag(TAG), "Successfully deleted property with ID: " + propertyId);
-            return StandardResponse.success("Property deleted successfully.");
+            return ApplicationResponse.success("Property deleted successfully.");
         } catch (ResourceNotFoundException e) {
             ApiLogger.error(buildLogTag(TAG), e.getMessage());
-            return StandardResponse.error(ApiCode.PROPERTY_NOT_FOUND.getCode(), e.getMessage(), ApiCode.PROPERTY_NOT_FOUND.getHttpStatus());
+            return ApplicationResponse.error(ApiCode.PROPERTY_NOT_FOUND.getCode(), e.getMessage(), ApiCode.PROPERTY_NOT_FOUND.getHttpStatus());
         } catch (AuthorizationException e) {
             ApiLogger.error(buildLogTag(TAG), e.getMessage());
-            return StandardResponse.error(ApiCode.PERMISSION_DENIED.getCode(), e.getMessage(), ApiCode.PERMISSION_DENIED.getHttpStatus());
+            return ApplicationResponse.error(ApiCode.PERMISSION_DENIED.getCode(), e.getMessage(), ApiCode.PERMISSION_DENIED.getHttpStatus());
         } catch (Exception e) {
             ApiLogger.error(buildLogTag(TAG), "Error deleting property with ID: " + propertyId, e);
-            return StandardResponse.error(ApiCode.SYSTEM_ERROR.getCode(), e.getMessage(), ApiCode.SYSTEM_ERROR.getHttpStatus());
+            return ApplicationResponse.error(ApiCode.SYSTEM_ERROR.getCode(), e.getMessage(), ApiCode.SYSTEM_ERROR.getHttpStatus());
         }
     }
 

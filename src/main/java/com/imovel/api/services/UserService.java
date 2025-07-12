@@ -4,7 +4,7 @@ import com.imovel.api.exception.ResourceNotFoundException;
 import com.imovel.api.model.User;
 import com.imovel.api.repository.UserRepository;
 import com.imovel.api.request.UserProfileUpdateRequestDto;
-import com.imovel.api.response.StandardResponse;
+import com.imovel.api.response.ApplicationResponse;
 import com.imovel.api.response.UserProfileResponseDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -47,9 +47,9 @@ public class UserService {
      * @return StandardResponse containing the user profile DTO
      */
     @Transactional(readOnly = true)
-    public StandardResponse<UserProfileResponseDto> getCurrentUserProfile() {
+    public ApplicationResponse<UserProfileResponseDto> getCurrentUserProfile() {
         User currentUser = getCurrentAuthenticatedUser();
-        return StandardResponse.success(mapToUserProfileResponseDto(currentUser));
+        return ApplicationResponse.success(mapToUserProfileResponseDto(currentUser));
     }
 
     /**
@@ -59,7 +59,7 @@ public class UserService {
      * @return StandardResponse containing the updated user profile DTO
      */
     @Transactional
-    public StandardResponse<UserProfileResponseDto> updateCurrentUserProfile(UserProfileUpdateRequestDto updateRequestDto) {
+    public ApplicationResponse<UserProfileResponseDto> updateCurrentUserProfile(UserProfileUpdateRequestDto updateRequestDto) {
         User currentUser = getCurrentAuthenticatedUser();
 
         // Update user fields if they are provided in the request
@@ -77,7 +77,7 @@ public class UserService {
         }
 
         User updatedUser = userRepository.save(currentUser);
-        return StandardResponse.success(mapToUserProfileResponseDto(updatedUser));
+        return ApplicationResponse.success(mapToUserProfileResponseDto(updatedUser));
     }
 
     /**

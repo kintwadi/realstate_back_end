@@ -6,7 +6,7 @@ import com.imovel.api.exception.TokenRefreshException;
 import com.imovel.api.model.RefreshToken;
 import com.imovel.api.model.User;
 import com.imovel.api.repository.RefreshTokenRepository;
-import com.imovel.api.response.StandardResponse;
+import com.imovel.api.response.ApplicationResponse;
 import com.imovel.api.security.token.JWTProvider;
 import com.imovel.api.security.token.Token;
 import jakarta.servlet.http.HttpServletRequest;
@@ -54,7 +54,7 @@ public class TokenService {
      * @return StandardResponse containing Token pair (access + refresh)
      * @throws AuthenticationException if credentials are invalid (HTTP 401)
      */
-    public StandardResponse<Token> login(User user, HttpServletRequest request) {
+    public ApplicationResponse<Token> login(User user, HttpServletRequest request) {
         try {
             enforceTokenLimits(user.getId());
 
@@ -64,10 +64,10 @@ public class TokenService {
             Token tokens = generateTokensForUser(user);
             saveRefreshToken(tokens.getRefreshToken(), user, now, request);
 
-            return StandardResponse.success(tokens);
+            return ApplicationResponse.success(tokens);
         } catch (Exception ex) {
 
-            return StandardResponse.error(ApiCode.AUTHENTICATION_FAILED.getCode(), ApiCode.AUTHENTICATION_FAILED.getMessage(), HttpStatus.BAD_REQUEST);
+            return ApplicationResponse.error(ApiCode.AUTHENTICATION_FAILED.getCode(), ApiCode.AUTHENTICATION_FAILED.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -89,7 +89,7 @@ public class TokenService {
      * @return StandardResponse containing new Token pair (access + refresh)
      * @throws TokenRefreshException if refresh token is invalid (HTTP 401)
      */
-    public StandardResponse<Token> refreshToken(String refreshToken, HttpServletRequest request) {
+    public ApplicationResponse<Token> refreshToken(String refreshToken, HttpServletRequest request) {
         validateRefreshToken(refreshToken);
 
         RefreshToken storedToken = getValidRefreshTokenFromDB(refreshToken);
@@ -101,7 +101,7 @@ public class TokenService {
         Token tokens = generateTokensForUser(user);
         saveRefreshToken(tokens.getRefreshToken(), user, Instant.now(), request);
 
-        return StandardResponse.success(tokens);
+        return ApplicationResponse.success(tokens);
     }
 
     /**
@@ -110,7 +110,7 @@ public class TokenService {
      * @param refreshToken The refresh token to revoke
      * @return StandardResponse indicating success or failure
      */
-    public StandardResponse<Void> logout(String refreshToken) {
+    public ApplicationResponse<Void> logout(String refreshToken) {
         refreshTokenRepository.findByToken(refreshToken)
                 .ifPresent(token -> {
                     token.setRevoked(true);
@@ -118,7 +118,7 @@ public class TokenService {
                     refreshTokenRepository.save(token);
                 });
 
-        return StandardResponse.success(null);
+        return ApplicationResponse.success(null);
     }
 
     /**
@@ -127,9 +127,9 @@ public class TokenService {
      * @param userId The user ID
      * @return StandardResponse indicating success or failure
      */
-    public StandardResponse<Void> logoutAll(Long userId) {
+    public ApplicationResponse<Void> logoutAll(Long userId) {
         revokeAllUserTokens(userId, Instant.now());
-        return StandardResponse.success(null);
+        return ApplicationResponse.success(null);
     }
 
     /**

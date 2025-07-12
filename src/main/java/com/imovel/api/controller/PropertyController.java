@@ -3,7 +3,7 @@ package com.imovel.api.controller;
 import com.imovel.api.logger.ApiLogger;
 import com.imovel.api.request.PropertyRequestDto;
 import com.imovel.api.response.PropertyResponseDto;
-import com.imovel.api.response.StandardResponse;
+import com.imovel.api.response.ApplicationResponse;
 import com.imovel.api.security.token.JWTProvider;
 import com.imovel.api.services.PropertyService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,11 +13,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.util.StringUtils;
-
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -60,29 +57,25 @@ public class PropertyController {
     }
 
     @PostMapping
-    public ResponseEntity<StandardResponse<PropertyResponseDto>> createProperty(
+    public ApplicationResponse<PropertyResponseDto> createProperty(
             @Valid @RequestBody PropertyRequestDto propertyRequestDto, HttpServletRequest request) {
         final String TAG = "createProperty";
         ApiLogger.info(buildLogTag(TAG), "Received request to create property.");
 
         Long currentUserId = getUserIdFromToken(request);
 
-        StandardResponse<PropertyResponseDto> response = propertyService.createProperty(propertyRequestDto, currentUserId);
-        HttpStatus status = response.isSuccess() ? HttpStatus.CREATED : response.getError().getStatus();
-        return new ResponseEntity<>(response, status);
+        return propertyService.createProperty(propertyRequestDto, currentUserId);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<StandardResponse<PropertyResponseDto>> getPropertyById(@PathVariable Long id) {
+    public ApplicationResponse<PropertyResponseDto> getPropertyById(@PathVariable Long id) {
         final String TAG = "getPropertyById";
         ApiLogger.info(buildLogTag(TAG), "Received request to get property by ID: " + id);
-        StandardResponse<PropertyResponseDto> response = propertyService.getPropertyById(id);
-        HttpStatus status = response.isSuccess() ? HttpStatus.OK : response.getError().getStatus();
-        return new ResponseEntity<>(response, status);
+        return propertyService.getPropertyById(id);
     }
 
     @GetMapping
-    public ResponseEntity<StandardResponse<Page<PropertyResponseDto>>> getAllProperties(
+    public ApplicationResponse<Page<PropertyResponseDto>> getAllProperties(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdAt,desc") String[] sort) {
@@ -105,13 +98,11 @@ public class PropertyController {
         }
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortField));
-        StandardResponse<Page<PropertyResponseDto>> response = propertyService.getAllProperties(pageable);
-        HttpStatus status = response.isSuccess() ? HttpStatus.OK : response.getError().getStatus();
-        return new ResponseEntity<>(response, status);
+        return propertyService.getAllProperties(pageable);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<StandardResponse<PropertyResponseDto>> updateProperty(
+    public ApplicationResponse<PropertyResponseDto> updateProperty(
             @PathVariable Long id,
             @Valid @RequestBody PropertyRequestDto propertyRequestDto, HttpServletRequest request) {
         final String TAG = "updateProperty";
@@ -119,20 +110,16 @@ public class PropertyController {
 
         Long currentUserId = getUserIdFromToken(request);
 
-        StandardResponse<PropertyResponseDto> response = propertyService.updateProperty(id, propertyRequestDto, currentUserId);
-        HttpStatus status = response.isSuccess() ? HttpStatus.OK : response.getError().getStatus();
-        return new ResponseEntity<>(response, status);
+        return propertyService.updateProperty(id, propertyRequestDto, currentUserId);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<StandardResponse<Void>> deleteProperty(@PathVariable Long id, HttpServletRequest request) {
+    public ApplicationResponse<Void> deleteProperty(@PathVariable Long id, HttpServletRequest request) {
         final String TAG = "deleteProperty";
         ApiLogger.info(buildLogTag(TAG), "Received request to delete property with ID: " + id);
 
         Long currentUserId = getUserIdFromToken(request);
 
-        StandardResponse<Void> response = propertyService.deleteProperty(id, currentUserId);
-        HttpStatus status = response.isSuccess() ? HttpStatus.OK : response.getError().getStatus();
-        return new ResponseEntity<>(response, status);
+        return propertyService.deleteProperty(id, currentUserId);
     }
 }

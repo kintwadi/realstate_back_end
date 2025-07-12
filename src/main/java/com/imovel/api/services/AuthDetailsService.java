@@ -3,7 +3,7 @@ package com.imovel.api.services;
 import com.imovel.api.exception.ResourceNotFoundException;
 import com.imovel.api.model.AuthDetails;
 import com.imovel.api.repository.AuthDetailRepository;
-import com.imovel.api.response.StandardResponse;
+import com.imovel.api.response.ApplicationResponse;
 import com.imovel.api.security.PasswordManager;
 import org.springframework.stereotype.Service;
 
@@ -35,9 +35,9 @@ public class AuthDetailsService {
      * @param authDetails The authentication details to be saved
      * @return StandardResponse containing the saved AuthDetails
      */
-    public StandardResponse<AuthDetails> save(final AuthDetails authDetails) {
+    public ApplicationResponse<AuthDetails> save(final AuthDetails authDetails) {
         AuthDetails savedDetails = authDetailRepository.save(authDetails);
-        return StandardResponse.success(savedDetails);
+        return ApplicationResponse.success(savedDetails);
     }
 
     /**
@@ -47,9 +47,9 @@ public class AuthDetailsService {
      * @return StandardResponse containing AuthDetails if found
      * @throws ResourceNotFoundException if no auth details found for user
      */
-    public StandardResponse<AuthDetails> findByUserId(final long id) {
+    public ApplicationResponse<AuthDetails> findByUserId(final long id) {
         return authDetailRepository.findByUserId(id)
-                .map(StandardResponse::success)
+                .map(ApplicationResponse::success)
                 .orElseThrow(() -> new ResourceNotFoundException("AuthDetails", id));
     }
 
@@ -61,12 +61,12 @@ public class AuthDetailsService {
      * @return StandardResponse with verification result
      * @throws ResourceNotFoundException if no user exists with the given ID
      */
-    public StandardResponse<Boolean> verifyUserCredentials(final long userId, final String password) {
+    public ApplicationResponse<Boolean> verifyUserCredentials(final long userId, final String password) {
         AuthDetails authDetails = authDetailRepository.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("AuthDetails", userId));
 
         boolean isValid = isPasswordValid(authDetails, password);
-        return StandardResponse.success(isValid);
+        return ApplicationResponse.success(isValid);
     }
 
     /**

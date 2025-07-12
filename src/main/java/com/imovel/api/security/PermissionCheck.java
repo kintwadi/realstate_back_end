@@ -5,7 +5,7 @@ import com.imovel.api.model.Property;
 import com.imovel.api.model.User;
 import com.imovel.api.model.enums.PropertyStatus;
 import com.imovel.api.model.enums.RoleReference;
-import com.imovel.api.response.StandardResponse;
+import com.imovel.api.response.ApplicationResponse;
 import com.imovel.api.services.PermissionService;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +28,7 @@ public class PermissionCheck {
             return true;
         }
         
-        StandardResponse <Set<Permissions>>  response = permissionService.getUserPermissions(user);
+        ApplicationResponse<Set<Permissions>> response = permissionService.getUserPermissions(user);
 
         Set<Permissions> permissions = ( Set<Permissions>)response.getData();
 
