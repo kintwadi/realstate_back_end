@@ -15,7 +15,7 @@ import com.imovel.api.request.AccordionItemDto;
 import com.imovel.api.request.LocationDto;
 import com.imovel.api.request.NearbyPlaceDto;
 import com.imovel.api.request.PropertyRequestDto;
-import com.imovel.api.response.PropertyResponseDto;
+import com.imovel.api.response.PropertyResponse;
 import com.imovel.api.response.ApplicationResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -42,7 +42,7 @@ public class PropertyService {
     }
 
     @Transactional
-    public ApplicationResponse<PropertyResponseDto> createProperty(PropertyRequestDto propertyRequestDto, Long currentUserId) {
+    public ApplicationResponse<PropertyResponse> createProperty(PropertyRequestDto propertyRequestDto, Long currentUserId) {
         final String TAG = "createProperty";
         ApiLogger.info(buildLogTag(TAG), "Attempting to create a new property.", propertyRequestDto);
         try {
@@ -64,7 +64,7 @@ public class PropertyService {
     }
 
     @Transactional(readOnly = true)
-    public ApplicationResponse<PropertyResponseDto> getPropertyById(Long id) {
+    public ApplicationResponse<PropertyResponse> getPropertyById(Long id) {
         final String TAG = "getPropertyById";
         ApiLogger.info(buildLogTag(TAG), "Attempting to retrieve property with ID: " + id);
         try {
@@ -82,15 +82,15 @@ public class PropertyService {
     }
 
     @Transactional(readOnly = true)
-    public ApplicationResponse<Page<PropertyResponseDto>> getAllProperties(Pageable pageable) {
+    public ApplicationResponse<Page<PropertyResponse>> getAllProperties(Pageable pageable) {
         final String TAG = "getAllProperties";
         ApiLogger.info(buildLogTag(TAG), "Attempting to retrieve all properties for page: " + pageable.getPageNumber());
         try {
             Page<Property> propertiesPage = propertyRepository.findAll(pageable);
-            List<PropertyResponseDto> dtos = propertiesPage.getContent().stream()
+            List<PropertyResponse> dtos = propertiesPage.getContent().stream()
                     .map(this::mapToResponseDto)
                     .collect(Collectors.toList());
-            Page<PropertyResponseDto> responsePage = new PageImpl<>(dtos, pageable, propertiesPage.getTotalElements());
+            Page<PropertyResponse> responsePage = new PageImpl<>(dtos, pageable, propertiesPage.getTotalElements());
             ApiLogger.info(buildLogTag(TAG), "Successfully retrieved " + responsePage.getNumberOfElements() + " properties.");
             return ApplicationResponse.success(responsePage, "Properties retrieved successfully.");
         } catch (Exception e) {
@@ -100,7 +100,7 @@ public class PropertyService {
     }
 
     @Transactional
-    public ApplicationResponse<PropertyResponseDto> updateProperty(Long propertyId, PropertyRequestDto propertyRequestDto, Long currentUserId) {
+    public ApplicationResponse<PropertyResponse> updateProperty(Long propertyId, PropertyRequestDto propertyRequestDto, Long currentUserId) {
         final String TAG = "updateProperty";
         ApiLogger.info(buildLogTag(TAG), "Attempting to update property with ID: " + propertyId, propertyRequestDto);
         try {
@@ -231,8 +231,8 @@ public class PropertyService {
         return entity;
     }
 
-    private PropertyResponseDto mapToResponseDto(Property entity) {
-        PropertyResponseDto dto = new PropertyResponseDto();
+    private PropertyResponse mapToResponseDto(Property entity) {
+        PropertyResponse dto = new PropertyResponse();
         dto.setId(entity.getId());
         dto.setMainTitle(entity.getMainTitle());
         dto.setType(entity.getType());

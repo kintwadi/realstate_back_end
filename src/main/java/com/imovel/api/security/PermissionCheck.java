@@ -6,38 +6,38 @@ import com.imovel.api.model.User;
 import com.imovel.api.model.enums.PropertyStatus;
 import com.imovel.api.model.enums.RoleReference;
 import com.imovel.api.response.ApplicationResponse;
-import com.imovel.api.services.PermissionService;
+import com.imovel.api.response.PermissionResponse;
+import com.imovel.api.services.RolePermissionService;
 import org.springframework.stereotype.Service;
 
 import java.util.Set;
+
 @Service
 public class PermissionCheck {
 
-    private final PermissionService permissionService;
+    private final RolePermissionService rolePermissionService;
 
-    public PermissionCheck(PermissionService permissionService) {
-        this.permissionService = permissionService;
+    public PermissionCheck(RolePermissionService rolePermissionService) {
+        this.rolePermissionService = rolePermissionService;
     }
 
     // General permission check
     public boolean hasPermission(User user, String permissionName) {
-        if (user == null) return false;
-        
+        if (user == null || user.getRole() == null) return false;
+
         // Admin has all permissions
         if (user.getRole().getRoleName().equals(RoleReference.ADMIN.name())) {
             return true;
         }
-        
-        ApplicationResponse<Set<Permissions>> response = permissionService.getUserPermissions(user);
 
-        Set<Permissions> permissions = ( Set<Permissions>)response.getData();
+        ApplicationResponse<Set<PermissionResponse>> response = rolePermissionService.getUserPermissions(user);
 
-        for (Permissions permission : permissions) {
-            if(permission.getPermissionName().equals(permissionName)){
-                return true;
-            }
+        if (!response.isSuccess() || response.getData() == null) {
+            return false;
         }
-        return false;
+
+        return response.getData().stream()
+                .anyMatch(permission -> permissionName.equals(permission.getPermissionName()));
     }
 
     // Property-related permission checks
@@ -50,25 +50,25 @@ public class PermissionCheck {
         if (property.getStatus().name().equals(PropertyStatus.AVAILABLE.name())) {
             return true;
         }
-        
+
         // For inactive properties, check ownership or admin rights
-        return hasPermission(user, Policies.PROPERTY_MANAGE_ALL) || 
-               (hasPermission(user, Policies.PROPERTY_READ) && isPropertyOwner(user, property));
+        return hasPermission(user, Policies.PROPERTY_MANAGE_ALL) ||
+                (hasPermission(user, Policies.PROPERTY_READ) && isPropertyOwner(user, property));
     }
 
     public boolean canUpdateProperty(User user, Property property) {
-        return hasPermission(user, Policies.PROPERTY_MANAGE_ALL) || 
-               (hasPermission(user, Policies.PROPERTY_UPDATE) && isPropertyOwner(user, property));
+        return hasPermission(user, Policies.PROPERTY_MANAGE_ALL) ||
+                (hasPermission(user, Policies.PROPERTY_UPDATE) && isPropertyOwner(user, property));
     }
 
     public boolean canDeleteProperty(User user, Property property) {
-        return hasPermission(user, Policies.PROPERTY_MANAGE_ALL) || 
-               (hasPermission(user, Policies.PROPERTY_DELETE) && isPropertyOwner(user, property));
+        return hasPermission(user, Policies.PROPERTY_MANAGE_ALL) ||
+                (hasPermission(user, Policies.PROPERTY_DELETE) && isPropertyOwner(user, property));
     }
 
     public boolean canDeactivateProperty(User user, Property property) {
-        return hasPermission(user, Policies.PROPERTY_MANAGE_ALL) || 
-               (hasPermission(user, Policies.PROPERTY_DEACTIVATE) && isPropertyOwner(user, property));
+        return hasPermission(user, Policies.PROPERTY_MANAGE_ALL) ||
+                (hasPermission(user, Policies.PROPERTY_DEACTIVATE) && isPropertyOwner(user, property));
     }
 
     // User-related permission checks

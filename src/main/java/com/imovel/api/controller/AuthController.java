@@ -3,6 +3,7 @@ package com.imovel.api.controller;
 import com.imovel.api.model.User;
 import com.imovel.api.request.*;
 import com.imovel.api.response.ApplicationResponse;
+import com.imovel.api.response.UserResponse;
 import com.imovel.api.security.token.JWTProvider;
 import com.imovel.api.security.token.Token;
 import com.imovel.api.services.AuthService;
@@ -41,7 +42,7 @@ public class AuthController {
      * @return ApplicationResponse with registration status
      */
     @PostMapping("/register")
-    public ApplicationResponse<User> registerUser(
+    public ApplicationResponse<UserResponse> registerUser(
             @RequestBody UserRegistrationRequest registrationRequest) {
         return authService.registerUser(registrationRequest);
     }
@@ -105,7 +106,7 @@ public class AuthController {
      * @return ApplicationResponse with password change status
      */
     @PostMapping("/reset-password")
-    public ApplicationResponse<User> initiatePasswordReset(
+    public ApplicationResponse<UserResponse> initiatePasswordReset(
             @RequestBody PasswordChangeRequest passwordChangeRequest) {
         return authService.changeUserPassword(passwordChangeRequest);
     }

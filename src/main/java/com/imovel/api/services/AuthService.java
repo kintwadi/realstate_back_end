@@ -10,6 +10,7 @@ import com.imovel.api.repository.UserRepository;
 import com.imovel.api.request.PasswordChangeRequest;
 import com.imovel.api.request.UserRegistrationRequest;
 import com.imovel.api.response.ApplicationResponse;
+import com.imovel.api.response.UserResponse;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -44,9 +45,9 @@ public class AuthService {
      * @return StandardResponse containing the registered user
      * @throws ConflictException if email is already registered
      */
-    public ApplicationResponse<User> registerUser(UserRegistrationRequest request) {
+    public ApplicationResponse<UserResponse> registerUser(UserRegistrationRequest request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new ConflictException(ApiCode.INVALID_EMAIL_ALREADY_EXIST.getCode(),ApiCode.INVALID_EMAIL_ALREADY_EXIST.getMessage());
+            return ApplicationResponse.error(ApiCode.INVALID_EMAIL_ALREADY_EXIST.getCode(), ApiCode.INVALID_EMAIL_ALREADY_EXIST.getMessage(),HttpStatus.NOT_FOUND);
         }
 
         Role role = new Role();
@@ -57,8 +58,6 @@ public class AuthService {
         }else{
             role = roleOptional.get();
         }
-
-
         User newUser = new User();
         newUser.setName(request.getName());
         newUser.setEmail(request.getEmail());
@@ -66,7 +65,9 @@ public class AuthService {
         newUser.setRole(role);
 
         User savedUser = userRepository.save(newUser);
-        return ApplicationResponse.success(savedUser);
+        UserResponse userResponse = UserResponse.parse(savedUser).get();
+
+        return ApplicationResponse.success(userResponse);
     }
 
     /**
@@ -89,6 +90,7 @@ public class AuthService {
      */
     public ApplicationResponse<User> loginUser(String email, String password) {
 
+
         return findByEmail(email)
                 .map(ApplicationResponse::success)
                 .orElse(ApplicationResponse.error(ApiCode.USER_NOT_FOUND.getCode(), ApiCode.USER_NOT_FOUND.getMessage() + email, HttpStatus.NOT_FOUND));
@@ -102,8 +104,10 @@ public class AuthService {
      * @return StandardResponse indicating the result of the operation
      */
     @Transactional
-    public ApplicationResponse<User> changeUserPassword(PasswordChangeRequest changePasswordRequestDto) {
-        return userRepository.findByEmail(changePasswordRequestDto.getEmail())
+    public ApplicationResponse<UserResponse> changeUserPassword(PasswordChangeRequest changePasswordRequestDto) {
+
+       Optional<UserResponse> userOptional =  UserResponse.parse(userRepository.findByEmail(changePasswordRequestDto.getEmail()).get());
+        return userOptional
                 .map(user -> ApplicationResponse.success(user, "Password changed successfully"))
                 .orElse(ApplicationResponse.error(ApiCode.USER_NOT_FOUND.getCode(), ApiCode.USER_NOT_FOUND.getMessage(),HttpStatus.NOT_FOUND));
     }

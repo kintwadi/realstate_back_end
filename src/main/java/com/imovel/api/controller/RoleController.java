@@ -3,6 +3,7 @@ package com.imovel.api.controller;
 import com.imovel.api.model.Role;
 import com.imovel.api.model.User;
 import com.imovel.api.response.ApplicationResponse;
+import com.imovel.api.response.RoleResponse;
 import com.imovel.api.services.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +26,13 @@ public class RoleController {
         return roleService.createRole(role);
     }
 
+    @GetMapping
+    public ApplicationResponse<List<RoleResponse>> findRoles() {
+
+        return roleService.findAll();
+    }
+
+
     @GetMapping("/{id}")
     public ApplicationResponse<Role> getRoleById(@PathVariable Long id) {
         return roleService.getRoleById(id);
@@ -33,11 +41,6 @@ public class RoleController {
     @GetMapping("/name/{roleName}")
     public ApplicationResponse<Role> getRoleByName(@PathVariable String roleName) {
         return roleService.getRoleByName(roleName);
-    }
-
-    @GetMapping
-    public ApplicationResponse<List<Role>> getAllRoles() {
-        return roleService.getAllRoles();
     }
 
     @PutMapping("/{id}")
@@ -55,17 +58,17 @@ public class RoleController {
         return roleService.initializeDefaultRoles();
     }
 
-    @DeleteMapping("/remove-role-from-user")
-    public ApplicationResponse<Role> removeRoleFromUser(
-            @RequestBody User user,
-            @RequestParam String roleName) {
-        return roleService.removeRoleFromUser(user, roleName);
-    }
-
-    @PostMapping("/assign-role-to-user")
+    @PostMapping("/assign-to-user")
     public ApplicationResponse<Role> assignRoleToUser(
             @RequestBody User user,
             @RequestParam String roleName) {
         return roleService.addRoleToUser(user, roleName);
+    }
+
+    @DeleteMapping("/remove-from-user")
+    public ApplicationResponse<Role> removeRoleFromUser(
+            @RequestBody User user,
+            @RequestParam String roleName) {
+        return roleService.removeRoleFromUser(user, roleName);
     }
 }
