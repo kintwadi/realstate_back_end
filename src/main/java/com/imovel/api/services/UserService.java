@@ -5,7 +5,7 @@ import com.imovel.api.model.User;
 import com.imovel.api.repository.UserRepository;
 import com.imovel.api.request.UserProfileUpdateRequestDto;
 import com.imovel.api.response.ApplicationResponse;
-import com.imovel.api.response.UserProfileResponseDto;
+import com.imovel.api.response.UserResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,7 +47,7 @@ public class UserService {
      * @return StandardResponse containing the user profile DTO
      */
     @Transactional(readOnly = true)
-    public ApplicationResponse<UserProfileResponseDto> getCurrentUserProfile() {
+    public ApplicationResponse<UserResponse> getCurrentUserProfile() {
         User currentUser = getCurrentAuthenticatedUser();
         return ApplicationResponse.success(mapToUserProfileResponseDto(currentUser));
     }
@@ -59,7 +59,7 @@ public class UserService {
      * @return StandardResponse containing the updated user profile DTO
      */
     @Transactional
-    public ApplicationResponse<UserProfileResponseDto> updateCurrentUserProfile(UserProfileUpdateRequestDto updateRequestDto) {
+    public ApplicationResponse<UserResponse> updateCurrentUserProfile(UserProfileUpdateRequestDto updateRequestDto) {
         User currentUser = getCurrentAuthenticatedUser();
 
         // Update user fields if they are provided in the request
@@ -86,8 +86,8 @@ public class UserService {
      * @param user The user entity to map
      * @return The mapped UserProfileResponseDto
      */
-    private UserProfileResponseDto mapToUserProfileResponseDto(User user) {
-        UserProfileResponseDto dto = new UserProfileResponseDto();
+    private UserResponse mapToUserProfileResponseDto(User user) {
+        UserResponse dto = new UserResponse();
         dto.setId(user.getId());
         dto.setName(user.getName());
         dto.setEmail(user.getEmail());

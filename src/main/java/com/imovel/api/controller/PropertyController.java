@@ -2,7 +2,7 @@ package com.imovel.api.controller;
 
 import com.imovel.api.logger.ApiLogger;
 import com.imovel.api.request.PropertyRequestDto;
-import com.imovel.api.response.PropertyResponseDto;
+import com.imovel.api.response.PropertyResponse;
 import com.imovel.api.response.ApplicationResponse;
 import com.imovel.api.security.token.JWTProvider;
 import com.imovel.api.services.PropertyService;
@@ -57,7 +57,7 @@ public class PropertyController {
     }
 
     @PostMapping
-    public ApplicationResponse<PropertyResponseDto> createProperty(
+    public ApplicationResponse<PropertyResponse> createProperty(
             @Valid @RequestBody PropertyRequestDto propertyRequestDto, HttpServletRequest request) {
         final String TAG = "createProperty";
         ApiLogger.info(buildLogTag(TAG), "Received request to create property.");
@@ -68,14 +68,14 @@ public class PropertyController {
     }
 
     @GetMapping("/{id}")
-    public ApplicationResponse<PropertyResponseDto> getPropertyById(@PathVariable Long id) {
+    public ApplicationResponse<PropertyResponse> getPropertyById(@PathVariable Long id) {
         final String TAG = "getPropertyById";
         ApiLogger.info(buildLogTag(TAG), "Received request to get property by ID: " + id);
         return propertyService.getPropertyById(id);
     }
 
     @GetMapping
-    public ApplicationResponse<Page<PropertyResponseDto>> getAllProperties(
+    public ApplicationResponse<Page<PropertyResponse>> getAllProperties(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdAt,desc") String[] sort) {
@@ -102,7 +102,7 @@ public class PropertyController {
     }
 
     @PutMapping("/{id}")
-    public ApplicationResponse<PropertyResponseDto> updateProperty(
+    public ApplicationResponse<PropertyResponse> updateProperty(
             @PathVariable Long id,
             @Valid @RequestBody PropertyRequestDto propertyRequestDto, HttpServletRequest request) {
         final String TAG = "updateProperty";

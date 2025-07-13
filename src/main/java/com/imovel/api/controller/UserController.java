@@ -2,7 +2,7 @@ package com.imovel.api.controller;
 
 import com.imovel.api.request.UserProfileUpdateRequestDto;
 import com.imovel.api.response.ApplicationResponse;
-import com.imovel.api.response.UserProfileResponseDto;
+import com.imovel.api.response.UserResponse;
 import com.imovel.api.services.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +30,7 @@ public class UserController {
      * @return ApplicationResponse with user profile or error
      */
     @GetMapping("/me")
-    public ApplicationResponse<UserProfileResponseDto> getCurrentUserProfile() {
+    public ApplicationResponse<UserResponse> getCurrentUserProfile() {
         return userService.getCurrentUserProfile();
     }
 
@@ -41,7 +41,7 @@ public class UserController {
      * @return ApplicationResponse with updated profile or error
      */
     @PutMapping("/profile-update")
-    public ApplicationResponse<UserProfileResponseDto> updateUserProfile(
+    public ApplicationResponse<UserResponse> updateUserProfile(
             @Valid @RequestBody UserProfileUpdateRequestDto updateRequestDto) {
         return userService.updateCurrentUserProfile(updateRequestDto);
     }

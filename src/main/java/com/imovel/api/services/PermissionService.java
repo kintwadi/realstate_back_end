@@ -1,63 +1,31 @@
-// PermissionService.java
 package com.imovel.api.services;
 
 import com.imovel.api.error.ApiCode;
 import com.imovel.api.model.Permissions;
-import com.imovel.api.model.Role;
 import com.imovel.api.model.User;
-import com.imovel.api.model.enums.RoleReference;
-import com.imovel.api.repository.PermissionRepository;
-import com.imovel.api.repository.RoleRepository;
-import com.imovel.api.repository.UserRepository;
+import com.imovel.api.repository.PermissionsRepository;
 import com.imovel.api.response.ApplicationResponse;
+import com.imovel.api.response.PermissionResponse;
 import com.imovel.api.security.Policies;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Service
-@Transactional
 public class PermissionService {
-    private final RoleRepository roleRepository;
-    private final PermissionRepository permissionRepository;
-    private final UserRepository userRepository;
+    private final PermissionsRepository permissionRepository;
 
-    public PermissionService(RoleRepository roleRepository,
-                             PermissionRepository permissionRepository,
-                             UserRepository userRepository) {
-        this.roleRepository = roleRepository;
+    public PermissionService(PermissionsRepository permissionRepository) {
         this.permissionRepository = permissionRepository;
-        this.userRepository = userRepository;
     }
 
-    // Role management methods
-    public ApplicationResponse<Role> createRole(String roleName, String description) {
-        try {
-            Role role = new Role(roleName, description);
-            return ApplicationResponse.success(roleRepository.save(role), "Role created successfully");
-        } catch (Exception e) {
-            return ApplicationResponse.error(ApiCode.ROLE_CREATION_FAILED.getCode(),
-                    "Failed to create role: " + e.getMessage(),
-                    ApiCode.ROLE_CREATION_FAILED.getHttpStatus());
-        }
-    }
-
-    public ApplicationResponse<Role> findRoleByName(String roleName) {
-        Optional<Role> role = roleRepository.findByRoleName(roleName);
-        return role.map(r -> ApplicationResponse.success(r))
-                .orElseGet(() -> ApplicationResponse.error(ApiCode.ROLE_NOT_FOUND.getCode(),
-                        "Role not found with name: " + roleName,
-                        ApiCode.ROLE_NOT_FOUND.getHttpStatus()));
-    }
-
-    // Permission management methods
-    public ApplicationResponse<Permissions> createPermission(String permissionName, String description) {
+    @Transactional
+    public ApplicationResponse<PermissionResponse> createPermission(String permissionName, String description) {
         try {
             Permissions permission = new Permissions(permissionName, description);
-            return ApplicationResponse.success(permissionRepository.save(permission), "Permission created successfully");
+            Optional<PermissionResponse> permissionResponse = PermissionResponse.parse(permissionRepository.save(permission));
+            return ApplicationResponse.success(permissionResponse.get(), "Permission created successfully");
         } catch (Exception e) {
             return ApplicationResponse.error(ApiCode.PERMISSION_CREATION_FAILED.getCode(),
                     "Failed to create permission: " + e.getMessage(),
@@ -65,51 +33,23 @@ public class PermissionService {
         }
     }
 
-    public ApplicationResponse<Permissions> findPermissionByName(String permissionName) {
+    public ApplicationResponse<PermissionResponse> findPermissionByName(String permissionName) {
         Optional<Permissions> permission = permissionRepository.findByPermissionName(permissionName);
-        return permission.map(p -> ApplicationResponse.success(p))
-                .orElseGet(() -> ApplicationResponse.error(ApiCode.PERMISSION_NOT_FOUND.getCode(),
-                        "Permission not found with name: " + permissionName,
-                        ApiCode.PERMISSION_NOT_FOUND.getHttpStatus()));
-    }
-
-    // Role-Permission assignment
-    public ApplicationResponse<Permissions> addPermissionToRole(String roleName, String permissionName) {
-
-        ApplicationResponse<Role> roleResponse = findRoleByName(roleName);
-        ApplicationResponse<Permissions> permissionResponse = findPermissionByName(permissionName);
-
-        if(!roleResponse.isSuccess()  && !permissionResponse.isSuccess())
-        {
-            return ApplicationResponse.error(ApiCode.PERMISSION_OR_ROLE_NOT_FOUND.getCode(), "failed to add permission to role", ApiCode.PERMISSION_OR_ROLE_NOT_FOUND.getHttpStatus());
+        if (permission.isEmpty()) {
+            return ApplicationResponse.error(ApiCode.PERMISSION_NOT_FOUND.getCode(),
+                    "Permission not found with name: " + permissionName,
+                    ApiCode.PERMISSION_NOT_FOUND.getHttpStatus());
         }
-        Role role = roleResponse.getData();
-        Permissions permission = permissionResponse.getData();
-        role.getPermissions().add(permission);
-        permission.getRoles().add(role);
-        roleRepository.save(role);
-        return ApplicationResponse.success(permission, "Permission added to role successfully");
+        return PermissionResponse.parse(permission.get())
+                .map(p -> ApplicationResponse.success(p))
+                .orElseGet(() -> ApplicationResponse.error(ApiCode.PARSE_ERROR.getCode(),
+                        "Failed to parse permission",
+                        ApiCode.PARSE_ERROR.getHttpStatus()));
     }
 
-    public ApplicationResponse<Permissions> removePermissionFromRole(String roleName, String permissionName) {
-        ApplicationResponse<Role> roleResponse = findRoleByName(roleName);
-        ApplicationResponse<Permissions> permissionResponse = findPermissionByName(permissionName);
-
-        if (!roleResponse.isSuccess() && !permissionResponse.isSuccess()) {
-            return ApplicationResponse.error(ApiCode.PERMISSION_OR_ROLE_NOT_FOUND.getCode(), "failed to remove permission to role", ApiCode.PERMISSION_OR_ROLE_NOT_FOUND.getHttpStatus());
-        }
-
-        Role role = roleResponse.getData();
-        Permissions permission = permissionResponse.getData();
-
-        role.getPermissions().remove(permission);
-        permission.getRoles().remove(role);
-        roleRepository.save(role);
-        return ApplicationResponse.success(permission, "Permission removed from role successfully");
-    }
-
-    // Initialize default roles and permissions
-    public ApplicationResponse<Void> initializeDefaultRolesAndPermissions() {
+    @Transactional
+    public ApplicationResponse<List<PermissionResponse>> initializeDefaultPermissions() {
+        List<PermissionResponse> createdPermissions = new ArrayList<>();
         try {
             // Create permissions for property management
             createPermissionIfNotExists(Policies.PROPERTY_CREATE, "Create new property listings");
@@ -144,117 +84,36 @@ public class PermissionService {
             createPermissionIfNotExists(Policies.TENANT_WISHLIST, "Manage wishlist");
             createPermissionIfNotExists(Policies.TENANT_COMPARE, "Compare properties");
 
-            // Create default roles and assign permissions
-            initializeAdminRole();
-            initializeAgentRole();
-            initializeTenantRole();
+            List<Permissions> permissions = permissionRepository.findAll();
+            permissions.forEach(permission -> {
+                PermissionResponse.parse(permission).ifPresent(createdPermissions::add);
+            });
 
-            return ApplicationResponse.success(null, "Default roles and permissions initialized successfully");
+            return ApplicationResponse.success(createdPermissions, "Default permissions initialized successfully");
         } catch (Exception e) {
             return ApplicationResponse.error(ApiCode.INITIALIZATION_FAILED.getCode(),
-                    "Failed to initialize default roles and permissions: " + e.getMessage(),
+                    "Failed to initialize default permissions: " + e.getMessage(),
                     ApiCode.INITIALIZATION_FAILED.getHttpStatus());
         }
     }
 
-    private void createPermissionIfNotExists(String permissionName, String description) {
-        ApplicationResponse<Permissions> response = findPermissionByName(permissionName);
-        if (!response.isSuccess()) {
-            createPermission(permissionName, description);
-        }
-    }
-
-    private ApplicationResponse<Void> initializeAdminRole() {
-        ApplicationResponse<Role> response = findRoleByName(RoleReference.ADMIN.name());
-        if (!response.isSuccess()) {
-            ApplicationResponse<Role> createResponse = createRole(RoleReference.ADMIN.name(), "System Administrator with full access");
-            if (!createResponse.isSuccess()) {
-                return ApplicationResponse.error(createResponse.getError());
-            }
-
-            Role adminRole = createResponse.getData();
-
-            // Assign all permissions to admin
-            addPermissionToRole(RoleReference.ADMIN.name(), Policies.PROPERTY_CREATE);
-            addPermissionToRole(RoleReference.ADMIN.name(), Policies.PROPERTY_READ);
-            addPermissionToRole(RoleReference.ADMIN.name(), Policies.PROPERTY_UPDATE);
-            addPermissionToRole(RoleReference.ADMIN.name(), Policies.PROPERTY_DELETE);
-            addPermissionToRole(RoleReference.ADMIN.name(), Policies.PROPERTY_DEACTIVATE);
-            addPermissionToRole(RoleReference.ADMIN.name(), Policies.PROPERTY_MANAGE_ALL);
-
-            addPermissionToRole(RoleReference.ADMIN.name(), Policies.USER_CREATE);
-            addPermissionToRole(RoleReference.ADMIN.name(), Policies.USER_READ);
-            addPermissionToRole(RoleReference.ADMIN.name(), Policies.USER_UPDATE);
-            addPermissionToRole(RoleReference.ADMIN.name(), Policies.USER_DELETE);
-            addPermissionToRole(RoleReference.ADMIN.name(), Policies.USER_DEACTIVATE);
-
-            addPermissionToRole(RoleReference.ADMIN.name(), Policies.FINANCIAL_READ);
-            addPermissionToRole(RoleReference.ADMIN.name(), Policies.FINANCIAL_REPORT);
-
-            addPermissionToRole(RoleReference.ADMIN.name(), Policies.SYSTEM_CONFIGURE);
-
-            addPermissionToRole(RoleReference.ADMIN.name(), Policies.AGENT_APPROVE);
-
-            addPermissionToRole(RoleReference.ADMIN.name(), Policies.DISPUTE_RESOLVE);
-        }
-        return ApplicationResponse.success(null);
-    }
-
-    private ApplicationResponse<Void> initializeAgentRole() {
-        ApplicationResponse<Role> response = findRoleByName(RoleReference.AGENT.name());
-        if (!response.isSuccess()) {
-            ApplicationResponse<Role> createResponse = createRole(RoleReference.ADMIN.name(), "Real Estate Agent with property management access");
-            if (!createResponse.isSuccess()) {
-                return ApplicationResponse.error(createResponse.getError());
-            }
-
-            Role agentRole = createResponse.getData();
-
-            // Assign agent permissions
-            addPermissionToRole(RoleReference.AGENT.name(), Policies.PROPERTY_CREATE);
-            addPermissionToRole(RoleReference.AGENT.name(), Policies.PROPERTY_READ);
-            addPermissionToRole(RoleReference.AGENT.name(), Policies.PROPERTY_UPDATE);
-            addPermissionToRole(RoleReference.AGENT.name(), Policies.PROPERTY_DELETE);
-            addPermissionToRole(RoleReference.AGENT.name(), Policies.PROPERTY_DEACTIVATE);
-
-            // Agent can only manage their own properties (handled in permission checks)
-            addPermissionToRole(RoleReference.AGENT.name(), Policies.USER_UPDATE); // For their own profile
-        }
-        return ApplicationResponse.success(null);
-    }
-
-    private ApplicationResponse<Void> initializeTenantRole() {
-        ApplicationResponse<Role> response = findRoleByName(RoleReference.TENANT.name());
-        if (!response.isSuccess()) {
-            ApplicationResponse<Role> createResponse = createRole(RoleReference.TENANT.name(), "Tenant with property viewing and application access");
-            if (!createResponse.isSuccess()) {
-                return ApplicationResponse.error(createResponse.getError());
-            }
-
-            Role tenantRole = createResponse.getData();
-
-            // Assign tenant permissions
-            addPermissionToRole(RoleReference.TENANT.name(), Policies.PROPERTY_READ);
-            addPermissionToRole(RoleReference.TENANT.name(), Policies.TENANT_APPLICATION);
-            addPermissionToRole(RoleReference.TENANT.name(), Policies.TENANT_WISHLIST);
-            addPermissionToRole(RoleReference.TENANT.name(), Policies.TENANT_COMPARE);
-            addPermissionToRole(RoleReference.TENANT.name(), Policies.USER_UPDATE); // For their own profile
-        }
-        return ApplicationResponse.success(null);
-    }
-
-    public ApplicationResponse<Set<Permissions>> getUserPermissions(User user) {
-        try {
-            Set<Permissions> permissions = new HashSet<>();
-
-            for (Permissions permission : user.getRole().getPermissions()) {
-                permissions.add(permission);
-            }
-            return ApplicationResponse.success(permissions);
-        } catch (Exception e) {
-            return ApplicationResponse.error(ApiCode.PERMISSION_RETRIEVAL_FAILED.getCode(),
-                    "Failed to retrieve user permissions: " + e.getMessage(),
+    public ApplicationResponse<List<PermissionResponse>> findAll() {
+        List<PermissionResponse> permissionResponses = new ArrayList<>();
+        List<Permissions> permissions = permissionRepository.findAll();
+        if (permissions.isEmpty()) {
+            return ApplicationResponse.error(ApiCode.PERMISSION_NOT_FOUND.getCode(),
+                    "no permissions found",
                     ApiCode.PERMISSION_RETRIEVAL_FAILED.getHttpStatus());
+        }
+        permissions.forEach(permission -> {
+            PermissionResponse.parse(permission).ifPresent(permissionResponses::add);
+        });
+        return ApplicationResponse.success(permissionResponses);
+    }
+
+    private void createPermissionIfNotExists(String permissionName, String description) {
+        if (!permissionRepository.findByPermissionName(permissionName).isPresent()) {
+            createPermission(permissionName, description);
         }
     }
 }

@@ -1,11 +1,13 @@
 package com.imovel.api.response;
 
 import com.imovel.api.model.Role;
+import com.imovel.api.model.User;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
-public class UserProfileResponseDto {
+public class UserResponse {
     private Long id;
     private String name;
     private String email;
@@ -16,7 +18,7 @@ public class UserProfileResponseDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public UserProfileResponseDto() {
+    public UserResponse() {
     }
 
     public Long getId() {
@@ -89,5 +91,19 @@ public class UserProfileResponseDto {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public static Optional<UserResponse> parse(User user){
+        UserResponse dto = new UserResponse();
+        dto.setId(user.getId());
+        dto.setName(user.getName());
+        dto.setEmail(user.getEmail());
+        dto.setPhone(user.getPhone());
+        dto.setAvatar(user.getAvatar());
+        dto.setRole(user.getRole());
+        dto.setSocialLinks(user.getSocialLinks());
+        dto.setCreatedAt(user.getCreatedAt());
+        dto.setUpdatedAt(user.getUpdatedAt());
+        return Optional.of(dto);
     }
 }

@@ -1,6 +1,7 @@
 package com.imovel.api.services;
 
 import com.imovel.api.exception.ResourceNotFoundException;
+import com.imovel.api.logger.ApiLogger;
 import com.imovel.api.model.AuthDetails;
 import com.imovel.api.repository.AuthDetailRepository;
 import com.imovel.api.response.ApplicationResponse;
@@ -16,6 +17,7 @@ public class AuthDetailsService {
 
     private final AuthDetailRepository authDetailRepository;
     private final PasswordManager passwordManager;
+    private static final String SERVICE_NAME = "AuthDetailsService";
 
     /**
      * Constructs an AuthDetailsService with required dependencies.
@@ -27,6 +29,7 @@ public class AuthDetailsService {
                               final PasswordManager passwordManager) {
         this.authDetailRepository = authDetailRepository;
         this.passwordManager = passwordManager;
+        safeLogInfo("Service initialized");
     }
 
     /**
@@ -36,7 +39,9 @@ public class AuthDetailsService {
      * @return StandardResponse containing the saved AuthDetails
      */
     public ApplicationResponse<AuthDetails> save(final AuthDetails authDetails) {
+        safeLogDebug("Saving auth details for user: " + authDetails.getUserId());
         AuthDetails savedDetails = authDetailRepository.save(authDetails);
+        safeLogInfo("Auth details saved successfully for user: " + authDetails.getUserId());
         return ApplicationResponse.success(savedDetails);
     }
 
@@ -48,9 +53,13 @@ public class AuthDetailsService {
      * @throws ResourceNotFoundException if no auth details found for user
      */
     public ApplicationResponse<AuthDetails> findByUserId(final long id) {
+        safeLogDebug("Finding auth details by user ID: " + id);
         return authDetailRepository.findByUserId(id)
                 .map(ApplicationResponse::success)
-                .orElseThrow(() -> new ResourceNotFoundException("AuthDetails", id));
+                .orElseThrow(() -> {
+                    safeLogError("AuthDetails not found for user ID: " + id);
+                    return new ResourceNotFoundException("AuthDetails", id);
+                });
     }
 
     /**
@@ -62,10 +71,15 @@ public class AuthDetailsService {
      * @throws ResourceNotFoundException if no user exists with the given ID
      */
     public ApplicationResponse<Boolean> verifyUserCredentials(final long userId, final String password) {
+        safeLogDebug("Verifying credentials for user ID: " + userId);
         AuthDetails authDetails = authDetailRepository.findByUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("AuthDetails", userId));
+                .orElseThrow(() -> {
+                    safeLogError("AuthDetails not found for user ID: " + userId);
+                    return new ResourceNotFoundException("AuthDetails", userId);
+                });
 
         boolean isValid = isPasswordValid(authDetails, password);
+        safeLogInfo("Verification result for user ID: " + userId + " - " + isValid);
         return ApplicationResponse.success(isValid);
     }
 
@@ -77,9 +91,38 @@ public class AuthDetailsService {
      * @return true if password matches, false otherwise
      */
     private boolean isPasswordValid(final AuthDetails authDetails, final String password) {
-        return passwordManager.verifyPassword(
+        safeLogDebug("Validating password for user ID: " + authDetails.getUserId());
+        boolean isValid = passwordManager.verifyPassword(
                 password,
                 authDetails.getHash(),
                 authDetails.getSalt());
+        safeLogDebug("Password validation result for user ID: " + authDetails.getUserId() + " - " + isValid);
+        return isValid;
+    }
+
+    // Safe logging methods to prevent NPEs
+    private void safeLogDebug(String message) {
+        try {
+            ApiLogger.debug(SERVICE_NAME, message);
+        } catch (Exception e) {
+            // Fallback to prevent logging from breaking functionality
+            System.out.println("[DEBUG] " + SERVICE_NAME + " - " + message);
+        }
+    }
+
+    private void safeLogInfo(String message) {
+        try {
+            ApiLogger.info(SERVICE_NAME, message);
+        } catch (Exception e) {
+            System.out.println("[INFO] " + SERVICE_NAME + " - " + message);
+        }
+    }
+
+    private void safeLogError(String message) {
+        try {
+            ApiLogger.error(SERVICE_NAME, message);
+        } catch (Exception e) {
+            System.out.println("[ERROR] " + SERVICE_NAME + " - " + message);
+        }
     }
 }
