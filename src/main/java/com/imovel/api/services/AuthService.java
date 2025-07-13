@@ -81,21 +81,6 @@ public class AuthService {
         return userRepository.findByEmail(email);
 
     }
-    /**
-     * Attempts to log in a user.
-     *
-     * @param email The user's email
-     * @param password The user's password
-     * @return StandardResponse containing the user if credentials are valid
-     */
-    public ApplicationResponse<User> loginUser(String email, String password) {
-
-
-        return findByEmail(email)
-                .map(ApplicationResponse::success)
-                .orElse(ApplicationResponse.error(ApiCode.USER_NOT_FOUND.getCode(), ApiCode.USER_NOT_FOUND.getMessage() + email, HttpStatus.NOT_FOUND));
-
-    }
 
     /**
      * Changes the user's password after validating the request.

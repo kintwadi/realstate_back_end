@@ -6,6 +6,7 @@ import com.imovel.api.exception.TokenRefreshException;
 import com.imovel.api.model.RefreshToken;
 import com.imovel.api.model.User;
 import com.imovel.api.repository.RefreshTokenRepository;
+import com.imovel.api.request.UserLoginRequest;
 import com.imovel.api.response.ApplicationResponse;
 import com.imovel.api.security.token.JWTProvider;
 import com.imovel.api.security.token.Token;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,14 +30,16 @@ public class TokenService {
     private final JWTProvider jwtProvider;
     private final RefreshTokenRepository refreshTokenRepository;
     private final ConfigurationService configurationService;
+    private final AuthService authService;
 
     @Autowired
     public TokenService(JWTProvider jwtProvider,
                         RefreshTokenRepository refreshTokenRepository,
-                        ConfigurationService configurationService) {
+                        ConfigurationService configurationService, AuthService authService) {
         this.jwtProvider = jwtProvider;
         this.refreshTokenRepository = refreshTokenRepository;
         this.configurationService = configurationService;
+        this.authService = authService;
         this.jwtProvider.initialize();
     }
 
@@ -49,20 +53,26 @@ public class TokenService {
      * 4. Save the new refresh token to database
      * 5. Return the token pair wrapped in StandardResponse
      *
-     * @param user The user to authenticate
+     * @param loginRequest The user to authenticate
      * @param request HTTP request for device information
      * @return StandardResponse containing Token pair (access + refresh)
      * @throws AuthenticationException if credentials are invalid (HTTP 401)
      */
-    public ApplicationResponse<Token> login(User user, HttpServletRequest request) {
+    public ApplicationResponse<Token> login(UserLoginRequest loginRequest, HttpServletRequest request) {
+
+
         try {
-            enforceTokenLimits(user.getId());
+            Optional<User> optionalUser = authService.findByEmail(loginRequest.getEmail());
+            if(!optionalUser.isPresent()){
+               return  ApplicationResponse.error(ApiCode.AUTHENTICATION_FAILED.getCode(), ApiCode.REQUIRED_FIELD_MISSING.getMessage(), ApiCode.AUTHENTICATION_FAILED.getHttpStatus());
+            }
+            enforceTokenLimits(optionalUser.get().getId());
 
             Instant now = Instant.now();
-            revokeAllUserTokens(user.getId(), now);
+            revokeAllUserTokens(optionalUser.get().getId(), now);
 
-            Token tokens = generateTokensForUser(user);
-            saveRefreshToken(tokens.getRefreshToken(), user, now, request);
+            Token tokens = generateTokensForUser(optionalUser.get());
+            saveRefreshToken(tokens.getRefreshToken(), optionalUser.get(), now, request);
 
             return ApplicationResponse.success(tokens);
         } catch (Exception ex) {

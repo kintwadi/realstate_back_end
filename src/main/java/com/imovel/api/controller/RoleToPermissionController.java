@@ -65,10 +65,8 @@ public class RoleToPermissionController {
     }
 
     @GetMapping("/check")
-    public ApplicationResponse<Boolean> hasPermission(
-            @RequestParam Long roleId,
-            @RequestParam Long permissionId) {
-        return rolePermissionService.hasPermission(roleId, permissionId);
+    public ApplicationResponse<Boolean> hasPermission(@RequestBody RolePermissionRequest request) {
+        return rolePermissionService.hasPermission(request.getRoleId(), request.getPermissionId());
     }
 
     //to be  tested
@@ -82,6 +80,7 @@ public class RoleToPermissionController {
         return rolePermissionService.clearAllPermissionsFromRole(roleId);
     }
 
+    //to be  tested
     @GetMapping("/count/{permissionId}")
     public ApplicationResponse<Long> countRolesWithPermission(
             @PathVariable Long permissionId) {

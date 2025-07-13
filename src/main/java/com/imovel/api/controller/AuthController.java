@@ -56,8 +56,7 @@ public class AuthController {
     @PostMapping("/login")
     public ApplicationResponse<Token> authenticateUser(
             @RequestBody UserLoginRequest loginRequest, HttpServletRequest request) {
-        ApplicationResponse<User> userResponse = authService.loginUser(loginRequest.getEmail(), loginRequest.getPassword());
-        ApplicationResponse<Token> standardResponse = tokenService.login(userResponse.getData(), request);
+        ApplicationResponse<Token> standardResponse = tokenService.login(loginRequest, request);
         return ApplicationResponse.success(standardResponse.getData());
     }
 

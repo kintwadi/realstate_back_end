@@ -1,6 +1,8 @@
 package com.imovel.api.security.token;
 
-public class Token {
+import java.io.Serializable;
+
+public class Token implements Serializable {
     private String accessToken;
     private String refreshToken;
 
