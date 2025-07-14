@@ -91,13 +91,6 @@ public class UserService {
         dto.setId(user.getId());
         dto.setName(user.getName());
         dto.setEmail(user.getEmail());
-        dto.setPhone(user.getPhone());
-        dto.setAvatar(user.getAvatar());
-        dto.setRole(user.getRole());
-        dto.setSocialLinks(user.getSocialLinks() != null ?
-                new ArrayList<>(user.getSocialLinks()) : new ArrayList<>());
-        dto.setCreatedAt(user.getCreatedAt());
-        dto.setUpdatedAt(user.getUpdatedAt());
         return dto;
     }
 }

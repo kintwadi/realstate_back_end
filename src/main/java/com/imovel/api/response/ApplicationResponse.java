@@ -61,7 +61,6 @@ public class ApplicationResponse<T> {
     public static <T> ApplicationResponse<T> success(String message) {
         return new ApplicationResponse<>(true, null, message, null);
     }
-
     /**
      * Creates an error response with error code and message
      * 

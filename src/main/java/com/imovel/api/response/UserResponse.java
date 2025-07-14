@@ -13,10 +13,6 @@ public class UserResponse {
     private String email;
     private String phone;
     private String avatar;
-    private Role role;
-    private List<String> socialLinks;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 
     public UserResponse() {
     }
@@ -60,39 +56,6 @@ public class UserResponse {
     public void setAvatar(String avatar) {
         this.avatar = avatar;
     }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
-    }
-
-    public List<String> getSocialLinks() {
-        return socialLinks;
-    }
-
-    public void setSocialLinks(List<String> socialLinks) {
-        this.socialLinks = socialLinks;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
     public static Optional<UserResponse> parse(User user){
         UserResponse dto = new UserResponse();
         dto.setId(user.getId());
@@ -100,10 +63,6 @@ public class UserResponse {
         dto.setEmail(user.getEmail());
         dto.setPhone(user.getPhone());
         dto.setAvatar(user.getAvatar());
-        dto.setRole(user.getRole());
-        dto.setSocialLinks(user.getSocialLinks());
-        dto.setCreatedAt(user.getCreatedAt());
-        dto.setUpdatedAt(user.getUpdatedAt());
         return Optional.of(dto);
     }
 }
