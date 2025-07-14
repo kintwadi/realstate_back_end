@@ -13,8 +13,7 @@ import com.imovel.api.response.ApplicationResponse;
 import com.imovel.api.response.PermissionResponse;
 import com.imovel.api.response.RoleToPermissionResponse;
 import com.imovel.api.security.Policies;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.imovel.api.logger.ApiLogger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +23,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class RolePermissionService {
-    private static final Logger logger = LoggerFactory.getLogger(RolePermissionService.class);
+    private static final String LOGGER_LOCATION = "RolePermissionService";
 
     private final RoleRepository roleRepository;
     private final PermissionsRepository permissionsRepository;
@@ -41,22 +40,26 @@ public class RolePermissionService {
 
     @Transactional
     public ApplicationResponse<RoleToPermissionResponse> assignPermissionToRole(Long roleId, Long permissionId) {
-        logger.debug("Attempting to assign permission {} to role {}", permissionId, roleId);
+        ApiLogger.debug(LOGGER_LOCATION, "Attempting to assign permission to role",
+                Map.of("roleId", roleId, "permissionId", permissionId));
 
         Optional<Role> roleOptional = roleRepository.findById(roleId);
         if (roleOptional.isEmpty()) {
-            logger.error("Role not found with id: {}", roleId);
+            ApiLogger.error(LOGGER_LOCATION, "Role not found",
+                    Map.of("roleId", roleId));
             return errorResponse(ApiCode.ROLE_NOT_FOUND, "Role not found with id: " + roleId);
         }
 
         Optional<Permissions> permissionOptional = permissionsRepository.findById(permissionId);
         if (permissionOptional.isEmpty()) {
-            logger.error("Permission not found with id: {}", permissionId);
+            ApiLogger.error(LOGGER_LOCATION, "Permission not found",
+                    Map.of("permissionId", permissionId));
             return errorResponse(ApiCode.PERMISSION_NOT_FOUND, "Permission not found with id: " + permissionId);
         }
 
         if (rolePermissionRepository.existsByRoleIdAndPermissionId(roleId, permissionId)) {
-            logger.warn("Permission {} already assigned to role {}", permissionId, roleId);
+            ApiLogger.debug(LOGGER_LOCATION, "Permission already assigned to role",
+                    Map.of("roleId", roleId, "permissionId", permissionId));
             return errorResponse(ApiCode.PERMISSION_ASSIGNMENT_FAILED, "Permission already assigned to this role");
         }
 
@@ -69,30 +72,35 @@ public class RolePermissionService {
             rolePermission.setPermission(permission);
             rolePermissionRepository.save(rolePermission);
 
-            logger.info("Successfully assigned permission {} to role {}", permissionId, roleId);
+            ApiLogger.info(LOGGER_LOCATION, "Successfully assigned permission to role",
+                    Map.of("roleId", roleId, "permissionId", permissionId));
 
             return RoleToPermissionResponse.parse(role, permission)
                     .map(response -> successResponse(response, "Permission assigned successfully"))
                     .orElse(errorResponse(ApiCode.PERMISSION_ASSIGNMENT_FAILED, "Failed to create response"));
         } catch (Exception e) {
-            logger.error("Failed to assign permission {} to role {}: {}", permissionId, roleId, e.getMessage(), e);
+            ApiLogger.error(LOGGER_LOCATION, "Failed to assign permission to role", e,
+                    Map.of("roleId", roleId, "permissionId", permissionId));
             return errorResponse(ApiCode.PERMISSION_ASSIGNMENT_FAILED, "Failed to assign permission");
         }
     }
 
     @Transactional
     public ApplicationResponse<RoleToPermissionResponse> assignPermissionToRoleByName(String roleName, String permissionName) {
-        logger.debug("Attempting to assign permission '{}' to role '{}'", permissionName, roleName);
+        ApiLogger.debug(LOGGER_LOCATION, "Attempting to assign permission to role by name",
+                Map.of("roleName", roleName, "permissionName", permissionName));
 
         Optional<Role> roleOptional = roleRepository.findByRoleName(roleName);
         if (roleOptional.isEmpty()) {
-            logger.error("Role not found with name: {}", roleName);
+            ApiLogger.error(LOGGER_LOCATION, "Role not found",
+                    Map.of("roleName", roleName));
             return errorResponse(ApiCode.ROLE_NOT_FOUND, "Role not found with name: " + roleName);
         }
 
         Optional<Permissions> permissionOptional = permissionsRepository.findByPermissionName(permissionName);
         if (permissionOptional.isEmpty()) {
-            logger.error("Permission not found with name: {}", permissionName);
+            ApiLogger.error(LOGGER_LOCATION, "Permission not found",
+                    Map.of("permissionName", permissionName));
             return errorResponse(ApiCode.PERMISSION_NOT_FOUND, "Permission not found with name: " + permissionName);
         }
 
@@ -100,7 +108,8 @@ public class RolePermissionService {
         Permissions permission = permissionOptional.get();
 
         if (rolePermissionRepository.existsByRoleIdAndPermissionId(role.getId(), permission.getId())) {
-            logger.warn("Permission '{}' already assigned to role '{}'", permissionName, roleName);
+            ApiLogger.debug(LOGGER_LOCATION, "Permission already assigned to role",
+                    Map.of("roleName", roleName, "permissionName", permissionName));
             return errorResponse(ApiCode.PERMISSION_ASSIGNMENT_FAILED, "Permission already assigned to this role");
         }
 
@@ -110,35 +119,41 @@ public class RolePermissionService {
             rolePermission.setPermission(permission);
             rolePermissionRepository.save(rolePermission);
 
-            logger.info("Successfully assigned permission '{}' to role '{}'", permissionName, roleName);
+            ApiLogger.info(LOGGER_LOCATION, "Successfully assigned permission to role",
+                    Map.of("roleName", roleName, "permissionName", permissionName));
 
             return RoleToPermissionResponse.parse(role, permission)
                     .map(response -> successResponse(response, "Permission assigned successfully"))
                     .orElse(errorResponse(ApiCode.PERMISSION_ASSIGNMENT_FAILED, "Failed to create response"));
         } catch (Exception e) {
-            logger.error("Failed to assign permission '{}' to role '{}': {}", permissionName, roleName, e.getMessage(), e);
+            ApiLogger.error(LOGGER_LOCATION, "Failed to assign permission to role", e,
+                    Map.of("roleName", roleName, "permissionName", permissionName));
             return errorResponse(ApiCode.PERMISSION_ASSIGNMENT_FAILED, "Failed to assign permission");
         }
     }
 
     @Transactional
     public ApplicationResponse<Void> removePermissionFromRole(Long roleId, Long permissionId) {
-        logger.debug("Attempting to remove permission {} from role {}", permissionId, roleId);
+        ApiLogger.debug(LOGGER_LOCATION, "Attempting to remove permission from role",
+                Map.of("roleId", roleId, "permissionId", permissionId));
 
         if (!rolePermissionRepository.existsByRoleIdAndPermissionId(roleId, permissionId)) {
-            logger.error("Permission {} not assigned to role {}", permissionId, roleId);
+            ApiLogger.error(LOGGER_LOCATION, "Permission not assigned to role",
+                    Map.of("roleId", roleId, "permissionId", permissionId));
             return errorResponse(ApiCode.PERMISSION_OR_ROLE_NOT_FOUND, "Permission not assigned to this role");
         }
 
         Optional<Role> roleOptional = roleRepository.findById(roleId);
         if (roleOptional.isEmpty()) {
-            logger.error("Role not found with id: {}", roleId);
+            ApiLogger.error(LOGGER_LOCATION, "Role not found",
+                    Map.of("roleId", roleId));
             return errorResponse(ApiCode.ROLE_NOT_FOUND, "Role not found with id: " + roleId);
         }
 
         Optional<Permissions> permissionOptional = permissionsRepository.findById(permissionId);
         if (permissionOptional.isEmpty()) {
-            logger.error("Permission not found with id: {}", permissionId);
+            ApiLogger.error(LOGGER_LOCATION, "Permission not found",
+                    Map.of("permissionId", permissionId));
             return errorResponse(ApiCode.PERMISSION_NOT_FOUND, "Permission not found with id: " + permissionId);
         }
 
@@ -147,17 +162,20 @@ public class RolePermissionService {
         rolePermissionRepository.findByRoleAndPermission(role, permission)
                 .ifPresent(rolePermissionRepository::delete);
 
-        logger.info("Successfully removed permission {} from role {}", permissionId, roleId);
+        ApiLogger.info(LOGGER_LOCATION, "Successfully removed permission from role",
+                Map.of("roleId", roleId, "permissionId", permissionId));
 
         return successResponse("Permission removed successfully");
     }
 
     @Transactional(readOnly = true)
     public ApplicationResponse<Set<RoleToPermissionResponse>> getPermissionsByRoleId(Long roleId) {
-        logger.debug("Getting permissions for role {}", roleId);
+        ApiLogger.debug(LOGGER_LOCATION, "Getting permissions for role",
+                Map.of("roleId", roleId));
 
         if (!roleRepository.existsById(roleId)) {
-            logger.error("Role not found with id: {}", roleId);
+            ApiLogger.error(LOGGER_LOCATION, "Role not found",
+                    Map.of("roleId", roleId));
             return errorResponse(ApiCode.ROLE_NOT_FOUND, "Role not found with id: " + roleId);
         }
 
@@ -167,17 +185,20 @@ public class RolePermissionService {
                 .map(Optional::get)
                 .collect(Collectors.toSet());
 
-        logger.info("Found {} permissions for role {}", permissions.size(), roleId);
+        ApiLogger.info(LOGGER_LOCATION, "Found permissions for role",
+                Map.of("roleId", roleId, "count", permissions.size()));
 
         return successResponse(permissions);
     }
 
     @Transactional(readOnly = true)
     public ApplicationResponse<Set<RoleToPermissionResponse>> getRolesByPermissionId(Long permissionId) {
-        logger.debug("Getting roles for permission {}", permissionId);
+        ApiLogger.debug(LOGGER_LOCATION, "Getting roles for permission",
+                Map.of("permissionId", permissionId));
 
         if (!permissionsRepository.existsById(permissionId)) {
-            logger.error("Permission not found with id: {}", permissionId);
+            ApiLogger.error(LOGGER_LOCATION, "Permission not found",
+                    Map.of("permissionId", permissionId));
             return errorResponse(ApiCode.PERMISSION_NOT_FOUND, "Permission not found with id: " + permissionId);
         }
 
@@ -187,40 +208,47 @@ public class RolePermissionService {
                 .map(Optional::get)
                 .collect(Collectors.toSet());
 
-        logger.info("Found {} roles for permission {}", roles.size(), permissionId);
+        ApiLogger.info(LOGGER_LOCATION, "Found roles for permission",
+                Map.of("permissionId", permissionId, "count", roles.size()));
 
         return successResponse(roles);
     }
 
     @Transactional(readOnly = true)
     public ApplicationResponse<Boolean> hasPermission(Long roleId, Long permissionId) {
-        logger.debug("Checking if role {} has permission {}", roleId, permissionId);
+        ApiLogger.debug(LOGGER_LOCATION, "Checking if role has permission",
+                Map.of("roleId", roleId, "permissionId", permissionId));
 
         try {
             boolean hasPermission = rolePermissionRepository.existsByRoleIdAndPermissionId(roleId, permissionId);
 
-            logger.debug("Role {} {} permission {}", roleId, hasPermission ? "has" : "does not have", permissionId);
+            ApiLogger.debug(LOGGER_LOCATION, "Permission check result",
+                    Map.of("roleId", roleId, "permissionId", permissionId, "hasPermission", hasPermission));
 
             return successResponse(hasPermission);
         } catch (Exception e) {
-            logger.error("Failed to check permission {} for role {}: {}", permissionId, roleId, e.getMessage(), e);
+            ApiLogger.error(LOGGER_LOCATION, "Failed to check permission for role", e,
+                    Map.of("roleId", roleId, "permissionId", permissionId));
             return errorResponse(ApiCode.PERMISSION_RETRIEVAL_FAILED, "Failed to check permission: " + e.getMessage());
         }
     }
 
     @Transactional
     public ApplicationResponse<RoleToPermissionResponse> updateRolePermissions(Long roleId, Long permissionId) {
-        logger.debug("Updating role permissions for role {} and permission {}", roleId, permissionId);
+        ApiLogger.debug(LOGGER_LOCATION, "Updating role permissions",
+                Map.of("roleId", roleId, "permissionId", permissionId));
 
         Optional<Role> roleOptional = roleRepository.findById(roleId);
         if (roleOptional.isEmpty()) {
-            logger.error("Role not found with id: {}", roleId);
+            ApiLogger.error(LOGGER_LOCATION, "Role not found",
+                    Map.of("roleId", roleId));
             return errorResponse(ApiCode.ROLE_NOT_FOUND, "Role not found with id: " + roleId);
         }
 
         Optional<Permissions> permissionsOptional = permissionsRepository.findById(permissionId);
         if (permissionsOptional.isEmpty()) {
-            logger.error("Permission not found with id: {}", permissionId);
+            ApiLogger.error(LOGGER_LOCATION, "Permission not found",
+                    Map.of("permissionId", permissionId));
             return errorResponse(ApiCode.PERMISSION_NOT_FOUND, "Permission not found with id: " + permissionId);
         }
 
@@ -228,13 +256,15 @@ public class RolePermissionService {
                 roleOptional.get(), permissionsOptional.get());
 
         if (rolePermission.isEmpty()) {
-            logger.error("Role permission not found for role {} and permission {}", roleId, permissionId);
+            ApiLogger.error(LOGGER_LOCATION, "Role permission not found",
+                    Map.of("roleId", roleId, "permissionId", permissionId));
             return errorResponse(ApiCode.PERMISSION_OR_ROLE_NOT_FOUND, "Permission or Role not found with id");
         }
 
         rolePermissionRepository.save(rolePermission.get());
 
-        logger.info("Successfully updated role permissions for role {} and permission {}", roleId, permissionId);
+        ApiLogger.info(LOGGER_LOCATION, "Successfully updated role permissions",
+                Map.of("roleId", roleId, "permissionId", permissionId));
 
         return RoleToPermissionResponse.parse(rolePermission.get().getRole(), rolePermission.get().getPermission())
                 .map(response -> successResponse(response, "Role permission updated successfully"))
@@ -243,23 +273,27 @@ public class RolePermissionService {
 
     @Transactional
     public ApplicationResponse<RoleToPermissionResponse> clearAllPermissionsFromRole(Long roleId) {
-        logger.debug("Clearing all permissions from role {}", roleId);
+        ApiLogger.debug(LOGGER_LOCATION, "Clearing all permissions from role",
+                Map.of("roleId", roleId));
 
         Optional<Role> roleOptional = roleRepository.findById(roleId);
         if (roleOptional.isEmpty()) {
-            logger.error("Role not found with id: {}", roleId);
+            ApiLogger.error(LOGGER_LOCATION, "Role not found",
+                    Map.of("roleId", roleId));
             return errorResponse(ApiCode.ROLE_NOT_FOUND, "Role not found with id: " + roleId);
         }
 
         List<RolePermission> rolePermissions = rolePermissionRepository.findByRoleId(roleId);
         if (rolePermissions.isEmpty()) {
-            logger.error("No permissions found for role {}", roleId);
+            ApiLogger.error(LOGGER_LOCATION, "No permissions found for role",
+                    Map.of("roleId", roleId));
             return errorResponse(ApiCode.PERMISSION_OR_ROLE_NOT_FOUND, "Role permission not found with id: " + roleId);
         }
 
         rolePermissionRepository.delete(rolePermissions.get(0));
 
-        logger.info("Successfully cleared all permissions from role {}", roleId);
+        ApiLogger.info(LOGGER_LOCATION, "Successfully cleared all permissions from role",
+                Map.of("roleId", roleId));
 
         return RoleToPermissionResponse.parse(rolePermissions.get(0).getRole(), rolePermissions.get(0).getPermission())
                 .map(response -> successResponse(response, "All permissions cleared from role"))
@@ -268,48 +302,54 @@ public class RolePermissionService {
 
     @Transactional(readOnly = true)
     public ApplicationResponse<Long> countRolesWithPermission(Long permissionId) {
-        logger.debug("Counting roles with permission {}", permissionId);
+        ApiLogger.debug(LOGGER_LOCATION, "Counting roles with permission",
+                Map.of("permissionId", permissionId));
 
         if (!permissionsRepository.existsById(permissionId)) {
-            logger.error("Permission not found with id: {}", permissionId);
+            ApiLogger.error(LOGGER_LOCATION, "Permission not found",
+                    Map.of("permissionId", permissionId));
             return errorResponse(ApiCode.PERMISSION_NOT_FOUND, "Permission not found with id: " + permissionId);
         }
 
         long count = rolePermissionRepository.countByPermissionId(permissionId);
 
-        logger.info("Found {} roles with permission {}", count, permissionId);
+        ApiLogger.info(LOGGER_LOCATION, "Found roles with permission",
+                Map.of("permissionId", permissionId, "count", count));
 
         return successResponse(count);
     }
 
     @Transactional
     public ApplicationResponse<RoleToPermissionResponse> assignDefaultRolePermissions() {
-        logger.info("Assigning default role permissions");
+        ApiLogger.info(LOGGER_LOCATION, "Assigning default role permissions");
 
         ApplicationResponse<RoleToPermissionResponse> adminResponse = assignAdminPermissions();
         if (!adminResponse.isSuccess()) {
-            logger.error("Failed to assign admin permissions: {}", adminResponse.getMessage());
+            ApiLogger.error(LOGGER_LOCATION, "Failed to assign admin permissions",
+                    Map.of("message", adminResponse.getMessage()));
             return adminResponse;
         }
 
         ApplicationResponse<RoleToPermissionResponse> agentResponse = assignAgentPermissions();
         if (!agentResponse.isSuccess()) {
-            logger.error("Failed to assign agent permissions: {}", agentResponse.getMessage());
+            ApiLogger.error(LOGGER_LOCATION, "Failed to assign agent permissions",
+                    Map.of("message", agentResponse.getMessage()));
             return agentResponse;
         }
 
         ApplicationResponse<RoleToPermissionResponse> tenantResponse = assignTenantPermissions();
         if (!tenantResponse.isSuccess()) {
-            logger.error("Failed to assign tenant permissions: {}", tenantResponse.getMessage());
+            ApiLogger.error(LOGGER_LOCATION, "Failed to assign tenant permissions",
+                    Map.of("message", tenantResponse.getMessage()));
             return tenantResponse;
         }
 
-        logger.info("Successfully assigned all default role permissions");
+        ApiLogger.info(LOGGER_LOCATION, "Successfully assigned all default role permissions");
         return successResponse("Default role permissions assigned successfully");
     }
 
     private ApplicationResponse<RoleToPermissionResponse> assignAdminPermissions() {
-        logger.debug("Assigning admin permissions");
+        ApiLogger.debug(LOGGER_LOCATION, "Assigning admin permissions");
         return assignPermissionsForRole(RoleReference.ADMIN,
                 Policies.PROPERTY_CREATE,
                 Policies.PROPERTY_READ,
@@ -330,7 +370,7 @@ public class RolePermissionService {
     }
 
     private ApplicationResponse<RoleToPermissionResponse> assignAgentPermissions() {
-        logger.debug("Assigning agent permissions");
+        ApiLogger.debug(LOGGER_LOCATION, "Assigning agent permissions");
         return assignPermissionsForRole(RoleReference.AGENT,
                 Policies.PROPERTY_CREATE,
                 Policies.PROPERTY_READ,
@@ -341,7 +381,7 @@ public class RolePermissionService {
     }
 
     private ApplicationResponse<RoleToPermissionResponse> assignTenantPermissions() {
-        logger.debug("Assigning tenant permissions");
+        ApiLogger.debug(LOGGER_LOCATION, "Assigning tenant permissions");
         return assignPermissionsForRole(RoleReference.TENANT,
                 Policies.PROPERTY_READ,
                 Policies.TENANT_APPLICATION,
@@ -351,11 +391,13 @@ public class RolePermissionService {
     }
 
     private ApplicationResponse<RoleToPermissionResponse> assignPermissionsForRole(RoleReference role, String... permissions) {
-        logger.debug("Assigning {} permissions to role {}", permissions.length, role.name());
+        ApiLogger.debug(LOGGER_LOCATION, "Assigning permissions to role",
+                Map.of("role", role.name(), "permissionCount", permissions.length));
 
         Optional<Role> roleOptional = roleRepository.findByRoleName(role.name());
         if (roleOptional.isEmpty()) {
-            logger.error("Role {} not found", role.name());
+            ApiLogger.error(LOGGER_LOCATION, "Role not found",
+                    Map.of("role", role.name()));
             return errorResponse(ApiCode.ROLE_NOT_FOUND, role.name() + " role not found");
         }
 
@@ -363,23 +405,27 @@ public class RolePermissionService {
             ApplicationResponse<RoleToPermissionResponse> response =
                     assignPermissionToRoleByName(role.name(), permission);
             if (!response.isSuccess()) {
-                logger.error("Failed to assign permission {} to role {}: {}", permission, role.name(), response.getMessage());
+                ApiLogger.error(LOGGER_LOCATION, "Failed to assign permission to role",
+                        Map.of("role", role.name(), "permission", permission, "message", response.getMessage()));
                 return errorResponse(ApiCode.PERMISSION_ASSIGNMENT_FAILED,
                         "Failed to assign permission: " + permission);
             }
         }
 
-        logger.info("Successfully assigned {} permissions to role {}", permissions.length, role.name());
+        ApiLogger.info(LOGGER_LOCATION, "Successfully assigned permissions to role",
+                Map.of("role", role.name(), "permissionCount", permissions.length));
 
         return successResponse("Permissions assigned successfully to " + role.name());
     }
 
     public ApplicationResponse<Set<PermissionResponse>> getUserPermissions(User user) {
         try {
-            logger.debug("Getting permissions for user {}", user.getId());
+            ApiLogger.debug(LOGGER_LOCATION, "Getting permissions for user",
+                    Map.of("userId", user.getId()));
 
             if (user.getRole() == null) {
-                logger.info("User {} has no role assigned", user.getId());
+                ApiLogger.info(LOGGER_LOCATION, "User has no role assigned",
+                        Map.of("userId", user.getId()));
                 return successResponse(Collections.emptySet());
             }
 
@@ -389,31 +435,40 @@ public class RolePermissionService {
                     .map(Optional::get)
                     .collect(Collectors.toSet());
 
-            logger.info("Found {} permissions for user {}", permissions.size(), user.getId());
+            ApiLogger.info(LOGGER_LOCATION, "Found permissions for user",
+                    Map.of("userId", user.getId(), "count", permissions.size()));
 
             return successResponse(permissions);
         } catch (Exception e) {
-            logger.error("Failed to retrieve permissions for user {}: {}", user.getId(), e.getMessage(), e);
+            ApiLogger.error(LOGGER_LOCATION, "Failed to retrieve permissions for user", e,
+                    Map.of("userId", user.getId()));
             return errorResponse(ApiCode.PERMISSION_RETRIEVAL_FAILED,
                     "Failed to retrieve user permissions: " + e.getMessage());
         }
     }
 
     public ApplicationResponse<List<RoleToPermissionResponse>> findAll() {
-        logger.debug("Finding all role permissions");
 
-        List<RoleToPermissionResponse> roleToPermissions = rolePermissionRepository.findAll().stream()
+        ApiLogger.debug(LOGGER_LOCATION, "Finding all role permissions");
+
+        List<RolePermission> rolePermissions = rolePermissionRepository.findAll();
+        if(rolePermissions.isEmpty()){
+            return errorResponse(ApiCode.PERMISSION_NOT_FOUND, "No role permissions assigned");
+        }
+
+        List<RoleToPermissionResponse> roleToPermissions = rolePermissions.stream()
                 .map(rp -> RoleToPermissionResponse.parse(rp.getRole(), rp.getPermission()))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toList());
 
         if (roleToPermissions.isEmpty()) {
-            logger.error("No role permissions found");
+            ApiLogger.error(LOGGER_LOCATION, "No role permissions found");
             return errorResponse(ApiCode.PERMISSION_NOT_FOUND, "No role permissions assigned");
         }
 
-        logger.info("Found {} role permissions", roleToPermissions.size());
+        ApiLogger.info(LOGGER_LOCATION, "Found role permissions",
+                Map.of("count", roleToPermissions.size()));
 
         return successResponse(roleToPermissions, "All role permissions");
     }
