@@ -6,6 +6,12 @@ public class Token implements Serializable {
     private String accessToken;
     private String refreshToken;
 
+
+    public Token(  )
+    {
+
+    }
+
     /**
      * Constructs a new Token instance with the provided access and refresh
      * tokens.

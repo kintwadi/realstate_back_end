@@ -13,6 +13,10 @@ public class SubscriptionPlanResponse {
     private Boolean isFeatured;
     private String supportType;
 
+    public SubscriptionPlanResponse(){
+
+    }
+
     // Getters and Setters
     public Long getId() {
         return id;
