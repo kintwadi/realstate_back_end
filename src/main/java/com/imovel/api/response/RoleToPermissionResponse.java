@@ -10,6 +10,10 @@ public class RoleToPermissionResponse {
     private Long permissionId;
     private String permissionName;
 
+    public RoleToPermissionResponse() {
+
+    }
+
     public RoleToPermissionResponse(Long roleId, String roleName, Long permissionId, String permissionName) {
         this.roleId = roleId;
         this.roleName = roleName;

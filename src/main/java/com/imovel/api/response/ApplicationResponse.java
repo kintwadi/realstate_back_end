@@ -17,6 +17,10 @@ public class ApplicationResponse<T> {
     private ErrorCode error;
     private Instant timestamp;
 
+    public ApplicationResponse(){
+        
+    }
+
     // Private constructor to enforce use of factory methods
     public ApplicationResponse(boolean success, T data, String message, ErrorCode error) {
         this.success = success;
