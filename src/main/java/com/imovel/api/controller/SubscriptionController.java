@@ -1,8 +1,10 @@
 package com.imovel.api.controller;
 
-import com.imovel.api.model.Subscription;
-import com.imovel.api.model.SubscriptionPlan;
+
+import com.imovel.api.request.SubscriptionPlainRequest;
 import com.imovel.api.response.ApplicationResponse;
+import com.imovel.api.response.SubscriptionPlanResponse;
+import com.imovel.api.response.SubscriptionResponse;
 import com.imovel.api.services.SubscriptionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -19,31 +21,26 @@ public class SubscriptionController {
         this.subscriptionService = subscriptionService;
     }
 
-    @GetMapping("/plans")
-    public ApplicationResponse<List<SubscriptionPlan>> getAllPlans() {
-        return subscriptionService.getAllPlans();
-    }
-
     @PostMapping("/subscribe")
-    public ApplicationResponse<Subscription> subscribe(
-            @RequestParam Long userId,
-            @RequestParam Long planId,
-            @RequestParam String billingCycle) {
-        return subscriptionService.subscribeUser(userId, planId, billingCycle);
+    public ApplicationResponse<SubscriptionResponse> subscribe(@RequestBody SubscriptionPlainRequest subscriptionPlanRequest) {
+
+        return subscriptionService.subscribeUser(subscriptionPlanRequest.getUserId(),
+                                                 subscriptionPlanRequest.getPlanId(),
+                                                 subscriptionPlanRequest.getBillingCycle());
     }
 
     @GetMapping("/user/{userId}")
-    public ApplicationResponse<List<Subscription>> getUserSubscriptions(@PathVariable Long userId) {
+    public ApplicationResponse<List<SubscriptionResponse>> getUserSubscriptions(@PathVariable Long userId) {
         return subscriptionService.getUserSubscriptions(userId);
     }
-
+    // NOT TESTED
     @PostMapping("/{subscriptionId}/cancel")
-    public ApplicationResponse<Subscription> cancelSubscription(@PathVariable Long subscriptionId) {
+    public ApplicationResponse<SubscriptionResponse> cancelSubscription(@PathVariable Long subscriptionId) {
         return subscriptionService.cancelSubscription(subscriptionId);
     }
 
     @PostMapping("/{subscriptionId}/change-plan")
-    public ApplicationResponse<Subscription> changePlan(
+    public ApplicationResponse<SubscriptionResponse> changePlan(
             @PathVariable Long subscriptionId,
             @RequestParam Long newPlanId,
             @RequestParam(required = false, defaultValue = "true") boolean immediate) {
