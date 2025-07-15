@@ -6,6 +6,7 @@ import com.imovel.api.model.User;
 import com.imovel.api.request.PasswordChangeRequest;
 import com.imovel.api.request.UserRegistrationRequest;
 import com.imovel.api.response.ApplicationResponse;
+import com.imovel.api.response.UserResponse;
 import com.imovel.api.security.PasswordManager;
 import com.imovel.api.services.AuthDetailsService;
 import com.imovel.api.services.AuthService;
@@ -81,7 +82,7 @@ public class AuthServiceAspect {
             return AspectErrorResponse.createErrorResponse(ApiCode.INVALID_EMAIL.getMessage(), ApiCode.INVALID_EMAIL.getCode(), HttpStatus.BAD_REQUEST);
         }
 
-        ApplicationResponse<User> response = (ApplicationResponse<User>) joinPoint.proceed();
+        ApplicationResponse<UserResponse> response = (ApplicationResponse<UserResponse>) joinPoint.proceed();
 
         if (!response.isSuccess() || response.getData() == null) {
             return response;

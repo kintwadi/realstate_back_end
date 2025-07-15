@@ -11,6 +11,7 @@ import com.imovel.api.request.PasswordChangeRequest;
 import com.imovel.api.request.UserRegistrationRequest;
 import com.imovel.api.response.ApplicationResponse;
 import com.imovel.api.response.UserResponse;
+import com.imovel.api.logger.ApiLogger;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -46,30 +47,35 @@ public class AuthService {
      * @throws ConflictException if email is already registered
      */
     public ApplicationResponse<UserResponse> registerUser(UserRegistrationRequest request) {
+        ApiLogger.debug("AuthService.registerUser", "Attempting to register user", request.getEmail());
+
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            return ApplicationResponse.error(ApiCode.INVALID_EMAIL_ALREADY_EXIST.getCode(), ApiCode.INVALID_EMAIL_ALREADY_EXIST.getMessage(),HttpStatus.NOT_FOUND);
+            ApiLogger.error("AuthService.registerUser", "Email already exists", request.getEmail());
+            return ApplicationResponse.error(ApiCode.INVALID_EMAIL_ALREADY_EXIST.getCode(),
+                    ApiCode.INVALID_EMAIL_ALREADY_EXIST.getMessage(),
+                    HttpStatus.NOT_FOUND);
         }
 
-        Role role = new Role();
-        role.setRoleName(RoleReference.TENANT.name());
-        Optional<Role> roleOptional = roleRepository.findByRoleName(RoleReference.TENANT.name());
-        if(!roleOptional.isPresent()){
-            roleRepository.save(role);
-        }else{
-            role = roleOptional.get();
-        }
+        Role role = roleRepository.findByRoleName(RoleReference.TENANT.name())
+                .orElseGet(() -> {
+                    Role newRole = new Role();
+                    newRole.setRoleName(RoleReference.TENANT.name());
+                    return roleRepository.save(newRole);
+
+                });
+
         User newUser = new User();
         newUser.setName(request.getName());
         newUser.setEmail(request.getEmail());
         newUser.setPhone(request.getPhone());
         newUser.setRole(role);
 
-        User savedUser = userRepository.save(newUser);
-        UserResponse userResponse = UserResponse.parse(savedUser).get();
+        userRepository.save(newUser);
+        UserResponse userResponse = UserResponse.parse(newUser).get();
 
-        return ApplicationResponse.success(userResponse);
+        ApiLogger.info("AuthService.registerUser", "User registered successfully");
+        return ApplicationResponse.success(userResponse, "User registered successfully");
     }
-
     /**
      * Finds a user by email.
      *
@@ -77,9 +83,14 @@ public class AuthService {
      * @return StandardResponse containing the user if found
      */
     public Optional<User> findByEmail(final String email) {
-
-        return userRepository.findByEmail(email);
-
+        ApiLogger.debug("AuthService.findByEmail", "Looking for user by email", email);
+        Optional<User> user = userRepository.findByEmail(email);
+        if (user.isPresent()) {
+            ApiLogger.debug("AuthService.findByEmail", "User found", email);
+        } else {
+            ApiLogger.debug("AuthService.findByEmail", "User not found", email);
+        }
+        return user;
     }
 
     /**
@@ -90,10 +101,17 @@ public class AuthService {
      */
     @Transactional
     public ApplicationResponse<UserResponse> changeUserPassword(PasswordChangeRequest changePasswordRequestDto) {
+        ApiLogger.debug("AuthService.changeUserPassword", "Attempting to change password", changePasswordRequestDto.getEmail());
 
-       Optional<UserResponse> userOptional =  UserResponse.parse(userRepository.findByEmail(changePasswordRequestDto.getEmail()).get());
-        return userOptional
-                .map(user -> ApplicationResponse.success(user, "Password changed successfully"))
-                .orElse(ApplicationResponse.error(ApiCode.USER_NOT_FOUND.getCode(), ApiCode.USER_NOT_FOUND.getMessage(),HttpStatus.NOT_FOUND));
+        Optional<UserResponse> userOptional = UserResponse.parse(userRepository.findByEmail(changePasswordRequestDto.getEmail()).get());
+
+        if (userOptional.isPresent()) {
+            ApiLogger.info("AuthService.changeUserPassword", "Password changed successfully", changePasswordRequestDto.getEmail());
+        } else {
+            ApiLogger.error("AuthService.changeUserPassword", "User not found for password change", changePasswordRequestDto.getEmail());
+        }
+
+        return  ApplicationResponse.success(null, "Password changed successfully");
+
     }
 }
