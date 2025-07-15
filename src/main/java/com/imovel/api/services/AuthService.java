@@ -51,18 +51,18 @@ public class AuthService {
 
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             ApiLogger.error("AuthService.registerUser", "Email already exists", request.getEmail());
-            return ApplicationResponse.error(ApiCode.INVALID_EMAIL_ALREADY_EXIST.getCode(), ApiCode.INVALID_EMAIL_ALREADY_EXIST.getMessage(),HttpStatus.NOT_FOUND);
+            return ApplicationResponse.error(ApiCode.INVALID_EMAIL_ALREADY_EXIST.getCode(),
+                    ApiCode.INVALID_EMAIL_ALREADY_EXIST.getMessage(),
+                    HttpStatus.NOT_FOUND);
         }
 
-        Role role = new Role();
-        role.setRoleName(RoleReference.TENANT.name());
-        Optional<Role> roleOptional = roleRepository.findByRoleName(RoleReference.TENANT.name());
-        if(!roleOptional.isPresent()){
-            roleRepository.save(role);
-            ApiLogger.debug("AuthService.registerUser", "Created new role", RoleReference.TENANT.name());
-        }else{
-            role = roleOptional.get();
-        }
+        Role role = roleRepository.findByRoleName(RoleReference.TENANT.name())
+                .orElseGet(() -> {
+                    Role newRole = new Role();
+                    newRole.setRoleName(RoleReference.TENANT.name());
+                    return roleRepository.save(newRole);
+
+                });
 
         User newUser = new User();
         newUser.setName(request.getName());
@@ -70,13 +70,12 @@ public class AuthService {
         newUser.setPhone(request.getPhone());
         newUser.setRole(role);
 
-        User savedUser = userRepository.save(newUser);
-        UserResponse userResponse = UserResponse.parse(savedUser).get();
+        userRepository.save(newUser);
+        UserResponse userResponse = UserResponse.parse(newUser).get();
 
         ApiLogger.info("AuthService.registerUser", "User registered successfully");
-        return ApplicationResponse.success(null,"User registered successfully");
+        return ApplicationResponse.success(userResponse, "User registered successfully");
     }
-
     /**
      * Finds a user by email.
      *

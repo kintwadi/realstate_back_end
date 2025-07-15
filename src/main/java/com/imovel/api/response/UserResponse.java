@@ -1,13 +1,10 @@
 package com.imovel.api.response;
 
-import com.imovel.api.model.Role;
 import com.imovel.api.model.User;
-
-import java.time.LocalDateTime;
-import java.util.List;
+import java.io.Serializable;
 import java.util.Optional;
 
-public class UserResponse {
+public class UserResponse  implements Serializable {
     private Long id;
     private String name;
     private String email;
