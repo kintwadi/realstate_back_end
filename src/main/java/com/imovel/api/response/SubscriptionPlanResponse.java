@@ -1,6 +1,10 @@
 package com.imovel.api.response;
 
+import com.imovel.api.model.SubscriptionPlan;
+
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class SubscriptionPlanResponse {
     private Long id;
@@ -13,8 +17,25 @@ public class SubscriptionPlanResponse {
     private Boolean isFeatured;
     private String supportType;
 
-    public SubscriptionPlanResponse(){
-
+    // Static factory method to parse from SubscriptionPlan entity
+    public static SubscriptionPlanResponse parse(SubscriptionPlan subscriptionPlan) {
+        SubscriptionPlanResponse response = new SubscriptionPlanResponse();
+        response.setId(subscriptionPlan.getId());
+        response.setName(subscriptionPlan.getName());
+        response.setDescription(subscriptionPlan.getDescription());
+        response.setMonthlyPrice(subscriptionPlan.getMonthlyPrice());
+        response.setYearlyPrice(subscriptionPlan.getYearlyPrice());
+        response.setListingLimit(subscriptionPlan.getListingLimit());
+        response.setAvailabilityDays(subscriptionPlan.getAvailabilityDays());
+        response.setIsFeatured(subscriptionPlan.getFeatured());
+        response.setSupportType(subscriptionPlan.getSupportType());
+        return response;
+    }
+    // Static factory method to parse from List of SubscriptionPlan entities
+    public static List<SubscriptionPlanResponse> parse(List<SubscriptionPlan> subscriptionPlans) {
+        return subscriptionPlans.stream()
+                .map(SubscriptionPlanResponse::parse)
+                .collect(Collectors.toList());
     }
 
     // Getters and Setters
@@ -74,11 +95,11 @@ public class SubscriptionPlanResponse {
         this.availabilityDays = availabilityDays;
     }
 
-    public Boolean getFeatured() {
+    public Boolean getIsFeatured() {
         return isFeatured;
     }
 
-    public void setFeatured(Boolean featured) {
+    public void setIsFeatured(Boolean featured) {
         isFeatured = featured;
     }
 

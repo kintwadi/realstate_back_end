@@ -5,6 +5,9 @@ import com.imovel.api.model.SubscriptionPlan;
 import com.imovel.api.repository.SubscriptionPlanRepository;
 import com.imovel.api.repository.SubscriptionRepository;
 import com.imovel.api.response.ApplicationResponse;
+import com.imovel.api.logger.ApiLogger;
+import com.imovel.api.response.SubscriptionPlanResponse;
+import com.imovel.api.response.SubscriptionResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,26 +33,14 @@ public class SubscriptionService {
         this.paymentService = paymentService;
     }
 
-    // Get all available subscription plans
-    public ApplicationResponse<List<SubscriptionPlan>> getAllPlans() {
-        try {
-            List<SubscriptionPlan> plans = planRepository.findAllByOrderByIdAsc();
-            return ApplicationResponse.success(plans, "Subscription plans retrieved successfully");
-        } catch (Exception e) {
-            return ApplicationResponse.error(
-                    ApiCode.DATABASE_CONNECTION_ERROR.getCode(),
-                    "Failed to retrieve subscription plans: " + e.getMessage(),
-                    ApiCode.DATABASE_CONNECTION_ERROR.getHttpStatus()
-            );
-        }
-    }
-
     // Create new subscription
     @Transactional
-    public ApplicationResponse<Subscription> subscribeUser(Long userId, Long planId, String billingCycle) {
+    public ApplicationResponse<SubscriptionResponse> subscribeUser(Long userId, Long planId, String billingCycle) {
         try {
             // Validate billing cycle
             if (!billingCycle.equals("monthly") && !billingCycle.equals("yearly")) {
+                ApiLogger.error("SubscriptionService.subscribeUser",
+                        "Invalid billing cycle. Must be 'monthly' or 'yearly'");
                 return ApplicationResponse.error(
                         ApiCode.INVALID_SUBSCRIPTION_DATA.getCode(),
                         "Invalid billing cycle. Must be 'monthly' or 'yearly'",
@@ -62,11 +53,17 @@ public class SubscriptionService {
 
             // Process payment for new subscription
             BigDecimal amount = billingCycle.equals("monthly") ? plan.getMonthlyPrice() : plan.getYearlyPrice();
+            ApiLogger.debug("SubscriptionService.subscribeUser",
+                    "Processing payment for new subscription",
+                    "User: " + userId + ", Amount: " + amount);
+
             ApplicationResponse<Boolean> paymentResponse = paymentService.processPayment(
                     userId, amount, "New subscription - " + plan.getName()
             );
 
             if (!paymentResponse.isSuccess()) {
+                ApiLogger.error("SubscriptionService.subscribeUser",
+                        "Payment processing failed", paymentResponse.getError());
                 return ApplicationResponse.error(
                         paymentResponse.getError().getCode(),
                         paymentResponse.getError().getMessage(),
@@ -88,14 +85,20 @@ public class SubscriptionService {
             subscription.setStatus("active");
 
             Subscription savedSubscription = subscriptionRepository.save(subscription);
-            return ApplicationResponse.success(savedSubscription, "Subscription created successfully");
+            ApiLogger.info("SubscriptionService.subscribeUser",
+                    "Subscription created successfully", savedSubscription);
+            return ApplicationResponse.success(SubscriptionResponse.parse(savedSubscription), "Subscription created successfully");
         } catch (IllegalArgumentException e) {
+            ApiLogger.error("SubscriptionService.subscribeUser",
+                    "Invalid subscription plan", e);
             return ApplicationResponse.error(
                     ApiCode.INVALID_SUBSCRIPTION_PLAN.getCode(),
                     e.getMessage(),
                     ApiCode.INVALID_SUBSCRIPTION_PLAN.getHttpStatus()
             );
         } catch (Exception e) {
+            ApiLogger.error("SubscriptionService.subscribeUser",
+                    "Failed to create subscription", e);
             return ApplicationResponse.error(
                     ApiCode.SUBSCRIPTION_PAYMENT_FAILED.getCode(),
                     "Failed to create subscription: " + e.getMessage(),
@@ -105,14 +108,20 @@ public class SubscriptionService {
     }
 
     // Get user's active subscriptions
-    public ApplicationResponse<List<Subscription>> getUserSubscriptions(Long userId) {
+    public ApplicationResponse<List<SubscriptionResponse>> getUserSubscriptions(Long userId) {
         try {
             List<Subscription> subscriptions = subscriptionRepository.findByUserId(userId);
             if (subscriptions.isEmpty()) {
-                return ApplicationResponse.success(subscriptions, "No subscriptions found for this user");
+                ApiLogger.debug("SubscriptionService.getUserSubscriptions",
+                        "No subscriptions found for user", userId);
+                return ApplicationResponse.success(SubscriptionResponse.parse(subscriptions), "No subscriptions found for this user");
             }
-            return ApplicationResponse.success(subscriptions, "User subscriptions retrieved successfully");
+            ApiLogger.info("SubscriptionService.getUserSubscriptions",
+                    "User subscriptions retrieved", subscriptions.size());
+            return ApplicationResponse.success(SubscriptionResponse.parse(subscriptions), "User subscriptions retrieved successfully");
         } catch (Exception e) {
+            ApiLogger.error("SubscriptionService.getUserSubscriptions",
+                    "Failed to retrieve user subscriptions", e);
             return ApplicationResponse.error(
                     ApiCode.DATABASE_CONNECTION_ERROR.getCode(),
                     "Failed to retrieve user subscriptions: " + e.getMessage(),
@@ -123,12 +132,14 @@ public class SubscriptionService {
 
     // Cancel subscription
     @Transactional
-    public ApplicationResponse<Subscription> cancelSubscription(Long subscriptionId) {
+    public ApplicationResponse<SubscriptionResponse> cancelSubscription(Long subscriptionId) {
         try {
             Subscription subscription = subscriptionRepository.findById(subscriptionId)
                     .orElseThrow(() -> new IllegalArgumentException("Invalid subscription ID"));
 
             if (subscription.getStatus().equals("canceled")) {
+                ApiLogger.debug("SubscriptionService.cancelSubscription",
+                        "Subscription is already canceled", subscriptionId);
                 return ApplicationResponse.error(
                         ApiCode.INVALID_SUBSCRIPTION_DATA.getCode(),
                         "Subscription is already canceled",
@@ -139,6 +150,10 @@ public class SubscriptionService {
             // Calculate refund for unused period (if applicable)
             BigDecimal refundAmount = calculateRefundAmount(subscription);
             if (refundAmount.compareTo(BigDecimal.ZERO) > 0) {
+                ApiLogger.debug("SubscriptionService.cancelSubscription",
+                        "Processing refund for subscription cancellation",
+                        "Amount: " + refundAmount);
+
                 ApplicationResponse<Boolean> refundResponse = paymentService.processRefund(
                         subscription.getUserId(),
                         refundAmount,
@@ -146,6 +161,8 @@ public class SubscriptionService {
                 );
 
                 if (!refundResponse.isSuccess()) {
+                    ApiLogger.error("SubscriptionService.cancelSubscription",
+                            "Refund processing failed", refundResponse.getError());
                     return ApplicationResponse.error(
                             refundResponse.getError().getCode(),
                             "Subscription canceled but refund failed: " + refundResponse.getError().getMessage(),
@@ -161,14 +178,20 @@ public class SubscriptionService {
                     "Subscription canceled successfully. Refund of " + refundAmount + " processed." :
                     "Subscription canceled successfully. No refund applicable.";
 
-            return ApplicationResponse.success(updatedSubscription, message);
+            ApiLogger.info("SubscriptionService.cancelSubscription",
+                    message, updatedSubscription);
+            return ApplicationResponse.success(SubscriptionResponse.parse(updatedSubscription), message);
         } catch (IllegalArgumentException e) {
+            ApiLogger.error("SubscriptionService.cancelSubscription",
+                    "Invalid subscription ID", e);
             return ApplicationResponse.error(
                     ApiCode.SUBSCRIPTION_NOT_FOUND.getCode(),
                     e.getMessage(),
                     ApiCode.SUBSCRIPTION_NOT_FOUND.getHttpStatus()
             );
         } catch (Exception e) {
+            ApiLogger.error("SubscriptionService.cancelSubscription",
+                    "Failed to cancel subscription", e);
             return ApplicationResponse.error(
                     ApiCode.SYSTEM_ERROR.getCode(),
                     "Failed to cancel subscription: " + e.getMessage(),
@@ -179,7 +202,7 @@ public class SubscriptionService {
 
     // Change subscription plan (upgrade/downgrade)
     @Transactional
-    public ApplicationResponse<Subscription> changePlan(Long subscriptionId, Long newPlanId, boolean immediate) {
+    public ApplicationResponse<SubscriptionResponse> changePlan(Long subscriptionId, Long newPlanId, boolean immediate) {
         try {
             // Get current subscription
             Subscription currentSub = subscriptionRepository.findById(subscriptionId)
@@ -191,6 +214,9 @@ public class SubscriptionService {
 
             // Check if changing to same plan
             if (currentSub.getPlan().getId().equals(newPlanId)) {
+                ApiLogger.debug("SubscriptionService.changePlan",
+                        "Attempt to change to the same plan",
+                        "Subscription: " + subscriptionId + ", Plan: " + newPlanId);
                 return ApplicationResponse.error(
                         ApiCode.INVALID_SUBSCRIPTION_DATA.getCode(),
                         "Cannot change to the same plan",
@@ -203,6 +229,10 @@ public class SubscriptionService {
 
             // Process payment if needed
             if (proration.getAmountDue().compareTo(BigDecimal.ZERO) > 0) {
+                ApiLogger.debug("SubscriptionService.changePlan",
+                        "Processing payment for plan change",
+                        "Amount: " + proration.getAmountDue());
+
                 ApplicationResponse<Boolean> paymentResponse = paymentService.processPayment(
                         currentSub.getUserId(),
                         proration.getAmountDue(),
@@ -210,6 +240,8 @@ public class SubscriptionService {
                 );
 
                 if (!paymentResponse.isSuccess()) {
+                    ApiLogger.error("SubscriptionService.changePlan",
+                            "Payment processing failed", paymentResponse.getError());
                     return ApplicationResponse.error(
                             paymentResponse.getError().getCode(),
                             paymentResponse.getError().getMessage(),
@@ -229,20 +261,26 @@ public class SubscriptionService {
 
             Subscription updatedSub = subscriptionRepository.save(currentSub);
 
-            return ApplicationResponse.success(updatedSub,
-                    "Subscription plan changed successfully. " +
-                            (proration.getAmountDue().compareTo(BigDecimal.ZERO) > 0 ?
-                                    "Prorated amount charged: " + proration.getAmountDue() :
-                                    "Credit applied: " + proration.getAmountDue().abs())
-            );
+            String resultMessage = "Subscription plan changed successfully. " +
+                    (proration.getAmountDue().compareTo(BigDecimal.ZERO) > 0 ?
+                            "Prorated amount charged: " + proration.getAmountDue() :
+                            "Credit applied: " + proration.getAmountDue().abs());
+
+            ApiLogger.info("SubscriptionService.changePlan",
+                    resultMessage, updatedSub);
+            return ApplicationResponse.success(SubscriptionResponse.parse(updatedSub), resultMessage);
 
         } catch (IllegalArgumentException e) {
+            ApiLogger.error("SubscriptionService.changePlan",
+                    "Subscription or plan not found", e);
             return ApplicationResponse.error(
                     ApiCode.SUBSCRIPTION_NOT_FOUND.getCode(),
                     e.getMessage(),
                     ApiCode.SUBSCRIPTION_NOT_FOUND.getHttpStatus()
             );
         } catch (Exception e) {
+            ApiLogger.error("SubscriptionService.changePlan",
+                    "Failed to change subscription plan", e);
             return ApplicationResponse.error(
                     ApiCode.SYSTEM_ERROR.getCode(),
                     "Failed to change subscription plan: " + e.getMessage(),
@@ -266,17 +304,23 @@ public class SubscriptionService {
                     "Upgrade requires payment of " + proration.getAmountDue() :
                     "Downgrade will credit " + proration.getAmountDue().abs();
 
+            ApiLogger.debug("SubscriptionService.calculatePlanChange",
+                    "Calculated proration amount", message);
             return ApplicationResponse.success(
                     proration.getAmountDue().setScale(2, RoundingMode.HALF_UP),
                     message
             );
         } catch (IllegalArgumentException e) {
+            ApiLogger.error("SubscriptionService.calculatePlanChange",
+                    "Subscription or plan not found", e);
             return ApplicationResponse.error(
                     ApiCode.SUBSCRIPTION_NOT_FOUND.getCode(),
                     e.getMessage(),
                     ApiCode.SUBSCRIPTION_NOT_FOUND.getHttpStatus()
             );
         } catch (Exception e) {
+            ApiLogger.error("SubscriptionService.calculatePlanChange",
+                    "Failed to calculate prorated amount", e);
             return ApplicationResponse.error(
                     ApiCode.SYSTEM_ERROR.getCode(),
                     "Failed to calculate prorated amount: " + e.getMessage(),
