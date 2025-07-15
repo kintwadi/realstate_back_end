@@ -17,6 +17,7 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class SubscriptionService {
@@ -48,6 +49,17 @@ public class SubscriptionService {
                 );
             }
 
+            Optional<Subscription> subscriptionOptional = subscriptionRepository.findByUserIdAndPlanId(userId, planId);
+
+            if(subscriptionOptional.isPresent()){
+                ApiLogger.error("SubscriptionService.subscribeUser",
+                        "subscription already exist for this user and plan");
+                return ApplicationResponse.error(
+                        ApiCode.SUBSCRIPTION_ALREADY_EXISTS.getCode(),
+                        "subscription already exist for this user and plan",
+                        ApiCode.SUBSCRIPTION_ALREADY_EXISTS.getHttpStatus()
+                );
+            }
             SubscriptionPlan plan = planRepository.findById(planId)
                     .orElseThrow(() -> new IllegalArgumentException("Invalid plan ID"));
 
