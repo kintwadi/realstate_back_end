@@ -10,15 +10,19 @@ import java.time.Instant;
  * 
  * @param <T> Type of the data payload
  */
-public class StandardResponse<T> {
+public class ApplicationResponse<T> {
     private boolean success;
     private T data;
     private String message;
     private ErrorCode error;
     private Instant timestamp;
 
+    public ApplicationResponse(){
+        
+    }
+
     // Private constructor to enforce use of factory methods
-    public StandardResponse(boolean success, T data, String message, ErrorCode error) {
+    public ApplicationResponse(boolean success, T data, String message, ErrorCode error) {
         this.success = success;
         this.data = data;
         this.message = message;
@@ -33,8 +37,8 @@ public class StandardResponse<T> {
      * @param data The successful response data
      * @return StandardResponse with success status and data
      */
-    public static <T> StandardResponse<T> success(T data) {
-        return new StandardResponse<>(true, data, null, null);
+    public static <T> ApplicationResponse<T> success(T data) {
+        return new ApplicationResponse<>(true, data, null, null);
     }
 
     /**
@@ -44,8 +48,8 @@ public class StandardResponse<T> {
      * @param message Descriptive success message
      * @return StandardResponse with success status, data, and message
      */
-    public static <T> StandardResponse<T> success(T data, String message) {
-        return new StandardResponse<>(true, data, message, null);
+    public static <T> ApplicationResponse<T> success(T data, String message) {
+        return new ApplicationResponse<>(true, data, message, null);
     }
 
     /**
@@ -54,10 +58,9 @@ public class StandardResponse<T> {
      * @param message Descriptive success message
      * @return StandardResponse with success status and message
      */
-    public static <T> StandardResponse<T> success(String message) {
-        return new StandardResponse<>(true, null, message, null);
+    public static <T> ApplicationResponse<T> success(String message) {
+        return new ApplicationResponse<>(true, null, message, null);
     }
-
     /**
      * Creates an error response with error code and message
      * 
@@ -65,9 +68,9 @@ public class StandardResponse<T> {
      * @param message Error message
      * @return StandardResponse with error details
      */
-    public static <T> StandardResponse<T> error(long code, String message, HttpStatus status)
+    public static <T> ApplicationResponse<T> error(long code, String message, HttpStatus status)
     {
-        return new StandardResponse<>(false, null, null, new ErrorCode(code, message,status));
+        return new ApplicationResponse<>(false, null, null, new ErrorCode(code, message,status));
     }
 
     /**
@@ -76,8 +79,8 @@ public class StandardResponse<T> {
      * @param error ErrorResponse containing code and message
      * @return StandardResponse with error details
      */
-    public static <T> StandardResponse<T> error(ErrorCode error) {
-        return new StandardResponse<>(false, null, null, error);
+    public static <T> ApplicationResponse<T> error(ErrorCode error) {
+        return new ApplicationResponse<>(false, null, null, error);
     }
 
     // Getters

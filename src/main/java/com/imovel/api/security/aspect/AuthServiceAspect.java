@@ -1,13 +1,12 @@
 package com.imovel.api.security.aspect;
 
 import com.imovel.api.error.ApiCode;
-import com.imovel.api.exception.AuthenticationException;
-import com.imovel.api.exception.ResourceNotFoundException;
 import com.imovel.api.model.AuthDetails;
 import com.imovel.api.model.User;
 import com.imovel.api.request.PasswordChangeRequest;
 import com.imovel.api.request.UserRegistrationRequest;
-import com.imovel.api.response.StandardResponse;
+import com.imovel.api.response.ApplicationResponse;
+import com.imovel.api.response.UserResponse;
 import com.imovel.api.security.PasswordManager;
 import com.imovel.api.services.AuthDetailsService;
 import com.imovel.api.services.AuthService;
@@ -83,7 +82,7 @@ public class AuthServiceAspect {
             return AspectErrorResponse.createErrorResponse(ApiCode.INVALID_EMAIL.getMessage(), ApiCode.INVALID_EMAIL.getCode(), HttpStatus.BAD_REQUEST);
         }
 
-        StandardResponse<User> response = (StandardResponse<User>) joinPoint.proceed();
+        ApplicationResponse<UserResponse> response = (ApplicationResponse<UserResponse>) joinPoint.proceed();
 
         if (!response.isSuccess() || response.getData() == null) {
             return response;
@@ -176,7 +175,7 @@ public class AuthServiceAspect {
      * @return true if the password is valid, false otherwise
      */
     private boolean verifyUserPassword(Long userId, String password) {
-        StandardResponse<AuthDetails> authDetailsResponse = authDetailsService.findByUserId(userId);
+        ApplicationResponse<AuthDetails> authDetailsResponse = authDetailsService.findByUserId(userId);
         if (!authDetailsResponse.isSuccess()) {
             return false;
         }

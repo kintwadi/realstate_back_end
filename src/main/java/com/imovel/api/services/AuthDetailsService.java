@@ -1,9 +1,10 @@
 package com.imovel.api.services;
 
 import com.imovel.api.exception.ResourceNotFoundException;
+import com.imovel.api.logger.ApiLogger;
 import com.imovel.api.model.AuthDetails;
 import com.imovel.api.repository.AuthDetailRepository;
-import com.imovel.api.response.StandardResponse;
+import com.imovel.api.response.ApplicationResponse;
 import com.imovel.api.security.PasswordManager;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,7 @@ public class AuthDetailsService {
 
     private final AuthDetailRepository authDetailRepository;
     private final PasswordManager passwordManager;
+    private static final String SERVICE_NAME = "AuthDetailsService";
 
     /**
      * Constructs an AuthDetailsService with required dependencies.
@@ -27,6 +29,7 @@ public class AuthDetailsService {
                               final PasswordManager passwordManager) {
         this.authDetailRepository = authDetailRepository;
         this.passwordManager = passwordManager;
+        ApiLogger.info(SERVICE_NAME, "Service initialized");
     }
 
     /**
@@ -35,9 +38,11 @@ public class AuthDetailsService {
      * @param authDetails The authentication details to be saved
      * @return StandardResponse containing the saved AuthDetails
      */
-    public StandardResponse<AuthDetails> save(final AuthDetails authDetails) {
+    public ApplicationResponse<AuthDetails> save(final AuthDetails authDetails) {
+        ApiLogger.debug(SERVICE_NAME, "Saving auth details for user: " + authDetails.getUserId());
         AuthDetails savedDetails = authDetailRepository.save(authDetails);
-        return StandardResponse.success(savedDetails);
+        ApiLogger.info(SERVICE_NAME, "Auth details saved successfully for user: " + authDetails.getUserId());
+        return ApplicationResponse.success(savedDetails);
     }
 
     /**
@@ -47,10 +52,14 @@ public class AuthDetailsService {
      * @return StandardResponse containing AuthDetails if found
      * @throws ResourceNotFoundException if no auth details found for user
      */
-    public StandardResponse<AuthDetails> findByUserId(final long id) {
+    public ApplicationResponse<AuthDetails> findByUserId(final long id) {
+        ApiLogger.debug(SERVICE_NAME, "Finding auth details by user ID: " + id);
         return authDetailRepository.findByUserId(id)
-                .map(StandardResponse::success)
-                .orElseThrow(() -> new ResourceNotFoundException("AuthDetails", id));
+                .map(ApplicationResponse::success)
+                .orElseThrow(() -> {
+                    ApiLogger.error(SERVICE_NAME, "AuthDetails not found for user ID: " + id);
+                    return new ResourceNotFoundException("AuthDetails", id);
+                });
     }
 
     /**
@@ -61,12 +70,17 @@ public class AuthDetailsService {
      * @return StandardResponse with verification result
      * @throws ResourceNotFoundException if no user exists with the given ID
      */
-    public StandardResponse<Boolean> verifyUserCredentials(final long userId, final String password) {
+    public ApplicationResponse<Boolean> verifyUserCredentials(final long userId, final String password) {
+        ApiLogger.debug(SERVICE_NAME, "Verifying credentials for user ID: " + userId);
         AuthDetails authDetails = authDetailRepository.findByUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("AuthDetails", userId));
+                .orElseThrow(() -> {
+                    ApiLogger.error(SERVICE_NAME, "AuthDetails not found for user ID: " + userId);
+                    return new ResourceNotFoundException("AuthDetails", userId);
+                });
 
         boolean isValid = isPasswordValid(authDetails, password);
-        return StandardResponse.success(isValid);
+        ApiLogger.info(SERVICE_NAME, "Verification result for user ID: " + userId + " - " + isValid);
+        return ApplicationResponse.success(isValid);
     }
 
     /**
@@ -77,9 +91,12 @@ public class AuthDetailsService {
      * @return true if password matches, false otherwise
      */
     private boolean isPasswordValid(final AuthDetails authDetails, final String password) {
-        return passwordManager.verifyPassword(
+        ApiLogger.debug(SERVICE_NAME, "Validating password for user ID: " + authDetails.getUserId());
+        boolean isValid = passwordManager.verifyPassword(
                 password,
                 authDetails.getHash(),
                 authDetails.getSalt());
+        ApiLogger.debug(SERVICE_NAME, "Password validation result for user ID: " + authDetails.getUserId() + " - " + isValid);
+        return isValid;
     }
 }

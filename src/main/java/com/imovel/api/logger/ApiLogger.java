@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -37,6 +38,8 @@ public final class ApiLogger {
     private static Map<String, String> getContext() {
         Map<String, String> globalSnapshot = globalHeaders;
         globalSnapshot.forEach(MDC::put);
+        if(MDC.getCopyOfContextMap() == null )
+            return Map.of();
         return MDC.getCopyOfContextMap();
     }
 
@@ -52,6 +55,7 @@ public final class ApiLogger {
 
     public static void debug(String location, String message) {
         try {
+
             getContext().forEach(MDC::put);
             logger.debug(SIMPLE_FORMAT, location, message);
         } finally {
@@ -61,6 +65,7 @@ public final class ApiLogger {
 
     public static void debug(String message, Object response) {
         try {
+
             getContext().forEach(MDC::put);
             logger.debug(SIMPLE_FORMAT, message, response);
         } finally {

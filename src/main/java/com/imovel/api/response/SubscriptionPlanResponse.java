@@ -2,7 +2,7 @@ package com.imovel.api.response;
 
 import java.math.BigDecimal;
 
-public class SubscriptionPlanDTO {
+public class SubscriptionPlanResponse {
     private Long id;
     private String name;
     private String description;
@@ -12,6 +12,10 @@ public class SubscriptionPlanDTO {
     private Integer availabilityDays;
     private Boolean isFeatured;
     private String supportType;
+
+    public SubscriptionPlanResponse(){
+
+    }
 
     // Getters and Setters
     public Long getId() {

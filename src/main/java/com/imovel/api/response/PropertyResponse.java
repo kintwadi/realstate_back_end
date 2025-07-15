@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
-public class PropertyResponseDto {
+public class PropertyResponse {
     private Long id;
     private String mainTitle;
     private PropertyType type;
@@ -43,7 +43,7 @@ public class PropertyResponseDto {
     private LocalDateTime updatedAt;
 
     // Constructors, Getters, and Setters for all fields
-    public PropertyResponseDto() {}
+    public PropertyResponse() {}
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
