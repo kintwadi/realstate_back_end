@@ -54,10 +54,10 @@ public class AuthServiceAspect {
         // Pointcut method - implementation will be provided by AspectJ
     }
 
-    @Pointcut("execution(* com.imovel.api.services.AuthService.registerUser(..))")
-    public static void registerUser() {
-        // Pointcut method - implementation will be provided by AspectJ
-    }
+//    @Pointcut("execution(* com.imovel.api.services.AuthService.registerUser(..))")
+//    public static void registerUser() {
+//        // Pointcut method - implementation will be provided by AspectJ
+//    }
 
     @Pointcut("execution(* com.imovel.api.services.AuthService.changeUserPassword(..))")
     public static void changeUserPassword() {
@@ -72,29 +72,18 @@ public class AuthServiceAspect {
      * @return StandardResponse containing the registered user if successful
      * @throws Throwable if an error occurs during processing
      */
-    @Around("registerUser()")
-    public Object registerUser(final ProceedingJoinPoint joinPoint) throws Throwable {
-        UserRegistrationRequest request = (UserRegistrationRequest) joinPoint.getArgs()[0];
-
-        // Validate email format
-        if (Util.isEmailInvalid(request.getEmail())) {
-
-            return AspectErrorResponse.createErrorResponse(ApiCode.INVALID_EMAIL.getMessage(), ApiCode.INVALID_EMAIL.getCode(), HttpStatus.BAD_REQUEST);
-        }
-
-        ApplicationResponse<UserResponse> response = (ApplicationResponse<UserResponse>) joinPoint.proceed();
-
-        if (!response.isSuccess() || response.getData() == null) {
-            return response;
-        }
-
-        // Create and save authentication details for the new user
-        AuthDetails authDetails = passwordManager.createAuthDetails(request.getPassword());
-        authDetails.setUserId(response.getData().getId());
-        authDetailsService.save(authDetails);
-
-        return response;
-    }
+//    @Around("registerUser()")
+//    public Object registerUser(final ProceedingJoinPoint joinPoint) throws Throwable {
+//        UserRegistrationRequest request = (UserRegistrationRequest) joinPoint.getArgs()[0];
+//
+//        // Validate email format
+//        if (Util.isEmailInvalid(request.getEmail())) {
+//
+//            return AspectErrorResponse.createErrorResponse(ApiCode.INVALID_EMAIL.getMessage(), ApiCode.INVALID_EMAIL.getCode(), HttpStatus.BAD_REQUEST);
+//        }
+//
+//        return joinPoint.proceed();
+//    }
 
     /**
      * Around advice for user login process.
@@ -182,5 +171,6 @@ public class AuthServiceAspect {
         AuthDetails authDetails = authDetailsResponse.getData();
         return passwordManager.verifyPassword(password, authDetails.getHash(), authDetails.getSalt());
     }
+
 
 }
