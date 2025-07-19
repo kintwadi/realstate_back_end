@@ -1,13 +1,12 @@
 package com.imovel.api.security.aspect;
 
 import com.imovel.api.error.ApiCode;
-import com.imovel.api.exception.AuthenticationException;
-import com.imovel.api.exception.ResourceNotFoundException;
 import com.imovel.api.model.AuthDetails;
 import com.imovel.api.model.User;
 import com.imovel.api.request.PasswordChangeRequest;
 import com.imovel.api.request.UserRegistrationRequest;
-import com.imovel.api.response.StandardResponse;
+import com.imovel.api.response.ApplicationResponse;
+import com.imovel.api.response.UserResponse;
 import com.imovel.api.security.PasswordManager;
 import com.imovel.api.services.AuthDetailsService;
 import com.imovel.api.services.AuthService;
@@ -17,7 +16,6 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
@@ -81,10 +79,10 @@ public class AuthServiceAspect {
         // Validate email format
         if (Util.isEmailInvalid(request.getEmail())) {
 
-            return StandardResponse.error(ApiCode.INVALID_EMAIL.getCode(), ApiCode.INVALID_EMAIL.getMessage(), HttpStatus.BAD_REQUEST);
+            return AspectErrorResponse.createErrorResponse(ApiCode.INVALID_EMAIL.getMessage(), ApiCode.INVALID_EMAIL.getCode(), HttpStatus.BAD_REQUEST);
         }
 
-        StandardResponse<User> response = (StandardResponse<User>) joinPoint.proceed();
+        ApplicationResponse<UserResponse> response = (ApplicationResponse<UserResponse>) joinPoint.proceed();
 
         if (!response.isSuccess() || response.getData() == null) {
             return response;
@@ -115,7 +113,9 @@ public class AuthServiceAspect {
         Optional<User> optionalUser = authService.findByEmail(email);
 
         if (!optionalUser.isPresent() || !verifyUserPassword(optionalUser.get().getId(), password)) {
-            throw new AuthenticationException(ApiCode.INVALID_CREDENTIALS.getCode(), ApiCode.INVALID_CREDENTIALS.getMessage());
+
+            return AspectErrorResponse.createErrorResponse(ApiCode.INVALID_CREDENTIALS.getMessage(), ApiCode.PASSWORD_RESET_FAILED.getCode(), HttpStatus.BAD_REQUEST);
+
         }
 
         return joinPoint.proceed();
@@ -135,11 +135,13 @@ public class AuthServiceAspect {
         final Optional<User> optionalUser = authService.findByEmail(passwordChangeRequest.getEmail());
 
         if (!optionalUser.isPresent()) {
-            return StandardResponse.error(ApiCode.PASSWORD_RESET_FAILED.getCode(), ApiCode.PASSWORD_RESET_FAILED.getMessage(), HttpStatus.BAD_REQUEST);
+            return AspectErrorResponse.createErrorResponse(ApiCode.PASSWORD_RESET_FAILED.getMessage(), ApiCode.PASSWORD_RESET_FAILED.getCode(), HttpStatus.BAD_REQUEST);
+
         }
 
         if (!isPasswordValid(optionalUser.get().getId(), passwordChangeRequest.getOldPassword())) {
-            return StandardResponse.error(ApiCode.PASSWORD_RESET_FAILED.getCode(), ApiCode.PASSWORD_RESET_FAILED.getMessage(),HttpStatus.BAD_REQUEST);
+            return AspectErrorResponse.createErrorResponse(ApiCode.PASSWORD_RESET_FAILED.getMessage(), ApiCode.PASSWORD_RESET_FAILED.getCode(), HttpStatus.BAD_REQUEST);
+
         }
 
         // Update authentication details
@@ -173,12 +175,12 @@ public class AuthServiceAspect {
      * @return true if the password is valid, false otherwise
      */
     private boolean verifyUserPassword(Long userId, String password) {
-        StandardResponse<AuthDetails> authDetailsResponse = authDetailsService.findByUserId(userId);
+        ApplicationResponse<AuthDetails> authDetailsResponse = authDetailsService.findByUserId(userId);
         if (!authDetailsResponse.isSuccess()) {
             return false;
         }
-
         AuthDetails authDetails = authDetailsResponse.getData();
         return passwordManager.verifyPassword(password, authDetails.getHash(), authDetails.getSalt());
     }
+
 }

@@ -1,42 +1,46 @@
 package com.imovel.api.model;
 
 import jakarta.persistence.*;
-
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
+@Table(name = "permissions")
 public class Permissions {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "permission_id")
-    private Long permissionId;
+    private Long id;
 
-    @Column(name = "permission_name", unique = true, nullable = false)
+    @Column(name = "permission_name", unique = true, nullable = false, length = 100)
     private String permissionName;
 
-    @Column(name = "description")
+    @Column(name = "description", length = 255)
     private String description;
 
-    @ManyToMany(mappedBy = "permissions")
-    private List<Role> roles = new ArrayList<>();
+    @OneToMany(mappedBy = "permission", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<RolePermission> rolePermissions = new HashSet<>();
 
     public Permissions() {
+        // Default constructor required by JPA
     }
 
     public Permissions(String permissionName, String description) {
+        if (permissionName == null || permissionName.isBlank()) {
+            throw new IllegalArgumentException("Permission name cannot be null or blank");
+        }
         this.permissionName = permissionName;
         this.description = description;
     }
 
-    public Long getPermissionId() {
-        return permissionId;
+    // Getters and Setters
+    public Long getId() {
+        return id;
     }
 
-    public void setPermissionId(Long permissionId) {
-        this.permissionId = permissionId;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getPermissionName() {
@@ -44,6 +48,9 @@ public class Permissions {
     }
 
     public void setPermissionName(String permissionName) {
+        if (permissionName == null || permissionName.isBlank()) {
+            throw new IllegalArgumentException("Permission name cannot be null or blank");
+        }
         this.permissionName = permissionName;
     }
 
@@ -55,11 +62,35 @@ public class Permissions {
         this.description = description;
     }
 
-    public List<Role> getRoles() {
-        return roles;
+    public Set<RolePermission> getRolePermissions() {
+        return Collections.unmodifiableSet(rolePermissions);
     }
 
-    public void setRoles(List<Role> roles) {
-        this.roles = roles;
+    public void addRolePermission(RolePermission rolePermission) {
+        if (rolePermission != null) {
+            rolePermissions.add(rolePermission);
+            rolePermission.setPermission(this);
+        }
     }
+
+    public void removeRolePermission(RolePermission rolePermission) {
+        if (rolePermission != null) {
+            rolePermissions.remove(rolePermission);
+            rolePermission.setPermission(null);
+        }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Permissions)) return false;
+        Permissions that = (Permissions) o;
+        return permissionName.equals(that.permissionName);
+    }
+
+    @Override
+    public int hashCode() {
+        return permissionName.hashCode();
+    }
+
 }

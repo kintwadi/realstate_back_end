@@ -6,9 +6,9 @@ import com.imovel.api.repository.SubscriptionPlanRepository;
 import java.math.BigDecimal;
 
 
-public class SubscriptionInitializer {
+public class SubscriptionPlanInitializer {
 
-    public static void init(SubscriptionPlanRepository repository) {
+    public static void initializeDefaultSubscriptionPlan(SubscriptionPlanRepository repository) {
 
         if(!repository.findAllByOrderByIdAsc().isEmpty())return;
         // Free Plan

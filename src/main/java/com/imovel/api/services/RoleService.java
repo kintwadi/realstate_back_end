@@ -1,209 +1,197 @@
 package com.imovel.api.services;
 
 import com.imovel.api.error.ApiCode;
-import com.imovel.api.error.ErrorCode;
 import com.imovel.api.model.Role;
 import com.imovel.api.model.User;
 import com.imovel.api.model.enums.RoleReference;
 import com.imovel.api.repository.RoleRepository;
 import com.imovel.api.repository.UserRepository;
-import com.imovel.api.response.StandardResponse;
+import com.imovel.api.response.ApplicationResponse;
+import com.imovel.api.response.RoleResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.imovel.api.logger.ApiLogger;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
 public class RoleService {
-
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
 
     @Autowired
-    public RoleService(RoleRepository roleRepository,UserRepository userRepository) {
+    public RoleService(RoleRepository roleRepository, UserRepository userRepository) {
         this.roleRepository = roleRepository;
         this.userRepository = userRepository;
     }
 
-    /**
-     * Creates a new role
-     * 
-     * @param role The role to create
-     * @return StandardResponse containing the created role
-     */
     @Transactional
-    public StandardResponse<Role> createRole(Role role) {
+    public ApplicationResponse<Role> createRole(Role role) {
         try {
-            // Check if role with same name already exists
+            ApiLogger.debug("RoleService.createRole", "Attempting to create role", role.getRoleName());
             if (roleRepository.findByRoleName(role.getRoleName()).isPresent()) {
-                return StandardResponse.error(ApiCode.ROLE_ALREADY_EXISTS.getCode(),
+                ApiLogger.error("RoleService.createRole", "Role already exists", role.getRoleName());
+                return ApplicationResponse.error(ApiCode.ROLE_ALREADY_EXISTS.getCode(),
                         ApiCode.ROLE_ALREADY_EXISTS.getMessage(),
                         ApiCode.ROLE_ALREADY_EXISTS.getHttpStatus());
             }
 
             Role savedRole = roleRepository.save(role);
-            return StandardResponse.success(savedRole, "Role created successfully");
+            ApiLogger.info("RoleService.createRole", "Role created successfully", savedRole);
+            return ApplicationResponse.success(savedRole, "Role created successfully");
         } catch (DataIntegrityViolationException e) {
-            return StandardResponse.error(ApiCode.INVALID_ROLE_DATA.getCode(),
+            ApiLogger.error("RoleService.createRole", "Invalid role data", e, role);
+            return ApplicationResponse.error(ApiCode.INVALID_ROLE_DATA.getCode(),
                     "Invalid role data: " + e.getMessage(),
                     ApiCode.INVALID_ROLE_DATA.getHttpStatus());
         } catch (Exception e) {
-            return StandardResponse.error(ApiCode.ROLE_CREATION_FAILED.getCode(),
+            ApiLogger.error("RoleService.createRole", "Failed to create role", e, role);
+            return ApplicationResponse.error(ApiCode.ROLE_CREATION_FAILED.getCode(),
                     "Failed to create role: " + e.getMessage(),
                     ApiCode.ROLE_CREATION_FAILED.getHttpStatus());
         }
     }
 
-    /**
-     * Retrieves a role by ID
-     * 
-     * @param id The ID of the role to retrieve
-     * @return StandardResponse containing the found role or error if not found
-     */
-    public StandardResponse<Role> getRoleById(Long id) {
+    public ApplicationResponse<Role> getRoleById(Long id) {
         try {
+            ApiLogger.debug("RoleService.getRoleById", "Attempting to get role by ID", id);
             Optional<Role> role = roleRepository.findById(id);
-            return role.map(value -> StandardResponse.success(value, "Role retrieved successfully"))
-                    .orElseGet(() -> StandardResponse.error(ApiCode.ROLE_NOT_FOUND.getCode(),
-                            ApiCode.ROLE_NOT_FOUND.getMessage(),
-                            ApiCode.ROLE_NOT_FOUND.getHttpStatus()));
+            if (role.isPresent()) {
+                ApiLogger.info("RoleService.getRoleById", "Role retrieved successfully", role.get());
+                return ApplicationResponse.success(role.get(), "Role retrieved successfully");
+            } else {
+                ApiLogger.error("RoleService.getRoleById", "Role not found", id);
+                return ApplicationResponse.error(ApiCode.ROLE_NOT_FOUND.getCode(),
+                        ApiCode.ROLE_NOT_FOUND.getMessage(),
+                        ApiCode.ROLE_NOT_FOUND.getHttpStatus());
+            }
         } catch (Exception e) {
-            return StandardResponse.error(ApiCode.SYSTEM_ERROR.getCode(),
+            ApiLogger.error("RoleService.getRoleById", "Failed to retrieve role", e, id);
+            return ApplicationResponse.error(ApiCode.SYSTEM_ERROR.getCode(),
                     "Failed to retrieve role: " + e.getMessage(),
                     ApiCode.SYSTEM_ERROR.getHttpStatus());
         }
     }
 
-    /**
-     * Retrieves a role by name
-     * 
-     * @param roleName The name of the role to retrieve
-     * @return StandardResponse containing the found role or error if not found
-     */
-    public StandardResponse<Role> getRoleByName(String roleName) {
+    public ApplicationResponse<Role> getRoleByName(String roleName) {
         try {
+            ApiLogger.debug("RoleService.getRoleByName", "Attempting to get role by name", roleName);
             Optional<Role> role = roleRepository.findByRoleName(roleName);
-            return role.map(value -> StandardResponse.success(value, "Role retrieved successfully"))
-                    .orElseGet(() -> StandardResponse.error(ApiCode.ROLE_NOT_FOUND.getCode(),
-                            ApiCode.ROLE_NOT_FOUND.getMessage(),
-                            ApiCode.ROLE_NOT_FOUND.getHttpStatus()));
+            if (role.isPresent()) {
+                ApiLogger.info("RoleService.getRoleByName", "Role retrieved successfully", role.get());
+                return ApplicationResponse.success(role.get(), "Role retrieved successfully");
+            } else {
+                ApiLogger.error("RoleService.getRoleByName", "Role not found", roleName);
+                return ApplicationResponse.error(ApiCode.ROLE_NOT_FOUND.getCode(),
+                        ApiCode.ROLE_NOT_FOUND.getMessage(),
+                        ApiCode.ROLE_NOT_FOUND.getHttpStatus());
+            }
         } catch (Exception e) {
-            return StandardResponse.error(ApiCode.SYSTEM_ERROR.getCode(),
+            ApiLogger.error("RoleService.getRoleByName", "Failed to retrieve role", e, roleName);
+            return ApplicationResponse.error(ApiCode.SYSTEM_ERROR.getCode(),
                     "Failed to retrieve role: " + e.getMessage(),
                     ApiCode.SYSTEM_ERROR.getHttpStatus());
         }
     }
 
-    /**
-     * Retrieves all roles
-     * 
-     * @return StandardResponse containing list of all roles
-     */
-    public StandardResponse<List<Role>> getAllRoles() {
+    public ApplicationResponse<List<Role>> getAllRoles() {
         try {
+            ApiLogger.debug("RoleService.getAllRoles", "Attempting to get all roles");
             List<Role> roles = roleRepository.findAll();
-            return StandardResponse.success(roles, "Roles retrieved successfully");
+            ApiLogger.info("RoleService.getAllRoles", "Roles retrieved successfully", roles.size());
+            return ApplicationResponse.success(roles, "Roles retrieved successfully");
         } catch (Exception e) {
-            return StandardResponse.error(ApiCode.SYSTEM_ERROR.getCode(),
+            ApiLogger.error("RoleService.getAllRoles", "Failed to retrieve roles", e);
+            return ApplicationResponse.error(ApiCode.SYSTEM_ERROR.getCode(),
                     "Failed to retrieve roles: " + e.getMessage(),
                     ApiCode.SYSTEM_ERROR.getHttpStatus());
         }
     }
 
-    /**
-     * Updates an existing role
-     * 
-     * @param id The ID of the role to update
-     * @param roleDetails The new role details
-     * @return StandardResponse containing the updated role
-     */
     @Transactional
-    public StandardResponse<Role> updateRole(Long id, Role roleDetails) {
+    public ApplicationResponse<Role> updateRole(Long id, Role roleDetails) {
         try {
+            ApiLogger.debug("RoleService.updateRole", "Attempting to update role", id);
             Optional<Role> optionalRole = roleRepository.findById(id);
             if (optionalRole.isPresent()) {
                 Role existingRole = optionalRole.get();
 
-                // Check if another role with the same name already exists
                 if (roleDetails.getRoleName() != null &&
                         !existingRole.getRoleName().equals(roleDetails.getRoleName())) {
                     Optional<Role> roleWithSameName = roleRepository.findByRoleName(roleDetails.getRoleName());
-                    if (roleWithSameName.isPresent() && roleWithSameName.get().getRoleId() == id) {
-                        return StandardResponse.error(ApiCode.ROLE_ALREADY_EXISTS.getCode(),
+                    if (roleWithSameName.isPresent() && !roleWithSameName.get().getId().equals(id)) {
+                        ApiLogger.error("RoleService.updateRole", "Role already exists", roleDetails.getRoleName());
+                        return ApplicationResponse.error(ApiCode.ROLE_ALREADY_EXISTS.getCode(),
                                 ApiCode.ROLE_ALREADY_EXISTS.getMessage(),
                                 ApiCode.ROLE_ALREADY_EXISTS.getHttpStatus());
                     }
                 }
 
-                // Update fields
                 if (roleDetails.getRoleName() != null) {
                     existingRole.setRoleName(roleDetails.getRoleName());
                 }
                 if (roleDetails.getDescription() != null) {
                     existingRole.setDescription(roleDetails.getDescription());
                 }
-                if (roleDetails.getRoleId() != null) {
-                    existingRole.setRoleId(roleDetails.getRoleId());
-                }
 
                 Role updatedRole = roleRepository.save(existingRole);
-                return StandardResponse.success(updatedRole, "Role updated successfully");
+                ApiLogger.info("RoleService.updateRole", "Role updated successfully", updatedRole);
+                return ApplicationResponse.success(updatedRole, "Role updated successfully");
             } else {
-                return StandardResponse.error(ApiCode.ROLE_NOT_FOUND.getCode(),
+                ApiLogger.error("RoleService.updateRole", "Role not found", id);
+                return ApplicationResponse.error(ApiCode.ROLE_NOT_FOUND.getCode(),
                         ApiCode.ROLE_NOT_FOUND.getMessage(),
                         ApiCode.ROLE_NOT_FOUND.getHttpStatus());
             }
         } catch (Exception e) {
-            return StandardResponse.error(ApiCode.SYSTEM_ERROR.getCode(),
+            ApiLogger.error("RoleService.updateRole", "Failed to update role", e, id);
+            return ApplicationResponse.error(ApiCode.SYSTEM_ERROR.getCode(),
                     "Failed to update role: " + e.getMessage(),
                     ApiCode.SYSTEM_ERROR.getHttpStatus());
         }
     }
 
-    /**
-     * Deletes a role by ID
-     * 
-     * @param id The ID of the role to delete
-     * @return StandardResponse with success message or error
-     */
     @Transactional
-    public StandardResponse<Void> deleteRole(Long id) {
+    public ApplicationResponse<Void> deleteRole(Long id) {
         try {
+            ApiLogger.debug("RoleService.deleteRole", "Attempting to delete role", id);
             Optional<Role> optionalRole = roleRepository.findById(id);
             if (optionalRole.isPresent()) {
                 Role role = optionalRole.get();
                 try {
                     roleRepository.delete(role);
-                    return StandardResponse.success("Role deleted successfully");
+                    ApiLogger.info("RoleService.deleteRole", "Role deleted successfully", id);
+                    return ApplicationResponse.success("Role deleted successfully");
                 } catch (DataIntegrityViolationException e) {
-                    return StandardResponse.error(ApiCode.ROLE_IN_USE.getCode(),
+                    ApiLogger.error("RoleService.deleteRole", "Role in use", e, id);
+                    return ApplicationResponse.error(ApiCode.ROLE_IN_USE.getCode(),
                             ApiCode.ROLE_IN_USE.getMessage(),
                             ApiCode.ROLE_IN_USE.getHttpStatus());
                 }
             } else {
-                return StandardResponse.error(ApiCode.ROLE_NOT_FOUND.getCode(),
+                ApiLogger.error("RoleService.deleteRole", "Role not found", id);
+                return ApplicationResponse.error(ApiCode.ROLE_NOT_FOUND.getCode(),
                         ApiCode.ROLE_NOT_FOUND.getMessage(),
                         ApiCode.ROLE_NOT_FOUND.getHttpStatus());
             }
         } catch (Exception e) {
-            return StandardResponse.error(ApiCode.SYSTEM_ERROR.getCode(),
+            ApiLogger.error("RoleService.deleteRole", "Failed to delete role", e, id);
+            return ApplicationResponse.error(ApiCode.SYSTEM_ERROR.getCode(),
                     "Failed to delete role: " + e.getMessage(),
                     ApiCode.SYSTEM_ERROR.getHttpStatus());
         }
     }
 
-    /**
-     * Initializes default roles if they don't exist
-     * 
-     * @return StandardResponse with success message
-     */
     @Transactional
-    public StandardResponse<Void> initializeDefaultRoles() {
+    public ApplicationResponse<Void> initializeDefaultRoles() {
         try {
+            ApiLogger.debug("RoleService.initializeDefaultRoles", "Initializing default roles");
             for (RoleReference roleRef : RoleReference.values()) {
                 String roleName = roleRef.name();
                 if (!roleRepository.findByRoleName(roleName).isPresent()) {
@@ -211,43 +199,87 @@ public class RoleService {
                     role.setRoleName(roleName);
                     role.setDescription("System default " + roleName.toLowerCase() + " role");
                     roleRepository.save(role);
+                    ApiLogger.debug("RoleService.initializeDefaultRoles", "Created default role", roleName);
                 }
             }
-            return StandardResponse.success("Default roles initialized successfully");
+            ApiLogger.info("RoleService.initializeDefaultRoles", "Default roles initialized successfully");
+            return ApplicationResponse.success("Default roles initialized successfully");
         } catch (Exception e) {
-            return StandardResponse.error(ApiCode.INITIALIZATION_FAILED.getCode(),
+            ApiLogger.error("RoleService.initializeDefaultRoles", "Failed to initialize default roles", e);
+            return ApplicationResponse.error(ApiCode.INITIALIZATION_FAILED.getCode(),
                     "Failed to initialize default roles: " + e.getMessage(),
                     ApiCode.INITIALIZATION_FAILED.getHttpStatus());
         }
     }
 
-    // User-Role assignment
-    public StandardResponse<Role> addRoleToUser(User user, String roleName) {
-        StandardResponse<Role> roleResponse = getRoleByName(roleName);
-
-        if (!roleResponse.isSuccess())
-        {
-            return StandardResponse.error(ApiCode.ROLE_NOT_FOUND.getCode(), "failed to add user to role", ApiCode.ROLE_NOT_FOUND.getHttpStatus());
+    @Transactional
+    public ApplicationResponse<Role> addRoleToUser(User user, String roleName) {
+        ApiLogger.debug("RoleService.addRoleToUser", "Attempting to add role to user",
+                Map.of("userId", user.getId(), "roleName", roleName));
+        ApplicationResponse<Role> roleResponse = getRoleByName(roleName);
+        if (!roleResponse.isSuccess()) {
+            ApiLogger.error("RoleService.addRoleToUser", "Role not found for user",
+                    Map.of("userId", user.getId(), "roleName", roleName));
+            return ApplicationResponse.error(ApiCode.ROLE_NOT_FOUND.getCode(),
+                    "failed to add user to role",
+                    ApiCode.ROLE_NOT_FOUND.getHttpStatus());
         }
+
         Role role = roleResponse.getData();
         user.setRole(role);
         role.getUsers().add(user);
         userRepository.save(user);
-
-        return StandardResponse.success(role, "Role added to user successfully");
+        ApiLogger.info("RoleService.addRoleToUser", "Role added to user successfully",
+                Map.of("userId", user.getId(), "roleId", role.getId()));
+        return ApplicationResponse.success(role, "Role added to user successfully");
     }
-    public StandardResponse<Role> removeRoleFromUser(User user, String roleName) {
-        StandardResponse<Role> roleResponse = getRoleByName(roleName);
+
+    @Transactional
+    public ApplicationResponse<Role> removeRoleFromUser(User user, String roleName) {
+        ApiLogger.debug("RoleService.removeRoleFromUser", "Attempting to remove role from user",
+                Map.of("userId", user.getId(), "roleName", roleName));
+        ApplicationResponse<Role> roleResponse = getRoleByName(roleName);
         if (!roleResponse.isSuccess()) {
-            return StandardResponse.error(ApiCode.ROLE_NOT_FOUND.getCode(), "failed to remove role from user", HttpStatus.BAD_REQUEST);
+            ApiLogger.error("RoleService.removeRoleFromUser", "Role not found for user",
+                    Map.of("userId", user.getId(), "roleName", roleName));
+            return ApplicationResponse.error(ApiCode.ROLE_NOT_FOUND.getCode(),
+                    "failed to remove role from user",
+                    HttpStatus.BAD_REQUEST);
         }
 
         Role role = roleResponse.getData();
         user.setRole(null);
         role.getUsers().remove(user);
         userRepository.save(user);
-
-        return StandardResponse.success(role, "Role removed from user successfully");
+        ApiLogger.info("RoleService.removeRoleFromUser", "Role removed from user successfully",
+                Map.of("userId", user.getId(), "roleId", role.getId()));
+        return ApplicationResponse.success(role, "Role removed from user successfully");
     }
 
+    public ApplicationResponse<List<RoleResponse>> findAll() {
+        try {
+            ApiLogger.debug("RoleService.findAll", "Attempting to find all roles");
+            List<RoleResponse> roleResponseList = new ArrayList<>();
+            List<Role> roles = roleRepository.findAll();
+
+            if(roles.isEmpty()){
+                ApiLogger.error("RoleService.findAll", "No roles found");
+                return ApplicationResponse.error(ApiCode.ROLE_NOT_FOUND.getCode(),
+                        "failed to retrieve list of roles",
+                        ApiCode.ROLE_NOT_FOUND.getHttpStatus());
+            }
+
+            roles.forEach(role -> {
+                roleResponseList.add(RoleResponse.parse(role).get());
+            });
+
+            ApiLogger.info("RoleService.findAll", "Roles found successfully", roleResponseList.size());
+            return ApplicationResponse.success(roleResponseList,"list of roles found successfully");
+        } catch (Exception e) {
+            ApiLogger.error("RoleService.findAll", "Failed to retrieve roles", e);
+            return ApplicationResponse.error(ApiCode.SYSTEM_ERROR.getCode(),
+                    "Failed to retrieve roles: " + e.getMessage(),
+                    ApiCode.SYSTEM_ERROR.getHttpStatus());
+        }
+    }
 }

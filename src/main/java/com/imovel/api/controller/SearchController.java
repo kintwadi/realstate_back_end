@@ -1,7 +1,6 @@
 package com.imovel.api.controller;
 
-import com.imovel.api.response.StandardResponse;
-import org.springframework.http.ResponseEntity;
+import com.imovel.api.response.ApplicationResponse;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -28,15 +27,15 @@ public class SearchController {
      * @param minPrice Optional minimum price filter
      * @param maxPrice Optional maximum price filter
      * @param propertyType Optional property type filter
-     * @return ResponseEntity containing StandardResponse with search results
+     * @return ApplicationResponse with search results
      *
      * @apiNote This endpoint will:
-     *          - Return 200 OK with results if search succeeds
-     *          - Return 400 Bad Request if invalid parameters are provided
-     *          - Return 500 Internal Server Error for unexpected failures
+     *          - Return success response with results if search succeeds
+     *          - Return error response if invalid parameters are provided
+     *          - Return error response for unexpected failures
      */
     @GetMapping
-    public ResponseEntity<StandardResponse<?>> searchProperties(
+    public ApplicationResponse<?> searchProperties(
             @RequestParam String query,
             @RequestParam(required = false) String location,
             @RequestParam(required = false) Double minPrice,
@@ -47,32 +46,32 @@ public class SearchController {
         // Implementation should:
         // 1. Validate input parameters
         // 2. Call search service
-        // 3. Return results wrapped in StandardResponse
+        // 3. Return results wrapped in ApplicationResponse
 
-        return ResponseEntity.ok(StandardResponse.success(null));
+        return ApplicationResponse.success(null);
     }
 
     /**
      * Gets search suggestions based on partial input.
      *
      * @param partialQuery The partial search query
-     * @return ResponseEntity containing StandardResponse with suggestions
+     * @return ApplicationResponse with suggestions
      *
      * @apiNote This endpoint will:
-     *          - Return 200 OK with suggestions if operation succeeds
-     *          - Return 400 Bad Request if invalid parameters are provided
-     *          - Return 500 Internal Server Error for unexpected failures
+     *          - Return success response with suggestions if operation succeeds
+     *          - Return error response if invalid parameters are provided
+     *          - Return error response for unexpected failures
      */
     @GetMapping("/suggestions")
-    public ResponseEntity<StandardResponse<?>> getSearchSuggestions(
+    public ApplicationResponse<?> getSearchSuggestions(
             @RequestParam String partialQuery) {
 
         // TODO: Implement search suggestions logic
         // Implementation should:
         // 1. Validate input parameters
         // 2. Call suggestion service
-        // 3. Return suggestions wrapped in StandardResponse
+        // 3. Return suggestions wrapped in ApplicationResponse
 
-        return ResponseEntity.ok(StandardResponse.success(null));
+        return ApplicationResponse.success(null);
     }
 }

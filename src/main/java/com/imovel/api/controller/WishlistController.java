@@ -1,7 +1,6 @@
 package com.imovel.api.controller;
 
-import com.imovel.api.response.StandardResponse;
-import org.springframework.http.ResponseEntity;
+import com.imovel.api.response.ApplicationResponse;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -22,53 +21,52 @@ public class WishlistController {
     /**
      * Retrieves the current user's wishlist
      *
-     * @return ResponseEntity containing StandardResponse with wishlist data
+     * @return ApplicationResponse with wishlist data
      */
     @GetMapping
-    public ResponseEntity<StandardResponse<?>> getWishlist() {
+    public ApplicationResponse<?> getWishlist() {
         // TODO: Implement get wishlist logic
         // Example implementation would call wishlistService.getWishlist(userId)
-        return ResponseEntity.ok(StandardResponse.success(null));
+        return ApplicationResponse.success(null);
     }
 
     /**
      * Adds a property to the user's wishlist
      *
      * @param propertyId The ID of the property to add
-     * @return ResponseEntity with success status
-
+     * @return ApplicationResponse with success status
      */
     @PostMapping("/{propertyId}")
-    public ResponseEntity<StandardResponse<?>> addToWishlist(
+    public ApplicationResponse<?> addToWishlist(
             @PathVariable String propertyId) {
         // TODO: Implement add to wishlist logic
         // Example: wishlistService.addToWishlist(userId, propertyId)
-        return ResponseEntity.ok(StandardResponse.success(null));
+        return ApplicationResponse.success(null);
     }
 
     /**
      * Removes a property from the user's wishlist
      *
      * @param propertyId The ID of the property to remove
-     * @return ResponseEntity with success status
+     * @return ApplicationResponse with success status
      */
     @DeleteMapping("/{propertyId}")
-    public ResponseEntity<StandardResponse<?>> removeFromWishlist(
+    public ApplicationResponse<?> removeFromWishlist(
             @PathVariable String propertyId) {
         // TODO: Implement remove from wishlist logic
         // Example: wishlistService.removeFromWishlist(userId, propertyId)
-        return ResponseEntity.ok(StandardResponse.success(null));
+        return ApplicationResponse.success(null);
     }
 
     /**
      * Clears all items from the user's wishlist
      *
-     * @return ResponseEntity with no content status
+     * @return ApplicationResponse with no content status
      */
     @DeleteMapping
-    public ResponseEntity<StandardResponse<?>> clearWishlist() {
+    public ApplicationResponse<?> clearWishlist() {
         // TODO: Implement clear wishlist logic
         // Example: wishlistService.clearWishlist(userId)
-        return ResponseEntity.noContent().build();
+        return ApplicationResponse.success(null);
     }
 }

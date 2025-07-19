@@ -1,69 +1,49 @@
 package com.imovel.api.logger.inherited;
 
-import org.apache.logging.log4j.CloseableThreadContext;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.message.ObjectMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * A thread-safe logging utility class that provides structured logging with
- * context information that is inherited by child threads.
- * Uses Log4j2 with CloseableThreadContext for automatic resource management.
+ * Thread-safe logging utility with context inheritance using SLF4J MDC
  */
 public final class ApiLogger {
-    // Default logger name
     private static final String DEFAULT_LOGGER_TYPE = "com.imovel.api.logger";
     private static final String SIMPLE_FORMAT = "[{}] {}";
     private static final String COMPLETE_FORMAT = "[{}] {}: {} - {}";
-    
+
     // Thread-local storage for context inheritance
-    private static final InheritableThreadLocal<ConcurrentHashMap<String, String>> threadContext = 
-        new InheritableThreadLocal<ConcurrentHashMap<String, String>>() {
-            @Override
-            protected ConcurrentHashMap<String, String> childValue(ConcurrentHashMap<String, String> parentValue) {
-                return parentValue == null ? new ConcurrentHashMap<>() : new ConcurrentHashMap<>(parentValue);
-            }
-        };
-    
-    private static Logger logger = LogManager.getLogger(DEFAULT_LOGGER_TYPE);
+    private static final InheritableThreadLocal<ConcurrentHashMap<String, String>> threadContext =
+            new InheritableThreadLocal<ConcurrentHashMap<String, String>>() {
+                @Override
+                protected ConcurrentHashMap<String, String> childValue(ConcurrentHashMap<String, String> parentValue) {
+                    return parentValue == null ? new ConcurrentHashMap<>() : new ConcurrentHashMap<>(parentValue);
+                }
+            };
 
-    private ApiLogger() {
-    }
+    private static Logger logger = LoggerFactory.getLogger(DEFAULT_LOGGER_TYPE);
 
-    /**
-     * Sets the logger type/name to be used for logging.
-     * 
-     * @param type The logger name to use
-     */
+    private ApiLogger() {}
+
     public static void setLoggerType(String type) {
-        logger = LogManager.getLogger(type);
+        logger = LoggerFactory.getLogger(type);
     }
 
     /**
-     * Sets a context value that will be inherited by child threads.
-     * 
-     * @param key The context key
-     * @param value The context value
+     * Sets a context value that will be inherited by child threads
      */
     public static void setContext(String key, String value) {
         ConcurrentHashMap<String, String> context = threadContext.get();
-
-        //parent
         if (context == null) {
             context = new ConcurrentHashMap<>();
             threadContext.set(context);
         }
-        //child
         context.put(key, value);
     }
 
-    /**
-     * Removes a context value.
-     * 
-     * @param key The context key to remove
-     */
     public static void removeContext(String key) {
         ConcurrentHashMap<String, String> context = threadContext.get();
         if (context != null) {
@@ -71,116 +51,175 @@ public final class ApiLogger {
         }
     }
 
-    /**
-     * Clears all context values for the current thread.
-     */
     public static void clearContext() {
         threadContext.remove();
     }
 
-    /**
-     * Gets a copy of the current thread's context.
-     * 
-     * @return An immutable map containing the context information
-     */
     private static Map<String, String> getContext() {
         ConcurrentHashMap<String, String> context = threadContext.get();
         return context == null ? Map.of() : Map.copyOf(context);
     }
 
-    public static void debug(final String message) {
-        try (CloseableThreadContext.Instance ignored = CloseableThreadContext.putAll(getContext())) {
+    // Debug Methods
+    public static void debug(String message) {
+        Map<String, String> context = getContext();
+        try {
+            context.forEach(MDC::put);
             logger.debug(message);
+        } finally {
+            MDC.clear();
         }
     }
 
-    public static void debug(final String location, final String message) {
-        try (CloseableThreadContext.Instance ignored = CloseableThreadContext.putAll(getContext())) {
+    public static void debug(String location, String message) {
+        Map<String, String> context = getContext();
+        try {
+            context.forEach(MDC::put);
             logger.debug(SIMPLE_FORMAT, location, message);
+        } finally {
+            MDC.clear();
         }
     }
 
-    public static void debug(final String message, final Object response) {
-        try (CloseableThreadContext.Instance ignored = CloseableThreadContext.putAll(getContext())) {
-            logger.debug(SIMPLE_FORMAT, message, new ObjectMessage(response));
+    public static void debug(String message, Object response) {
+        Map<String, String> context = getContext();
+        try {
+            context.forEach(MDC::put);
+            logger.debug(SIMPLE_FORMAT, message, response);
+        } finally {
+            MDC.clear();
         }
     }
 
-    public static void debug(final String location, final String message, final Object response) {
-        try (CloseableThreadContext.Instance ignored = CloseableThreadContext.putAll(getContext())) {
-            logger.debug(COMPLETE_FORMAT, location, message, new ObjectMessage(response));
+    public static void debug(String location, String message, Object response) {
+        Map<String, String> context = getContext();
+        try {
+            context.forEach(MDC::put);
+            logger.debug(COMPLETE_FORMAT, location, message, response);
+        } finally {
+            MDC.clear();
         }
     }
 
-    public static void info(final String message) {
-        try (CloseableThreadContext.Instance ignored = CloseableThreadContext.putAll(getContext())) {
+    // Info Methods
+    public static void info(String message) {
+        Map<String, String> context = getContext();
+        try {
+            context.forEach(MDC::put);
             logger.info(message);
+        } finally {
+            MDC.clear();
         }
     }
 
-    public static void info(final String location, final String message) {
-        try (CloseableThreadContext.Instance ignored = CloseableThreadContext.putAll(getContext())) {
+    public static void info(String location, String message) {
+        Map<String, String> context = getContext();
+        try {
+            context.forEach(MDC::put);
             logger.info(SIMPLE_FORMAT, location, message);
+        } finally {
+            MDC.clear();
         }
     }
 
-    public static void info(final String message, final Object response) {
-        try (CloseableThreadContext.Instance ignored = CloseableThreadContext.putAll(getContext())) {
-            logger.info(SIMPLE_FORMAT, message, new ObjectMessage(response));
+    public static void info(String message, Object response) {
+        Map<String, String> context = getContext();
+        try {
+            context.forEach(MDC::put);
+            logger.info(SIMPLE_FORMAT, message, response);
+        } finally {
+            MDC.clear();
         }
     }
 
-    public static void info(final String location, final String message, final Object response) {
-        try (CloseableThreadContext.Instance ignored = CloseableThreadContext.putAll(getContext())) {
-            logger.info(COMPLETE_FORMAT, location, message, new ObjectMessage(response));
+    public static void info(String location, String message, Object response) {
+        Map<String, String> context = getContext();
+        try {
+            context.forEach(MDC::put);
+            logger.info(COMPLETE_FORMAT, location, message, response);
+        } finally {
+            MDC.clear();
         }
     }
 
-    public static void error(final String message) {
-        try (CloseableThreadContext.Instance ignored = CloseableThreadContext.putAll(getContext())) {
+    // Error Methods
+    public static void error(String message) {
+        Map<String, String> context = getContext();
+        try {
+            context.forEach(MDC::put);
             logger.error(message);
+        } finally {
+            MDC.clear();
         }
     }
 
-    public static void error(final String location, final String message) {
-        try (CloseableThreadContext.Instance ignored = CloseableThreadContext.putAll(getContext())) {
+    public static void error(String location, String message) {
+        Map<String, String> context = getContext();
+        try {
+            context.forEach(MDC::put);
             logger.error(SIMPLE_FORMAT, location, message);
+        } finally {
+            MDC.clear();
         }
     }
 
-    public static void error(final String message, final Object response) {
-        try (CloseableThreadContext.Instance ignored = CloseableThreadContext.putAll(getContext())) {
-            logger.error(SIMPLE_FORMAT, message, new ObjectMessage(response));
+    public static void error(String message, Object response) {
+        Map<String, String> context = getContext();
+        try {
+            context.forEach(MDC::put);
+            logger.error(SIMPLE_FORMAT, message, response);
+        } finally {
+            MDC.clear();
         }
     }
 
-    public static void error(final String location, final String message, final Object response) {
-        try (CloseableThreadContext.Instance ignored = CloseableThreadContext.putAll(getContext())) {
-            logger.error(COMPLETE_FORMAT, location, message, new ObjectMessage(response));
+    public static void error(String location, String message, Object response) {
+        Map<String, String> context = getContext();
+        try {
+            context.forEach(MDC::put);
+            logger.error(COMPLETE_FORMAT, location, message, response);
+        } finally {
+            MDC.clear();
         }
     }
 
-    public static void error(final String message, final Throwable throwable) {
-        try (CloseableThreadContext.Instance ignored = CloseableThreadContext.putAll(getContext())) {
-            logger.error(SIMPLE_FORMAT, message, throwable);
+    public static void error(String message, Throwable throwable) {
+        Map<String, String> context = getContext();
+        try {
+            context.forEach(MDC::put);
+            logger.error(message, throwable);
+        } finally {
+            MDC.clear();
         }
     }
 
-    public static void error(final String location, final String message, final Throwable throwable) {
-        try (CloseableThreadContext.Instance ignored = CloseableThreadContext.putAll(getContext())) {
+    public static void error(String location, String message, Throwable throwable) {
+        Map<String, String> context = getContext();
+        try {
+            context.forEach(MDC::put);
             logger.error(SIMPLE_FORMAT, location, message, throwable);
+        } finally {
+            MDC.clear();
         }
     }
 
-    public static void error(final String message, final Throwable throwable, final Object response) {
-        try (CloseableThreadContext.Instance ignored = CloseableThreadContext.putAll(getContext())) {
-            logger.error(SIMPLE_FORMAT, message, new ObjectMessage(response), throwable);
+    public static void error(String message, Throwable throwable, Object response) {
+        Map<String, String> context = getContext();
+        try {
+            context.forEach(MDC::put);
+            logger.error(SIMPLE_FORMAT, message, response, throwable);
+        } finally {
+            MDC.clear();
         }
     }
 
-    public static void error(final String location, final String message, final Throwable throwable, final Object response) {
-        try (CloseableThreadContext.Instance ignored = CloseableThreadContext.putAll(getContext())) {
-            logger.error(COMPLETE_FORMAT, location, message, new ObjectMessage(response), throwable);
+    public static void error(String location, String message, Throwable throwable, Object response) {
+        Map<String, String> context = getContext();
+        try {
+            context.forEach(MDC::put);
+            logger.error(COMPLETE_FORMAT, location, message, response, throwable);
+        } finally {
+            MDC.clear();
         }
     }
 }

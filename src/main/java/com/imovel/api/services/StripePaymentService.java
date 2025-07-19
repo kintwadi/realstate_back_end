@@ -6,7 +6,7 @@ import com.imovel.api.model.Subscription;
 import com.imovel.api.model.SubscriptionPlan;
 import com.imovel.api.repository.SubscriptionPlanRepository;
 import com.imovel.api.repository.SubscriptionRepository;
-import com.imovel.api.response.StandardResponse;
+import com.imovel.api.response.ApplicationResponse;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Refund;
@@ -34,27 +34,27 @@ public class StripePaymentService implements PaymentService {
     }
 
     @Override
-    public StandardResponse<Boolean> processPayment(Long userId, BigDecimal amount, String description) {
+    public ApplicationResponse<Boolean> processPayment(Long userId, BigDecimal amount, String description) {
         try {
             // In a real implementation, this would call Stripe API
             if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-                return StandardResponse.success(true, "No payment needed");
+                return ApplicationResponse.success(true, "No payment needed");
             }
 
             // Mock Stripe API call
             boolean paymentSuccess = mockStripeCharge(userId, amount, description); // to do
             
             if (paymentSuccess) {
-                return StandardResponse.success(true, "Payment processed successfully");
+                return ApplicationResponse.success(true, "Payment processed successfully");
             } else {
-                return StandardResponse.error(
+                return ApplicationResponse.error(
                     ApiCode.SUBSCRIPTION_PAYMENT_FAILED.getCode(),
                     "Payment processing failed",
                     ApiCode.SUBSCRIPTION_PAYMENT_FAILED.getHttpStatus()
                 );
             }
         } catch (Exception e) {
-            return StandardResponse.error(
+            return ApplicationResponse.error(
                 ApiCode.PAYMENT_GATEWAY_ERROR.getCode(),
                 "Payment processing error: " + e.getMessage(),
                 ApiCode.PAYMENT_GATEWAY_ERROR.getHttpStatus()
@@ -63,27 +63,27 @@ public class StripePaymentService implements PaymentService {
     }
 
     @Override
-    public StandardResponse<Boolean> processRefund(Long userId, BigDecimal amount, String description) {
+    public ApplicationResponse<Boolean> processRefund(Long userId, BigDecimal amount, String description) {
 
         try {
             if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-                return StandardResponse.success(true, "No refund needed");
+                return ApplicationResponse.success(true, "No refund needed");
             }
 
             // Mock Stripe refund
             boolean refundSuccess = mockStripeRefund(userId, amount, description);
 
             if (refundSuccess) {
-                return StandardResponse.success(true, "Refund processed successfully");
+                return ApplicationResponse.success(true, "Refund processed successfully");
             } else {
-                return StandardResponse.error(
+                return ApplicationResponse.error(
                         ApiCode.PAYMENT_GATEWAY_ERROR.getCode(),
                         "Refund processing failed",
                         ApiCode.PAYMENT_GATEWAY_ERROR.getHttpStatus()
                 );
             }
         } catch (Exception e) {
-            return StandardResponse.error(
+            return ApplicationResponse.error(
                     ApiCode.PAYMENT_GATEWAY_ERROR.getCode(),
                     "Refund processing error: " + e.getMessage(),
                     ApiCode.PAYMENT_GATEWAY_ERROR.getHttpStatus()
@@ -116,7 +116,7 @@ public class StripePaymentService implements PaymentService {
     }
 
     @Override
-    public StandardResponse<BigDecimal> calculateProratedAmount(Long subscriptionId, Long newPlanId) {
+    public ApplicationResponse<BigDecimal> calculateProratedAmount(Long subscriptionId, Long newPlanId) {
         try {
             Subscription currentSub = subscriptionRepository.findById(subscriptionId)
                 .orElseThrow(() -> new IllegalArgumentException("Subscription not found"));
@@ -139,15 +139,15 @@ public class StripePaymentService implements PaymentService {
             // Amount due (positive = charge, negative = credit)
             BigDecimal amountDue = newPlanCost.subtract(unusedValue);
             
-            return StandardResponse.success(amountDue.setScale(2, RoundingMode.HALF_UP));
+            return ApplicationResponse.success(amountDue.setScale(2, RoundingMode.HALF_UP));
         } catch (IllegalArgumentException e) {
-            return StandardResponse.error(
+            return ApplicationResponse.error(
                 ApiCode.SUBSCRIPTION_NOT_FOUND.getCode(),
                 e.getMessage(),
                 ApiCode.SUBSCRIPTION_NOT_FOUND.getHttpStatus()
             );
         } catch (Exception e) {
-            return StandardResponse.error(
+            return ApplicationResponse.error(
                 ApiCode.SYSTEM_ERROR.getCode(),
                 "Failed to calculate prorated amount: " + e.getMessage(),
                 ApiCode.SYSTEM_ERROR.getHttpStatus()

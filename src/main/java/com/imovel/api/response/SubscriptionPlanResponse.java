@@ -1,8 +1,12 @@
 package com.imovel.api.response;
 
-import java.math.BigDecimal;
+import com.imovel.api.model.SubscriptionPlan;
 
-public class SubscriptionPlanDTO {
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class SubscriptionPlanResponse {
     private Long id;
     private String name;
     private String description;
@@ -12,6 +16,27 @@ public class SubscriptionPlanDTO {
     private Integer availabilityDays;
     private Boolean isFeatured;
     private String supportType;
+
+    // Static factory method to parse from SubscriptionPlan entity
+    public static SubscriptionPlanResponse parse(SubscriptionPlan subscriptionPlan) {
+        SubscriptionPlanResponse response = new SubscriptionPlanResponse();
+        response.setId(subscriptionPlan.getId());
+        response.setName(subscriptionPlan.getName());
+        response.setDescription(subscriptionPlan.getDescription());
+        response.setMonthlyPrice(subscriptionPlan.getMonthlyPrice());
+        response.setYearlyPrice(subscriptionPlan.getYearlyPrice());
+        response.setListingLimit(subscriptionPlan.getListingLimit());
+        response.setAvailabilityDays(subscriptionPlan.getAvailabilityDays());
+        response.setIsFeatured(subscriptionPlan.getFeatured());
+        response.setSupportType(subscriptionPlan.getSupportType());
+        return response;
+    }
+    // Static factory method to parse from List of SubscriptionPlan entities
+    public static List<SubscriptionPlanResponse> parse(List<SubscriptionPlan> subscriptionPlans) {
+        return subscriptionPlans.stream()
+                .map(SubscriptionPlanResponse::parse)
+                .collect(Collectors.toList());
+    }
 
     // Getters and Setters
     public Long getId() {
@@ -70,11 +95,11 @@ public class SubscriptionPlanDTO {
         this.availabilityDays = availabilityDays;
     }
 
-    public Boolean getFeatured() {
+    public Boolean getIsFeatured() {
         return isFeatured;
     }
 
-    public void setFeatured(Boolean featured) {
+    public void setIsFeatured(Boolean featured) {
         isFeatured = featured;
     }
 

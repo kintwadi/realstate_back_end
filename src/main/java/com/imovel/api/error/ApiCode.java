@@ -102,7 +102,8 @@ public enum ApiCode {
     ROLE_ASSIGNMENT_FAILED(2307, "Failed to assign role to user", HttpStatus.INTERNAL_SERVER_ERROR),
     ROLE_REMOVAL_FAILED(2308, "Failed to remove role from user", HttpStatus.INTERNAL_SERVER_ERROR),
     PERMISSION_RETRIEVAL_FAILED(2309, "Failed to retrieve permissions", HttpStatus.INTERNAL_SERVER_ERROR),
-    INITIALIZATION_FAILED(2310, "Failed to initialize default roles and permissions", HttpStatus.INTERNAL_SERVER_ERROR);
+    INITIALIZATION_FAILED(2310, "Failed to initialize default roles and permissions", HttpStatus.INTERNAL_SERVER_ERROR),
+    PARSE_ERROR(2312, "Failed to parse data", HttpStatus.INTERNAL_SERVER_ERROR);
 
 
     private final Integer code;
