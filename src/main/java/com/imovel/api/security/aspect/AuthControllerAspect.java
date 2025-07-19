@@ -86,25 +86,25 @@ public class AuthControllerAspect {
      * @throws Throwable if proceeding join point throws an exception
      */
 
-    @Around("authenticateUser()")
-    public Object authenticateUser(final ProceedingJoinPoint joinPoint) throws Throwable {
-        Object[] args = joinPoint.getArgs();
-
-        // Validate request payload (implicit in aspect pointcut)
-        UserLoginRequest request = (UserLoginRequest) args[0];
-
-        // Validate required fields
-        if (areFieldsMissing(request.getEmail(), request.getPassword())) {
-            return AspectErrorResponse.createErrorResponse(ApiCode.REQUIRED_FIELD_MISSING.getMessage(), ApiCode.REQUIRED_FIELD_MISSING.getCode(), HttpStatus.BAD_REQUEST);
-        }
-
-        // Validate email format
-        if (Util.isEmailInvalid(request.getEmail())) {
-            return AspectErrorResponse.createErrorResponse(ApiCode.INVALID_EMAIL.getMessage(), ApiCode.INVALID_EMAIL.getCode(), HttpStatus.BAD_REQUEST);
-        }
-
-        return joinPoint.proceed();
-    }
+//    @Around("authenticateUser()")
+//    public Object authenticateUser(final ProceedingJoinPoint joinPoint) throws Throwable {
+//        Object[] args = joinPoint.getArgs();
+//
+//        // Validate request payload (implicit in aspect pointcut)
+//        UserLoginRequest request = (UserLoginRequest) args[0];
+//
+//        // Validate required fields
+//        if (areFieldsMissing(request.getEmail(), request.getPassword())) {
+//            return AspectErrorResponse.createErrorResponse(ApiCode.REQUIRED_FIELD_MISSING.getMessage(), ApiCode.REQUIRED_FIELD_MISSING.getCode(), HttpStatus.BAD_REQUEST);
+//        }
+//
+//        // Validate email format
+//        if (Util.isEmailInvalid(request.getEmail())) {
+//            return AspectErrorResponse.createErrorResponse(ApiCode.INVALID_EMAIL.getMessage(), ApiCode.INVALID_EMAIL.getCode(), HttpStatus.BAD_REQUEST);
+//        }
+//
+//        return joinPoint.proceed();
+//    }
     @Around("initiatePasswordReset()")
     public Object resetPassword(final ProceedingJoinPoint joinPoint) throws Throwable {
         Object[] args = joinPoint.getArgs();
