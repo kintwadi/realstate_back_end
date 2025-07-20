@@ -57,12 +57,26 @@ public class AuthService {
     public ApplicationResponse<UserResponse> registerUser(UserRegistrationRequest request) {
         ApiLogger.debug("AuthService.registerUser", "Attempting to register user", request.getEmail());
 
+        // Validate password
+        if (request.getPassword().isBlank()) {
+            return ApplicationResponse.error(ApiCode.INVALID_CREDENTIALS.getCode(),
+                    ApiCode.INVALID_CREDENTIALS.getMessage(),
+                    HttpStatus.BAD_REQUEST);
+        }
+//        // Validate email format
+        if (Util.isEmailInvalid(request.getEmail())) {
+            return ApplicationResponse.error(ApiCode.INVALID_EMAIL.getCode(),
+                    ApiCode.INVALID_EMAIL.getMessage(),
+                    HttpStatus.BAD_REQUEST);
+        }
+
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             ApiLogger.error("AuthService.registerUser", "Email already exists", request.getEmail());
             return ApplicationResponse.error(ApiCode.INVALID_EMAIL_ALREADY_EXIST.getCode(),
                     ApiCode.INVALID_EMAIL_ALREADY_EXIST.getMessage(),
                     HttpStatus.NOT_FOUND);
         }
+
         Role role = roleRepository.findByRoleName(RoleReference.TENANT.name())
                 .orElseGet(() -> {
                     Role newRole = new Role();
@@ -70,6 +84,7 @@ public class AuthService {
                     return roleRepository.save(newRole);
 
                 });
+
 
         User newUser = new User();
         newUser.setName(request.getName());
