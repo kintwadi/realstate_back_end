@@ -5,4 +5,11 @@ SETUP KEYSTORE ENV VARIABLES IN YOUR workspace.xml or your OS
         <env name="ENV_REFRESH_TOKEN_ALIAS" value="imovel_refresh_token_alias" />
         <env name="ENV_REFRESH_TOKEN_PASS" value="@Imovel!432" />
         <env name="ENV_KEYSTORE_PASS" value="@Imovel!432" />
+
+        <env name="RDS_HOSTNAME" value="imovelpostgres.clmi6esmoyzi.eu-central-1.rds.amazonaws.com" />
+        <env name="RDS_PORT" value="5432" />
+        <env name="RDS_DB_NAME" value="imovel_db" />
+        <env name="RDS_USERNAME" value="postgres" />
+        <env name="RDS_PASSWORD" value="postgres" />
+
  </envs>
