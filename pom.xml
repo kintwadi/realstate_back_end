@@ -93,6 +93,17 @@
             <version>2.1.0</version>
         </dependency>
 
+        <!--  AWS SDK for S3  -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
+            <version>2.20.0</version>
+            <!--  Use the latest version  -->
+        </dependency>
+        <!--  For multipart file uploads  -->
+
+
+
     </dependencies>
 
     <build>
