@@ -34,7 +34,6 @@ public class PropertyMediaController {
         return mediaService.getAll(propertyId);
     }
 
-    //http://localhost:8080/imovel/api/media/1/6dfd38a0-7f45-4c02-a0f1-29ab88b69a70.png
     @GetMapping("{propertyId}/{name}")
     public ApplicationResponse<PropertyMediaResponse> getByName(@PathVariable Long propertyId,@PathVariable String name) {
 
