@@ -1,5 +1,7 @@
 package com.imovel.api.security.keystore;
 
+import com.imovel.api.util.ResourceLoader;
+
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.nio.file.Path;

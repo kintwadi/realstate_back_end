@@ -67,7 +67,7 @@ public class MediaService {
             media.setUrl(generateUrl(fileName));
             media.setUploadDate(Instant.now());
             media.setDescription(description);
-            media.setPropertyId(propertyId);
+
 
             return ApplicationResponse.success(media, "File uploaded successfully");
 
@@ -135,7 +135,6 @@ public class MediaService {
         media.setUrl(generateUrl(key));
         media.setUploadDate(headObject.lastModified());
         media.setDescription(headObject.metadata().get("description"));
-        media.setPropertyId(headObject.metadata().get("property-id"));
         return media;
     }
 
