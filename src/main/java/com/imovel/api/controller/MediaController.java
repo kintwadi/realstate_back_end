@@ -2,7 +2,6 @@ package com.imovel.api.controller;
 
 import com.imovel.api.model.PropertyMedia;
 import com.imovel.api.response.ApplicationResponse;
-import com.imovel.api.services.MediaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
