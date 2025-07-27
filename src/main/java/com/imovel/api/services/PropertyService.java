@@ -232,6 +232,7 @@ public class PropertyService {
     }
 
     private PropertyResponse mapToResponseDto(Property entity) {
+
         PropertyResponse dto = new PropertyResponse();
         dto.setId(entity.getId());
         dto.setMainTitle(entity.getMainTitle());

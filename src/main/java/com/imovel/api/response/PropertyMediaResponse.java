@@ -1,14 +1,12 @@
-package com.imovel.api.model;
+package com.imovel.api.response;
 
-import jakarta.persistence.*;
+import com.imovel.api.model.PropertyMedia;
 
 import java.time.Instant;
+import java.util.List;
+import java.util.stream.Collectors;
 
-@Entity
-@Table(name = "property_media")
-public class PropertyMedia {
-
-    @Id
+public class PropertyMediaResponse {
     private String id;
     private String name;
     private String type;
@@ -19,20 +17,59 @@ public class PropertyMedia {
     private String format;
     private Instant uploadDate;
     private String description;
-    private Long propertyId; // logical relation with property
+    private Long propertyId;
 
     // Constructors
-    public PropertyMedia() {
+    public PropertyMediaResponse() {
     }
 
-    public PropertyMedia(String name,
-                         String type,
-                         Long size,
-                         String url) {
+    public PropertyMediaResponse(String id, String name, String type, long size, String url, 
+                               int width, int height, String format, Instant uploadDate, 
+                               String description, Long propertyId) {
+        this.id = id;
         this.name = name;
         this.type = type;
         this.size = size;
         this.url = url;
+        this.width = width;
+        this.height = height;
+        this.format = format;
+        this.uploadDate = uploadDate;
+        this.description = description;
+        this.propertyId = propertyId;
+    }
+
+
+
+    // Static parsing methods
+    public static PropertyMediaResponse parse(PropertyMedia propertyMedia) {
+        if (propertyMedia == null) {
+            return null;
+        }
+        
+        return new PropertyMediaResponse(
+            propertyMedia.getId(),
+            propertyMedia.getName(),
+            propertyMedia.getType(),
+            propertyMedia.getSize(),
+            propertyMedia.getUrl(),
+            propertyMedia.getWidth(),
+            propertyMedia.getHeight(),
+            propertyMedia.getFormat(),
+            propertyMedia.getUploadDate(),
+            propertyMedia.getDescription(),
+            propertyMedia.getPropertyId()
+        );
+    }
+
+    public static List<PropertyMediaResponse> parse(List<PropertyMedia> propertyMediaList) {
+        if (propertyMediaList == null) {
+            return null;
+        }
+        
+        return propertyMediaList.stream()
+                .map(PropertyMediaResponse::parse)
+                .collect(Collectors.toList());
     }
 
     // Getters and Setters
