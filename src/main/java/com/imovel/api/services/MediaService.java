@@ -29,7 +29,7 @@ public class MediaService {
         this.s3Client = s3Client;
     }
 
-    public ApplicationResponse<PropertyMedia> upload(MultipartFile file, String propertyId, String description) {
+    public ApplicationResponse<PropertyMedia> upload(MultipartFile file, Long propertyId, String description) {
         try {
             if (file == null || file.isEmpty()) {
                 return errorResponse(ApiCode.INVALID_PAYLOAD, "File cannot be empty");
@@ -48,7 +48,7 @@ public class MediaService {
             Map<String, String> metadata = new HashMap<>();
             if (description != null) metadata.put("description", description);
             metadata.put("original-filename", originalFilename);
-            if (propertyId != null) metadata.put("property-id", propertyId);
+            if (propertyId != null) metadata.put("property-id", String.valueOf(propertyId));
 
             s3Client.putObject(PutObjectRequest.builder()
                             .bucket(bucketName)
@@ -135,7 +135,7 @@ public class MediaService {
         media.setUrl(generateUrl(key));
         media.setUploadDate(headObject.lastModified());
         media.setDescription(headObject.metadata().get("description"));
-        media.setPropertyId(headObject.metadata().get("property-id"));
+        media.setPropertyId(Long.valueOf(headObject.metadata().get("property-id")));
         return media;
     }
 

@@ -7,6 +7,7 @@ public class Location {
     private String address;
     private String city;
     private String state;
+    private String country;
     private String zipCode;
     private Double latitude;
     private Double longitude;
@@ -33,6 +34,14 @@ public class Location {
 
     public String getState() {
         return state;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
     }
 
     public void setState(String state) {

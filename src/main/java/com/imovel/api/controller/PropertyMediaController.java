@@ -1,8 +1,9 @@
 package com.imovel.api.controller;
 
-import com.imovel.api.model.PropertyMedia;
 import com.imovel.api.response.ApplicationResponse;
-import com.imovel.api.services.MediaService;
+import com.imovel.api.response.PropertyMediaResponse;
+import com.imovel.api.services.PropertyMediaService;
+import com.imovel.api.storage.StorageType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -11,37 +12,37 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/media")
-public class MediaController {
+public class PropertyMediaController {
 
-    private final MediaService mediaService;
+    private final PropertyMediaService mediaService;
 
     @Autowired
-    public MediaController(MediaService mediaService) {
+    public PropertyMediaController(PropertyMediaService mediaService) {
         this.mediaService = mediaService;
     }
 
     @PostMapping("/upload")
-    public ApplicationResponse<PropertyMedia> upload(
+    public ApplicationResponse<PropertyMediaResponse> upload(
             @RequestParam("file") MultipartFile file,
-            @RequestParam("propertyId") String propertyId,
+            @RequestParam("propertyId") Long propertyId,
             @RequestParam(value = "description", required = false) String description) {
         return mediaService.upload(file, propertyId, description);
     }
 
     @GetMapping("/property/{propertyId}")
-    public ApplicationResponse<List<PropertyMedia>> getAll(@PathVariable String propertyId) {
+    public ApplicationResponse<List<PropertyMediaResponse>> getAll(@PathVariable Long propertyId) {
         return mediaService.getAll(propertyId);
     }
 
     //http://localhost:8080/imovel/api/media/1/6dfd38a0-7f45-4c02-a0f1-29ab88b69a70.png
     @GetMapping("{propertyId}/{name}")
-    public ApplicationResponse<PropertyMedia> getByName(@PathVariable Long propertyId,@PathVariable String name) {
+    public ApplicationResponse<PropertyMediaResponse> getByName(@PathVariable Long propertyId,@PathVariable String name) {
 
         return mediaService.getByName(propertyId + "/" + name);
     }
 
     @DeleteMapping("{propertyId}/{name}")
-    public ApplicationResponse<PropertyMedia> delete(@PathVariable Long propertyId,@PathVariable String name) {
+    public ApplicationResponse<PropertyMediaResponse> delete(@PathVariable Long propertyId,@PathVariable String name) {
         return mediaService.delete(propertyId + "/" + name);
     }
 
