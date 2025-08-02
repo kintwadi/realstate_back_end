@@ -2,6 +2,9 @@ package com.imovel.api.pagination;
 
 import com.imovel.api.model.Property;
 import com.imovel.api.repository.PropertyRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -11,12 +14,19 @@ public class CustomPagination {
 
     private final PropertyRepository propertyRepository;
 
+    @PersistenceContext
+    private EntityManager entityManager;
+
     public CustomPagination(PropertyRepository propertyRepository) {
         this.propertyRepository = propertyRepository;
     }
 
     @Transactional(readOnly = true)
     public PaginationResult<Property> getProperties(Pagination pagination) {
+        // Create query
+        TypedQuery<Property> query = entityManager.createQuery(
+                "SELECT p FROM Property p ORDER BY p.id", Property.class);
+
         // Get total count
         long totalRecords = propertyRepository.countAllProperties();
 
@@ -24,12 +34,13 @@ public class CustomPagination {
         int lastPageNumber = calculateLastPageNumber(totalRecords, pagination.getPageSize());
         int currentPageNumber = adjustCurrentPageNumber(pagination.getPageNumber(), lastPageNumber);
 
-        // Get paginated results
+        // Apply pagination
         int offset = (currentPageNumber - 1) * pagination.getPageSize();
-        List<Property> properties = propertyRepository.findAllPropertiesWithPagination(
-                offset, 
-                pagination.getPageSize()
-        );
+        query.setFirstResult(offset);
+        query.setMaxResults(pagination.getPageSize());
+
+        // Execute query
+        List<Property> properties = query.getResultList();
 
         return buildPaginationResult(
                 currentPageNumber,
@@ -42,6 +53,21 @@ public class CustomPagination {
 
     @Transactional(readOnly = true)
     public PaginationResult<Property> getPropertiesWithFilter(Pagination pagination, Property filter) {
+        // Build query string
+        String queryStr = "SELECT p FROM Property p WHERE " +
+                "(:type IS NULL OR p.type = :type) AND " +
+                "(:category IS NULL OR p.category = :category) AND " +
+                "(:status IS NULL OR p.status = :status) AND " +
+                "(:price IS NULL OR p.price = :price) " +
+                "ORDER BY p.id";
+
+        // Create query
+        TypedQuery<Property> query = entityManager.createQuery(queryStr, Property.class)
+                .setParameter("type", filter.getType())
+                .setParameter("category", filter.getCategory())
+                .setParameter("status", filter.getStatus())
+                .setParameter("price", filter.getPrice());
+
         // Get filtered count
         long totalRecords = propertyRepository.countPropertiesWithFilter(
                 filter.getType(),
@@ -54,16 +80,13 @@ public class CustomPagination {
         int lastPageNumber = calculateLastPageNumber(totalRecords, pagination.getPageSize());
         int currentPageNumber = adjustCurrentPageNumber(pagination.getPageNumber(), lastPageNumber);
 
-        // Get paginated results with filter
+        // Apply pagination
         int offset = (currentPageNumber - 1) * pagination.getPageSize();
-        List<Property> properties = propertyRepository.findPropertiesWithFilter(
-                filter.getType(),
-                filter.getCategory(),
-                filter.getStatus(),
-                filter.getPrice(),
-                offset,
-                pagination.getPageSize()
-        );
+        query.setFirstResult(offset);
+        query.setMaxResults(pagination.getPageSize());
+
+        // Execute query
+        List<Property> properties = query.getResultList();
 
         return buildPaginationResult(
                 currentPageNumber,
