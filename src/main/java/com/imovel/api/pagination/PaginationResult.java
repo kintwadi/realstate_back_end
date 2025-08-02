@@ -1,9 +1,8 @@
 
-package com.imovel.api.util;
+package com.imovel.api.pagination;
 
 import java.util.ArrayList;
 import java.util.List;
-
 
 public class PaginationResult< T >
 {

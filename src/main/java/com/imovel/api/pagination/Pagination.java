@@ -1,16 +1,11 @@
-
-package com.imovel.api.util;
+package com.imovel.api.pagination;
 
 public class Pagination
 {
-    // ---------------------------------------------------------------------
-    // Properties
-    // ---------------------------------------------------------------------
+    
     private int pageSize;
     private int pageNumber;
-    // ---------------------------------------------------------------------
-    // Construction
-    // ---------------------------------------------------------------------
+ 
     public int getPageSize()
     {
         return pageSize;
@@ -33,4 +28,3 @@ public class Pagination
 
 
 }
-
