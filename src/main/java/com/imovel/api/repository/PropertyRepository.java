@@ -15,11 +15,11 @@ import java.util.List;
 @Repository
 public interface PropertyRepository extends JpaRepository<Property, Long> {
 
+    @Query(value = "SELECT p FROM Property p ORDER BY p.id")
+    List<Property> findAllPropertiesWithPagination();
+
     @Query("SELECT COUNT(p) FROM Property p")
     long countAllProperties();
-
-    @Query("SELECT p FROM Property p ORDER BY p.id")
-    List<Property> findAllPropertiesWithPagination(int offset, int limit);
 
     @Query("SELECT COUNT(p) FROM Property p WHERE " +
             "(:type IS NULL OR p.type = :type) AND " +
@@ -42,6 +42,5 @@ public interface PropertyRepository extends JpaRepository<Property, Long> {
             @Param("type") PropertyType type,
             @Param("category") PropertyCategory category,
             @Param("status") PropertyStatus status,
-            @Param("price") BigDecimal price,
-            int offset, int limit);
+            @Param("price") BigDecimal price);
 }
