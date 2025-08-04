@@ -6,7 +6,9 @@ public class SubscriptionPlainRequest {
 
     private Long userId;
     private Long planId;
+    private String currency;
     private String billingCycle;
+
 
    public SubscriptionPlainRequest(){
 
@@ -33,5 +35,13 @@ public class SubscriptionPlainRequest {
 
     public void setBillingCycle(String billingCycle) {
         this.billingCycle = billingCycle;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
     }
 }

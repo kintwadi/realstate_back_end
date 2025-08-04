@@ -26,7 +26,8 @@ public class SubscriptionController {
 
         return subscriptionService.subscribeUser(subscriptionPlanRequest.getUserId(),
                                                  subscriptionPlanRequest.getPlanId(),
-                                                 subscriptionPlanRequest.getBillingCycle());
+                                                 subscriptionPlanRequest.getBillingCycle(),
+                                                 subscriptionPlanRequest.getCurrency());
     }
 
     @GetMapping("/user/{userId}")
@@ -35,15 +36,16 @@ public class SubscriptionController {
     }
     // NOT TESTED
     @PostMapping("/{subscriptionId}/cancel")
-    public ApplicationResponse<SubscriptionResponse> cancelSubscription(@PathVariable Long subscriptionId) {
-        return subscriptionService.cancelSubscription(subscriptionId);
+    public ApplicationResponse<SubscriptionResponse> cancelSubscription(@PathVariable Long subscriptionId,@PathVariable  String currency) {
+        return subscriptionService.cancelSubscription(subscriptionId,currency);
     }
 
     @PostMapping("/{subscriptionId}/change-plan")
     public ApplicationResponse<SubscriptionResponse> changePlan(
             @PathVariable Long subscriptionId,
             @RequestParam Long newPlanId,
+            @RequestParam String currency,
             @RequestParam(required = false, defaultValue = "true") boolean immediate) {
-        return subscriptionService.changePlan(subscriptionId, newPlanId, immediate);
+        return subscriptionService.changePlan(subscriptionId, newPlanId,currency, immediate);
     }
 }

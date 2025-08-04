@@ -1,0 +1,35 @@
+classDiagram
+    class PaymentRequest {
+        -Long amount
+        -Long quantity
+        -String name
+        -String currency
+        +getters()
+        +setters()
+    }
+
+    class PaymentGateway {
+        <<interface>>
+        +processPayment(PaymentRequest request)* void
+    }
+
+    class StripeGateway {
+        +processPayment(PaymentRequest request) void
+    }
+
+    class PayPalGateway {
+        +processPayment(PaymentRequest request) void
+    }
+
+    class ApplePayGateway {
+        +processPayment(PaymentRequest request) void
+    }
+
+    class PaymentGatewayFactory {
+        +createPaymentGateway(String type) PaymentGateway
+    }
+
+    PaymentGateway <|.. StripeGateway
+    PaymentGateway <|.. PayPalGateway
+    PaymentGateway <|.. ApplePayGateway
+    PaymentGatewayFactory --> PaymentGateway

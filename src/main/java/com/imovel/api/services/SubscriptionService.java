@@ -2,11 +2,11 @@ package com.imovel.api.services;
 import com.imovel.api.error.ApiCode;
 import com.imovel.api.model.Subscription;
 import com.imovel.api.model.SubscriptionPlan;
+import com.imovel.api.payment.PaymentResponse;
 import com.imovel.api.repository.SubscriptionPlanRepository;
 import com.imovel.api.repository.SubscriptionRepository;
 import com.imovel.api.response.ApplicationResponse;
 import com.imovel.api.logger.ApiLogger;
-import com.imovel.api.response.SubscriptionPlanResponse;
 import com.imovel.api.response.SubscriptionResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,12 +23,12 @@ import java.util.Optional;
 public class SubscriptionService {
     private final SubscriptionPlanRepository planRepository;
     private final SubscriptionRepository subscriptionRepository;
-    private final PaymentService paymentService;
+    private final IPaymentService paymentService;
 
     @Autowired
     public SubscriptionService(SubscriptionPlanRepository planRepository,
                                SubscriptionRepository subscriptionRepository,
-                               PaymentService paymentService) {
+                               IPaymentService paymentService) {
         this.planRepository = planRepository;
         this.subscriptionRepository = subscriptionRepository;
         this.paymentService = paymentService;
@@ -36,7 +36,10 @@ public class SubscriptionService {
 
     // Create new subscription
     @Transactional
-    public ApplicationResponse<SubscriptionResponse> subscribeUser(Long userId, Long planId, String billingCycle) {
+    public ApplicationResponse<SubscriptionResponse> subscribeUser(Long userId,
+                                                                   Long planId,
+                                                                   String billingCycle,
+                                                                   String currency) {
         try {
             // Validate billing cycle
             if (!billingCycle.equals("monthly") && !billingCycle.equals("yearly")) {
@@ -69,8 +72,11 @@ public class SubscriptionService {
                     "Processing payment for new subscription",
                     "User: " + userId + ", Amount: " + amount);
 
-            ApplicationResponse<Boolean> paymentResponse = paymentService.processPayment(
-                    userId, amount, "New subscription - " + plan.getName()
+            ApplicationResponse<PaymentResponse> paymentResponse = paymentService.processPayment(
+                    userId,
+                    amount,
+                    currency,
+                    "New subscription - " + plan.getName()
             );
 
             if (!paymentResponse.isSuccess()) {
@@ -144,7 +150,7 @@ public class SubscriptionService {
 
     // Cancel subscription
     @Transactional
-    public ApplicationResponse<SubscriptionResponse> cancelSubscription(Long subscriptionId) {
+    public ApplicationResponse<SubscriptionResponse> cancelSubscription(Long subscriptionId,String currency) {
         try {
             Subscription subscription = subscriptionRepository.findById(subscriptionId)
                     .orElseThrow(() -> new IllegalArgumentException("Invalid subscription ID"));
@@ -166,9 +172,10 @@ public class SubscriptionService {
                         "Processing refund for subscription cancellation",
                         "Amount: " + refundAmount);
 
-                ApplicationResponse<Boolean> refundResponse = paymentService.processRefund(
+                ApplicationResponse<PaymentResponse> refundResponse = paymentService.processRefund(
                         subscription.getUserId(),
                         refundAmount,
+                        currency,
                         "Subscription cancellation refund"
                 );
 
@@ -214,7 +221,7 @@ public class SubscriptionService {
 
     // Change subscription plan (upgrade/downgrade)
     @Transactional
-    public ApplicationResponse<SubscriptionResponse> changePlan(Long subscriptionId, Long newPlanId, boolean immediate) {
+    public ApplicationResponse<SubscriptionResponse> changePlan(Long subscriptionId, Long newPlanId,String currency, boolean immediate) {
         try {
             // Get current subscription
             Subscription currentSub = subscriptionRepository.findById(subscriptionId)
@@ -245,9 +252,10 @@ public class SubscriptionService {
                         "Processing payment for plan change",
                         "Amount: " + proration.getAmountDue());
 
-                ApplicationResponse<Boolean> paymentResponse = paymentService.processPayment(
+                ApplicationResponse<PaymentResponse> paymentResponse = paymentService.processPayment(
                         currentSub.getUserId(),
                         proration.getAmountDue(),
+                        currency,
                         "Subscription plan change to " + newPlan.getName()
                 );
 
