@@ -145,4 +145,11 @@ public class AuthService {
         return  ApplicationResponse.success(null, "Password changed successfully");
 
     }
+
+    public ApplicationResponse<Boolean> verifyUserCredentials(final long userId, final String password){
+
+        return authDetailsService.verifyUserCredentials(userId, password);
+
+
+    }
 }
