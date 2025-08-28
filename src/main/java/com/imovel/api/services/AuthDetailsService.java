@@ -1,5 +1,6 @@
 package com.imovel.api.services;
 
+import com.imovel.api.error.ApiCode;
 import com.imovel.api.exception.ResourceNotFoundException;
 import com.imovel.api.logger.ApiLogger;
 import com.imovel.api.model.AuthDetails;
@@ -80,7 +81,9 @@ public class AuthDetailsService {
 
         boolean isValid = isPasswordValid(authDetails, password);
         ApiLogger.info(SERVICE_NAME, "Verification result for user ID: " + userId + " - " + isValid);
-        return ApplicationResponse.success(isValid);
+
+        return isValid ? ApplicationResponse.success(isValid) :
+                ApplicationResponse.error(ApiCode.PASSWORD_POLICY_VIOLATION.getCode(),ApiCode.PASSWORD_POLICY_VIOLATION.getMessage(),ApiCode.PASSWORD_POLICY_VIOLATION.getHttpStatus());
     }
 
     /**

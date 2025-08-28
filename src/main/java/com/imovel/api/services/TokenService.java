@@ -66,6 +66,11 @@ public class TokenService {
             if(!optionalUser.isPresent()){
                return  ApplicationResponse.error(ApiCode.AUTHENTICATION_FAILED.getCode(), ApiCode.REQUIRED_FIELD_MISSING.getMessage(), ApiCode.AUTHENTICATION_FAILED.getHttpStatus());
             }
+            // enforce password check...
+            if(!authService.verifyUserCredentials(optionalUser.get().getId(), loginRequest.getPassword()).isSuccess()){
+
+                return  ApplicationResponse.error(ApiCode.INVALID_CREDENTIALS.getCode(), ApiCode.INVALID_CREDENTIALS.getMessage(), ApiCode.INVALID_CREDENTIALS.getHttpStatus());
+            }
             enforceTokenLimits(optionalUser.get().getId());
 
             Instant now = Instant.now();
