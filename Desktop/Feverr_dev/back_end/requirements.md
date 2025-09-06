@@ -120,7 +120,7 @@ classDiagram
 | POST   | `/api/auth/login`            | User login                   | No            |
 | POST   | `/api/auth/logout`           | User logout                  | Yes           |
 | POST   | `/api/auth/forgot-password`  | Request password reset       | No            |
-| POST   | `/api/auth/reset-password`   | Reset password               | No            |
+| POST   | `/api/auth/reset-password`   | Reset password               | Yes           |
 
 ### Users
 
