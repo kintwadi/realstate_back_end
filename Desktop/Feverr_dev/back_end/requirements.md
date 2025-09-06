@@ -125,7 +125,7 @@ classDiagram
 ### Users
 
 | Method | Endpoint                     | Description                  | Requires Auth |
-|--------|------------------------------|------------------------------| Yes           |
+|--------|------------------------------|------------------------------| --------------|
 | GET    | `/api/users`                 | Get all users                | Yes           |
 | GET    | `/api/users/me`              | Get current user profile     | Yes           |
 | PUT    | `/api/users/me`              | Update current user profile  | Yes           |
