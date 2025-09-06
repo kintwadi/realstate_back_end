@@ -1,12 +1,15 @@
 package com.imovel.api.controller;
 
-import com.imovel.api.request.UserProfileUpdateRequestDto;
+import com.imovel.api.request.UserUpdateRequest;
 import com.imovel.api.response.ApplicationResponse;
 import com.imovel.api.response.UserResponse;
 import com.imovel.api.services.UserService;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * Controller for handling user profile related operations.
@@ -24,25 +27,42 @@ public class UserController {
         this.userService = userService;
     }
 
+    @GetMapping("")
+    public ApplicationResponse <List<UserResponse>> getAllUsers(HttpSession session) {
+
+        return userService.getAllUsers(session);
+    }
+
     /**
      * Retrieves the profile of the currently authenticated user.
      *
      * @return ApplicationResponse with user profile or error
      */
     @GetMapping("/me")
-    public ApplicationResponse<UserResponse> getCurrentUserProfile() {
-        return userService.getCurrentUserProfile();
+    public ApplicationResponse<UserResponse> getCurrentUserProfile(HttpSession session) {
+
+
+        return userService.getCurrentUserProfile(session);
     }
 
     /**
      * Updates the profile of the currently authenticated user.
      *
-     * @param updateRequestDto DTO containing the updated profile information
+     * @param userRequest  containing the updated profile information
      * @return ApplicationResponse with updated profile or error
      */
-    @PutMapping("/profile-update")
+    @PutMapping("/me")
     public ApplicationResponse<UserResponse> updateUserProfile(
-            @Valid @RequestBody UserProfileUpdateRequestDto updateRequestDto) {
-        return userService.updateCurrentUserProfile(updateRequestDto);
+            @Valid @RequestBody UserUpdateRequest userRequest, HttpSession session)
+    {
+        return userService.updateCurrentUser(userRequest,session);
     }
+
+    @DeleteMapping("/me")
+    public ApplicationResponse<UserResponse> deleteUserProfile(HttpSession session)
+    {
+        return userService.deleteCurrentUser(session);
+    }
+
+
 }
