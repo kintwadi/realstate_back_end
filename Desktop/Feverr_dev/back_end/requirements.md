@@ -127,10 +127,8 @@ classDiagram
 | Method | Endpoint                     | Description                  |
 |--------|------------------------------|------------------------------|
 | GET    | `/api/users/me`              | Get current user profile     |
-| PUT    | `/api/users/me`              | Update user profile          |
-| PUT    | `/api/users/me/password`     | Change password              |
-| POST   | `/api/users/me/avatar`       | Upload profile avatar        |
-| DELETE | `/api/users/me/avatar`       | Remove profile avatar        |
+| PUT    | `/api/users/me`              | Update current user profile  |
+| DELETE | `/api/users/me/avatar`       | Remove current user          |
 
 ### Properties
 
