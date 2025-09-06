@@ -128,7 +128,7 @@ classDiagram
 |--------|------------------------------|------------------------------|
 | GET    | `/api/users/me`              | Get current user profile     |
 | PUT    | `/api/users/me`              | Update current user profile  |
-| DELETE | `/api/users/me/avatar`       | Remove current user          |
+| DELETE | `/api/users/me`              | Remove current user          |
 
 ### Properties
 
