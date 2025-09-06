@@ -1,10 +1,8 @@
 package com.imovel.api.request;
 
-import jakarta.validation.constraints.Size;
-
 import java.util.List;
 
-public class UserProfileUpdateRequestDto {
+public class UserUpdateRequest {
 
     private String name;
 
@@ -14,7 +12,7 @@ public class UserProfileUpdateRequestDto {
 
     private List<String> socialLinks;
 
-    public UserProfileUpdateRequestDto() {
+    public UserUpdateRequest() {
     }
 
     public String getName() {

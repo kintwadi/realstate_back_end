@@ -304,4 +304,8 @@ public class TokenService {
 
         oldestTokens.forEach(this::revokeToken);
     }
+
+    public String getClaim(final String name, String token){
+        return jwtProvider.getClaim(name,token);
+    }
 }

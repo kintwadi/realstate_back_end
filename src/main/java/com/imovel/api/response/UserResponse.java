@@ -2,6 +2,8 @@ package com.imovel.api.response;
 
 import com.imovel.api.model.User;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public class UserResponse  implements Serializable {
@@ -53,6 +55,7 @@ public class UserResponse  implements Serializable {
     public void setAvatar(String avatar) {
         this.avatar = avatar;
     }
+
     public static Optional<UserResponse> parse(User user){
         UserResponse dto = new UserResponse();
         dto.setId(user.getId());
@@ -61,5 +64,21 @@ public class UserResponse  implements Serializable {
         dto.setPhone(user.getPhone());
         dto.setAvatar(user.getAvatar());
         return Optional.of(dto);
+    }
+
+    public static List<UserResponse> parse(List<User> users){
+
+        List<UserResponse>currentUsers = new ArrayList<>();
+
+        for (User user : users) {
+            UserResponse dto = new UserResponse();
+            dto.setId(user.getId());
+            dto.setName(user.getName());
+            dto.setEmail(user.getEmail());
+            dto.setPhone(user.getPhone());
+            dto.setAvatar(user.getAvatar());
+            currentUsers.add(dto);
+        }
+        return currentUsers;
     }
 }

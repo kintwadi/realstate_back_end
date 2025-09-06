@@ -50,8 +50,6 @@ public class AuthenticationFilter implements Filter {
         {
             System.out.println("Error loading filter configuration: "+ex.getMessage());
         }
-
-
     }
 
     @Override
@@ -73,12 +71,20 @@ public class AuthenticationFilter implements Filter {
         if (isPathMatch(path, protectedEndpoints)) {
             // Validate JWT token
             String token = httpRequest.getHeader("Authorization");
-            if (token == null || !token.startsWith("Bearer ") || !isValidToken(token.substring(7))) {
+            if (token == null || !token.startsWith("Bearer ")) {
                 httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or missing JWT token");
                 return;
             }
             // pass on the claims
-            httpRequest.getSession().setAttribute("claims",jwtProcessor.getAllClaim(token));
+            String currentToken = removeBearerPrefix(token);
+
+            if(!isValidToken(currentToken)){
+                httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or missing JWT token");
+                return;
+            }
+
+            httpRequest.getSession().setAttribute("claims",jwtProcessor.getAllClaim(currentToken));
+            httpRequest.getSession().setAttribute("token",currentToken);
         }
         chain.doFilter(request, response);
     }
@@ -99,4 +105,21 @@ public class AuthenticationFilter implements Filter {
         return jwtProcessor.validateAccessToken(token);
     }
 
+    public static String removeBearerPrefix(String token) {
+        if (token == null) {
+            return null;
+        }
+
+        // Pattern to match "Bearer" followed by one or more whitespace characters
+        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("^Bearer\\s+");
+        java.util.regex.Matcher matcher = pattern.matcher(token);
+
+        if (matcher.find()) {
+            return token.substring(matcher.end());
+        }
+        return token;
+    }
+
 }
+
+
