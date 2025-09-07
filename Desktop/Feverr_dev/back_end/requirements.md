@@ -133,26 +133,26 @@ classDiagram
 
 ### Properties
 
-| Method | Endpoint                               | Description                          |
-|--------|----------------------------------------|--------------------------------------|
-| GET    | `/api/properties`                      | List all properties (filterable)     |
-| POST   | `/api/properties`                      | Create new property                  |
-| GET    | `/api/properties/:id`                  | Get property details                 |
-| PUT    | `/api/properties/:id`                  | Update property                      |
-| DELETE | `/api/properties/:id`                  | Delete property                      |
-| GET    | `/api/properties/me`                   | Get current user's properties        |
-| POST   | `/api/properties/:id/media`            | Upload property media                |
-| DELETE | `/api/properties/:id/media/:mediaId`   | Delete property media                |
+| Method | Endpoint                               | Description                          | Requires Auth |
+|--------|----------------------------------------|--------------------------------------|---------------|
+| GET    | `/api/properties`                      | List all properties (filterable)     | No            |
+| POST   | `/api/properties`                      | Create new property                  | Yes           |
+| GET    | `/api/properties/:id`                  | Get property details                 | No            |
+| PUT    | `/api/properties/:id`                  | Update property                      | Yes           |
+| DELETE | `/api/properties/:id`                  | Delete property                      | Yes           | 
+| GET    | `/api/properties/me`                   | Get current user's properties        | Yes           |
+| POST   | `/api/properties/:id/media`            | Upload property media                | Yes           |
+| DELETE | `/api/properties/:id/media/:mediaId`   | Delete property media                | Yes           |  
 
 ### Wishlist
 
-| Method | Endpoint                     | Description                  |
-|--------|------------------------------|------------------------------|
-| GET    | `/api/wishlist`              | Get user's wishlist          |
-| POST   | `/api/wishlist/:propertyId`  | Add property to wishlist     |
-| DELETE | `/api/wishlist/:propertyId`  | Remove from wishlist         |
-| DELETE | `/api/wishlist`              | Clear entire wishlist        |
-
+| Method | Endpoint                     | Description                  | Requires Auth |                                      
+|--------|------------------------------|------------------------------|---------------|
+| GET    | `/api/wishlist`              | Get user's wishlist          | No            |
+| POST   | `/api/wishlist/:propertyId`  | Add property to wishlist     | No            |
+| DELETE | `/api/wishlist/:propertyId`  | Remove from wishlist         | No            |
+| DELETE | `/api/wishlist`              | Clear entire wishlist        | No            |
+ 
 ### Search
 
 | Method | Endpoint                     | Description                  |
