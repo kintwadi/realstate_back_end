@@ -17,12 +17,20 @@ import java.util.stream.Collectors;
 
 /**
  * Filter for authenticating requests using JWT or other authentication mechanisms
+ * and handling CORS
  */
 @Component
 public class AuthenticationFilter implements Filter {
 
     private List<String> protectedEndpoints = Collections.emptyList();
     private List<String> excludedEndpoints = Collections.emptyList();
+    private List<String> allowedOrigins = Arrays.asList(
+            "http://localhost:3000",
+            "http://localhost:3001",
+            "http://127.0.0.1:300"
+            // Add other allowed origins as needed
+    );
+
     @Autowired
     JWTProvider jwtProcessor;
     @Autowired
@@ -58,11 +66,19 @@ public class AuthenticationFilter implements Filter {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
 
+        // Add CORS headers to all responses
+        addCorsHeaders(httpRequest, httpResponse);
+
+        // Handle preflight requests first
+        if ("OPTIONS".equalsIgnoreCase(httpRequest.getMethod())) {
+            httpResponse.setStatus(HttpServletResponse.SC_OK);
+            return;
+        }
+
         String path = httpRequest.getRequestURI().substring(httpRequest.getContextPath().length());
 
         // Check if path is excluded
         if (isPathMatch(path, excludedEndpoints)) {
-
             chain.doFilter(request, response);
             return;
         }
@@ -89,12 +105,34 @@ public class AuthenticationFilter implements Filter {
         chain.doFilter(request, response);
     }
 
+    /**
+     * Adds CORS headers to the response
+     */
+    private void addCorsHeaders(HttpServletRequest request, HttpServletResponse response) {
+        String origin = request.getHeader("Origin");
+
+        // Check if origin is allowed
+        if (origin != null && allowedOrigins.contains(origin)) {
+            response.setHeader("Access-Control-Allow-Origin", origin);
+        } else if (allowedOrigins.contains("*")) {
+            response.setHeader("Access-Control-Allow-Origin", "*");
+        }
+
+        response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH");
+        response.setHeader("Access-Control-Max-Age", "3600");
+        response.setHeader("Access-Control-Allow-Headers",
+                "Origin, X-Requested-With, Content-Type, Accept, Authorization, Content-Length");
+        response.setHeader("Access-Control-Allow-Credentials", "true");
+        response.setHeader("Access-Control-Expose-Headers", "Authorization, Content-Disposition");
+    }
+
     private List<String> parseEndpoints(String endpointsStr) {
         return Arrays.stream(endpointsStr.split(","))
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
                 .collect(Collectors.toList());
     }
+
     private boolean isPathMatch(String path, List<String> patterns) {
         return patterns.stream().anyMatch(pattern ->
                 path.startsWith(pattern.replace("*", "")) ||
@@ -119,7 +157,4 @@ public class AuthenticationFilter implements Filter {
         }
         return token;
     }
-
 }
-
-
