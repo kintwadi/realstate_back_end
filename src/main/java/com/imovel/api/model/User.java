@@ -1,5 +1,6 @@
 package com.imovel.api.model;
 
+import com.imovel.api.model.embeddable.SocialLink;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -35,10 +36,20 @@ public class User {
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 
+    public List<SocialLink> getSocialLinks() {
+        return socialLinks;
+    }
+
+    public void setSocialLinks(List<SocialLink> socialLinks) {
+        this.socialLinks = socialLinks;
+    }
+
     @ElementCollection
-    @CollectionTable(name = "user_social_links", joinColumns = @JoinColumn(name = "user_id"))
-    @Column(name = "social_link")
-    private List<String> socialLinks = new ArrayList<>();
+    @CollectionTable(
+            name = "user_social_links",
+            joinColumns = @JoinColumn(name = "user_id")
+    )
+    private List<SocialLink> socialLinks = new ArrayList<>();
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -67,7 +78,6 @@ public class User {
         this.role = role;
     }
 
-    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -114,14 +124,6 @@ public class User {
 
     public void setRole(Role role) {
         this.role = role;
-    }
-
-    public List<String> getSocialLinks() {
-        return socialLinks;
-    }
-
-    public void setSocialLinks(List<String> socialLinks) {
-        this.socialLinks = socialLinks;
     }
 
     public LocalDateTime getCreatedAt() {
