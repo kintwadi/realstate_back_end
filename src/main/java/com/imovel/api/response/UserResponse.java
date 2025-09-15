@@ -1,17 +1,21 @@
 package com.imovel.api.response;
 
 import com.imovel.api.model.User;
+import com.imovel.api.request.SocialLinkDto;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-public class UserResponse  implements Serializable {
+public class UserResponse implements Serializable {
     private Long id;
     private String name;
     private String email;
     private String phone;
     private String avatar;
+    private List<SocialLinkDto> socialLinks;
 
     public UserResponse() {
     }
@@ -56,19 +60,33 @@ public class UserResponse  implements Serializable {
         this.avatar = avatar;
     }
 
-    public static Optional<UserResponse> parse(User user){
-        UserResponse dto = new UserResponse();
-        dto.setId(user.getId());
-        dto.setName(user.getName());
-        dto.setEmail(user.getEmail());
-        dto.setPhone(user.getPhone());
-        dto.setAvatar(user.getAvatar());
-        return Optional.of(dto);
+    public static Optional<UserResponse> parse(User user) {
+        if (user == null) return Optional.empty();
+
+        UserResponse resp = new UserResponse();
+        resp.setId(user.getId());
+        resp.setName(user.getName());
+        resp.setEmail(user.getEmail());
+        resp.setPhone(user.getPhone());
+        resp.setAvatar(user.getAvatar());
+
+        if (user.getSocialLinks() != null) {
+            resp.setSocialLinks(
+                    user.getSocialLinks().stream()
+                            .map(sl -> {
+                                SocialLinkDto dto = new SocialLinkDto();
+                                dto.setPlatform(sl.getPlatform());
+                                dto.setUrl(sl.getUrl());
+                                return dto;
+                            })
+                            .collect(Collectors.toList())
+            );
+        }
+        return Optional.of(resp);
     }
 
-    public static List<UserResponse> parse(List<User> users){
-
-        List<UserResponse>currentUsers = new ArrayList<>();
+    public static List<UserResponse> parse(List<User> users) {
+        List<UserResponse> currentUsers = new ArrayList<>();
 
         for (User user : users) {
             UserResponse dto = new UserResponse();
@@ -80,5 +98,13 @@ public class UserResponse  implements Serializable {
             currentUsers.add(dto);
         }
         return currentUsers;
+    }
+
+    public List<SocialLinkDto> getSocialLinks() {
+        return socialLinks;
+    }
+
+    public void setSocialLinks(List<SocialLinkDto> socialLinks) {
+        this.socialLinks = socialLinks;
     }
 }

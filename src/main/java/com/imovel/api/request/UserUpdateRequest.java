@@ -10,7 +10,7 @@ public class UserUpdateRequest {
 
     private String avatar;
 
-    private List<String> socialLinks;
+    private List<SocialLinkDto> socialLinks;
 
     public UserUpdateRequest() {
     }
@@ -19,31 +19,32 @@ public class UserUpdateRequest {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getPhone() {
         return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
     }
 
     public String getAvatar() {
         return avatar;
     }
 
+    public List<SocialLinkDto> getSocialLinks() {
+        return socialLinks;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
     public void setAvatar(String avatar) {
         this.avatar = avatar;
     }
 
-    public List<String> getSocialLinks() {
-        return socialLinks;
-    }
-
-    public void setSocialLinks(List<String> socialLinks) {
+    public void setSocialLinks(List<SocialLinkDto> socialLinks) {
         this.socialLinks = socialLinks;
     }
+
 }
