@@ -1,5 +1,7 @@
 package com.imovel.api.controller;
 
+import com.imovel.api.error.ApiCode;
+import com.imovel.api.logger.ApiLogger;
 import com.imovel.api.model.User;
 import com.imovel.api.request.*;
 import com.imovel.api.response.ApplicationResponse;
@@ -7,9 +9,13 @@ import com.imovel.api.response.UserResponse;
 import com.imovel.api.security.token.JWTProvider;
 import com.imovel.api.security.token.Token;
 import com.imovel.api.services.AuthService;
+import com.imovel.api.services.ForgotPasswordService;
 import com.imovel.api.services.TokenService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -25,13 +31,17 @@ public class AuthController {
     private final JWTProvider jwtProvider;
     private final TokenService tokenService;
 
+    private final ForgotPasswordService forgotPasswordService;
+
     @Autowired
     public AuthController(AuthService authService,
                           JWTProvider jwtProcessor,
-                          TokenService tokenService) {
+                          TokenService tokenService,
+                          ForgotPasswordService forgotPasswordService) {
         this.authService = authService;
         this.jwtProvider = jwtProcessor;
         this.tokenService = tokenService;
+        this.forgotPasswordService = forgotPasswordService;
         this.jwtProvider.initialize();
     }
 
@@ -97,15 +107,53 @@ public class AuthController {
         return ApplicationResponse.success(null, "Logged out from all devices");
     }
 
-    /**
-     * Resets user password with new credentials.
-     *
-     * @param passwordChangeRequest Contains old and new password details
-     * @return ApplicationResponse with password change status
-     */
-    @PostMapping("/reset-password")
-    public ApplicationResponse<UserResponse> initiatePasswordReset(
-            @RequestBody PasswordChangeRequest passwordChangeRequest) {
-        return authService.changeUserPassword(passwordChangeRequest);
+    @PostMapping("/forgot-password")
+    public ApplicationResponse<Void> forgotPassword(
+            @RequestBody ForgotPasswordRequest request) {
+        return forgotPasswordService.requestReset(request);
     }
+
+    @PostMapping("/reset-password")
+    public ApplicationResponse<Void> resetPassword(
+            @RequestBody ResetPasswordRequest request) {
+        return forgotPasswordService.reset(request);
+    }
+
+    @PostMapping("/change-password")
+    public ApplicationResponse<Void> changePassword(@RequestBody ChangePasswordRequest request,
+                                                    HttpServletRequest httpRequest) {
+        Long userId = getUserIdFromToken(httpRequest);
+        if (userId == null) {
+            ApiLogger.error(buildLogTag("changePassword"), "No valid userId in JWT");
+            return ApplicationResponse.error(
+                    ApiCode.AUTHENTICATION_FAILED.getCode(),
+                    ApiCode.AUTHENTICATION_FAILED.getMessage(),
+                    ApiCode.AUTHENTICATION_FAILED.getHttpStatus()
+            );
+        }
+        return authService.changePassword(request, userId);
+    }
+
+    private String buildLogTag(String method) {
+        return "AuthController." + method;
+    }
+
+    // Your provided helper, moved to controller:
+    private Long getUserIdFromToken(HttpServletRequest request) {
+        String header = request.getHeader("Authorization");
+        if (StringUtils.hasText(header) && header.startsWith("Bearer ")) {
+            String token = header.substring(7);
+            try {
+                // The "userId" claim is added in TokenService.generateTokensForUser
+                String userIdStr = jwtProvider.getClaim("userId", token);
+                return Long.parseLong(userIdStr);
+            } catch (Exception e) {
+                ApiLogger.error(buildLogTag("getUserIdFromToken"),
+                        "Could not extract userId from token.", e);
+                return null;
+            }
+        }
+        return null;
+    }
+
 }
