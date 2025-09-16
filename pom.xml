@@ -74,6 +74,11 @@
             <version>${aspectj.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+
         <!-- Development Tools -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -101,7 +106,6 @@
             <!--  Use the latest version  -->
         </dependency>
         <!--  For multipart file uploads  -->
-
 
 
     </dependencies>
