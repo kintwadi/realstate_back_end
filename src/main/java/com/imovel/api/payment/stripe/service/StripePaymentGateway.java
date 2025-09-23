@@ -4,6 +4,7 @@ import com.imovel.api.error.ApiCode;
 import com.imovel.api.error.ErrorCode;
 import com.imovel.api.exception.PaymentProcessingException;
 import com.imovel.api.logger.ApiLogger;
+import com.imovel.api.payment.audit.PaymentAuditLogger;
 import com.imovel.api.payment.dto.PaymentResponse;
 import com.imovel.api.payment.gateway.PaymentGatewayInterface;
 import com.imovel.api.payment.model.Payment;
@@ -277,6 +278,9 @@ public class StripePaymentGateway implements PaymentGatewayInterface {
             Event event = Webhook.constructEvent(webhookPayload, signature, stripeWebhookSecret);
             ApiLogger.info("Received Stripe webhook event: " + event.getType());
             
+            // Log webhook event details
+            PaymentAuditLogger.logWebhookEventReceived("stripe", event.getType(), event.getId());
+            
             // Handle different event types
             switch (event.getType()) {
                 case "payment_intent.succeeded":
@@ -290,6 +294,7 @@ public class StripePaymentGateway implements PaymentGatewayInterface {
                     break;
                 default:
                     ApiLogger.info("Unhandled webhook event type: " + event.getType());
+                    PaymentAuditLogger.logWebhookEventReceived("stripe", event.getType() + " (unhandled)", event.getId());
             }
             
             return ApplicationResponse.success("Webhook processed successfully");

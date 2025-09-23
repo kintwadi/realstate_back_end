@@ -3,8 +3,7 @@ package com.imovel.api.payment.repository;
 import com.imovel.api.payment.model.Payment;
 import com.imovel.api.payment.model.enums.PaymentGateway;
 import com.imovel.api.payment.model.enums.PaymentStatus;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -23,10 +22,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
      */
     List<Payment> findByUserId(Long userId);
     
-    /**
-     * Find payments by user ID with pagination
-     */
-    Page<Payment> findByUserId(Long userId, Pageable pageable);
+
     
     /**
      * Find payments by status
@@ -96,5 +92,15 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
      * Find recent payments by user ID
      */
     @Query("SELECT p FROM Payment p WHERE p.userId = :userId ORDER BY p.createdAt DESC")
-    List<Payment> findRecentPaymentsByUserId(@Param("userId") Long userId, Pageable pageable);
+    List<Payment> findRecentPaymentsByUserId(@Param("userId") Long userId);
+    
+    /**
+     * Count payments created after a specific date
+     */
+    long countByCreatedAtAfter(LocalDateTime date);
+    
+    /**
+     * Count payments created after a specific date with a specific status
+     */
+    long countByCreatedAtAfterAndStatus(LocalDateTime date, String status);
 }

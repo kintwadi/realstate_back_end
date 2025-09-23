@@ -4,8 +4,8 @@ import com.imovel.api.payment.dto.PaymentRequest;
 import com.imovel.api.payment.dto.PaymentResponse;
 import com.imovel.api.payment.model.Payment;
 import com.imovel.api.response.ApplicationResponse;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import com.imovel.api.pagination.Pagination;
+import com.imovel.api.pagination.PaginationResult;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -35,13 +35,9 @@ public interface PaymentService {
     ApplicationResponse<PaymentResponse> getPaymentById(Long paymentId, Long userId);
     
     /**
-     * Get all payments for a user
-     * 
-     * @param userId The user ID
-     * @param pageable Pagination information
-     * @return ApplicationResponse containing paginated payment list
+     * Get user's payment history with pagination
      */
-    ApplicationResponse<Page<PaymentResponse>> getUserPayments(Long userId, Pageable pageable);
+    ApplicationResponse<PaginationResult<PaymentResponse>> getUserPayments(Long userId, Pagination pagination, String sortBy, String sortDirection);
     
     /**
      * Process a refund

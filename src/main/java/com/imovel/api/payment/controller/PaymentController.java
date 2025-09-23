@@ -6,13 +6,13 @@ import com.imovel.api.payment.dto.PaymentResponse;
 import com.imovel.api.payment.service.PaymentService;
 import com.imovel.api.response.ApplicationResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import com.imovel.api.pagination.Pagination;
+import com.imovel.api.pagination.PaginationResult;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -22,7 +22,8 @@ import java.time.LocalDateTime;
 public class PaymentController {
     
     private final PaymentService paymentService;
-
+    // ApiLogger is a utility class with static methods, no instantiation needed
+    
     @Autowired
     public PaymentController(PaymentService paymentService) {
         this.paymentService = paymentService;
@@ -32,10 +33,10 @@ public class PaymentController {
      * Process a new payment
      */
     @PostMapping("/process")
+    @RateLimiter(name = "paymentProcessing", fallbackMethod = "paymentRateLimitFallback")
     public ResponseEntity<ApplicationResponse<PaymentResponse>> processPayment(
-            @RequestBody PaymentRequest paymentRequest,
-            @RequestParam Long userId)
-    {
+             @RequestBody PaymentRequest paymentRequest,
+            @RequestParam Long userId) {
         
         ApiLogger.info("Processing payment request for user: " + userId);
         
@@ -71,21 +72,20 @@ public class PaymentController {
      * Get user's payment history with pagination
      */
     @GetMapping("/user/{userId}")
-    public ResponseEntity<ApplicationResponse<Page<PaymentResponse>>> getUserPayments(
+    public ResponseEntity<ApplicationResponse<PaginationResult<PaymentResponse>>> getUserPayments(
             @PathVariable Long userId,
-            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "desc") String sortDirection) {
         
         ApiLogger.info("Retrieving payments for user: " + userId);
         
-        Sort.Direction direction = sortDirection.equalsIgnoreCase("desc") ? 
-            Sort.Direction.DESC : Sort.Direction.ASC;
+        Pagination pagination = new Pagination();
+        pagination.setPageNumber(page);
+        pagination.setPageSize(size);
         
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
-        
-        ApplicationResponse<Page<PaymentResponse>> response = paymentService.getUserPayments(userId, pageable);
+        ApplicationResponse<PaginationResult<PaymentResponse>> response = paymentService.getUserPayments(userId, pagination, sortBy, sortDirection);
         
         if (response.isSuccess()) {
             return ResponseEntity.ok(response);
@@ -98,6 +98,7 @@ public class PaymentController {
      * Process a refund
      */
     @PostMapping("/{paymentId}/refund")
+    @RateLimiter(name = "paymentRefund", fallbackMethod = "refundRateLimitFallback")
     public ResponseEntity<ApplicationResponse<PaymentResponse>> processRefund(
             @PathVariable Long paymentId,
             @RequestParam BigDecimal refundAmount,
@@ -139,6 +140,7 @@ public class PaymentController {
      * Verify payment status with gateway
      */
     @PostMapping("/{paymentId}/verify")
+    @RateLimiter(name = "paymentVerification", fallbackMethod = "verificationRateLimitFallback")
     public ResponseEntity<ApplicationResponse<PaymentResponse>> verifyPaymentStatus(
             @PathVariable Long paymentId,
             @RequestParam Long userId) {
@@ -173,5 +175,31 @@ public class PaymentController {
         } else {
             return ResponseEntity.status(response.getError().getStatus()).body(response);
         }
+    }
+    
+    // Rate limiting fallback methods
+    
+    public ResponseEntity<ApplicationResponse<PaymentResponse>> paymentRateLimitFallback(
+            PaymentRequest paymentRequest, Long userId, Exception ex) {
+        ApiLogger.warn("Payment processing rate limit exceeded for user: " + userId);
+        ApplicationResponse<PaymentResponse> response = ApplicationResponse.error(
+            429L, "Payment processing rate limit exceeded. Please try again later.", HttpStatus.TOO_MANY_REQUESTS);
+        return ResponseEntity.status(429).body(response);
+    }
+    
+    public ResponseEntity<ApplicationResponse<PaymentResponse>> refundRateLimitFallback(
+            Long paymentId, BigDecimal refundAmount, String reason, Long userId, Exception ex) {
+        ApiLogger.warn("Refund processing rate limit exceeded for user: " + userId);
+        ApplicationResponse<PaymentResponse> response = ApplicationResponse.error(
+            429L, "Refund processing rate limit exceeded. Please try again later.", HttpStatus.TOO_MANY_REQUESTS);
+        return ResponseEntity.status(429).body(response);
+    }
+    
+    public ResponseEntity<ApplicationResponse<PaymentResponse>> verificationRateLimitFallback(
+            Long paymentId, Long userId, Exception ex) {
+        ApiLogger.warn("Payment verification rate limit exceeded for user: " + userId);
+        ApplicationResponse<PaymentResponse> response = ApplicationResponse.error(
+            429L, "Payment verification rate limit exceeded. Please try again later.", HttpStatus.TOO_MANY_REQUESTS);
+        return ResponseEntity.status(429).body(response);
     }
 }

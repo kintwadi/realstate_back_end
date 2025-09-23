@@ -44,7 +44,7 @@ public class PaymentConfig {
         private String publicKey;
         private String secretKey;
         private String webhookSecret;
-        private String apiVersion = "2025-10-16";
+        private String apiVersion = "2023-10-16";
         private boolean enabled = true;
         private int connectTimeoutMs = 30000;
         private int readTimeoutMs = 80000;
