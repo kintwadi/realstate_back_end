@@ -1,0 +1,53 @@
+# Payment Module Configuration
+payment:
+  general:
+    default-currency: "USD"
+    minimum-amount: 0.50
+    maximum-amount: 999999.99
+    payment-timeout-minutes: 30
+    enable-refunds: true
+    enable-partial-refunds: true
+    max-refund-days: 90
+    supported-currencies:
+      USD: "US Dollar"
+      EUR: "Euro"
+      GBP: "British Pound"
+      CAD: "Canadian Dollar"
+      AUD: "Australian Dollar"
+      BRL: "Brazilian Real"
+
+  stripe:
+    enabled: true
+    public-key: "${STRIPE_PUBLIC_KEY}"
+    secret-key: "${STRIPE_SECRET_KEY}"
+    webhook-secret: "${STRIPE_WEBHOOK_SECRET}"
+    api-version: "2023-10-16"
+    connect-timeout-ms: 30000
+    read-timeout-ms: 80000
+
+  paypal:
+    enabled: false
+    client-id: "${PAYPAL_CLIENT_ID:your_paypal_client_id_here}"
+    client-secret: "${PAYPAL_CLIENT_SECRET:your_paypal_client_secret_here}"
+    webhook-id: "${PAYPAL_WEBHOOK_ID:your_paypal_webhook_id_here}"
+    environment: "sandbox" # sandbox or live
+
+# Database configuration for payment tables
+spring:
+  jpa:
+    properties:
+      hibernate:
+        # Enable SQL logging for payment operations (development only)
+        show_sql: false
+        format_sql: true
+    hibernate:
+      ddl-auto: update
+
+# Logging configuration for payment module
+logging:
+  level:
+    com.imovel.api.payment: DEBUG
+    com.stripe: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
