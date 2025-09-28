@@ -1,10 +1,14 @@
 package com.imovel.api.payment.controller;
 
 import com.imovel.api.logger.ApiLogger;
+import com.imovel.api.payment.audit.PaymentAuditLogger;
+import com.imovel.api.payment.dto.PaymentRefundRequest;
 import com.imovel.api.payment.dto.PaymentRequest;
 import com.imovel.api.payment.dto.PaymentResponse;
+import com.imovel.api.payment.monitoring.PaymentMonitoringService;
 import com.imovel.api.payment.service.PaymentService;
 import com.imovel.api.response.ApplicationResponse;
+import io.micrometer.core.instrument.Timer;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.imovel.api.pagination.Pagination;
 import com.imovel.api.pagination.PaginationResult;
@@ -18,15 +22,17 @@ import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/payments")
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 public class PaymentController {
     
     private final PaymentService paymentService;
+    private final PaymentMonitoringService monitoringService;
     // ApiLogger is a utility class with static methods, no instantiation needed
     
     @Autowired
-    public PaymentController(PaymentService paymentService) {
+    public PaymentController(PaymentService paymentService,PaymentMonitoringService monitoringService) {
         this.paymentService = paymentService;
+        this.monitoringService = monitoringService;
     }
     
     /**
@@ -35,12 +41,11 @@ public class PaymentController {
     @PostMapping("/process")
     @RateLimiter(name = "paymentProcessing", fallbackMethod = "paymentRateLimitFallback")
     public ResponseEntity<ApplicationResponse<PaymentResponse>> processPayment(
-             @RequestBody PaymentRequest paymentRequest,
-            @RequestParam Long userId) {
+             @RequestBody PaymentRequest paymentRequest) {
         
-        ApiLogger.info("Processing payment request for user: " + userId);
+        ApiLogger.info("Processing payment request for user: " + paymentRequest.getUserId());
         
-        ApplicationResponse<PaymentResponse> response = paymentService.processPayment(paymentRequest, userId);
+        ApplicationResponse<PaymentResponse> response = paymentService.processPayment(paymentRequest, paymentRequest.getUserId());
         
         if (response.isSuccess()) {
             return ResponseEntity.ok(response);
@@ -97,14 +102,17 @@ public class PaymentController {
     /**
      * Process a refund
      */
-    @PostMapping("/{paymentId}/refund")
+    @PostMapping("/refund")
     @RateLimiter(name = "paymentRefund", fallbackMethod = "refundRateLimitFallback")
-    public ResponseEntity<ApplicationResponse<PaymentResponse>> processRefund(
-            @PathVariable Long paymentId,
-            @RequestParam BigDecimal refundAmount,
-            @RequestParam(required = false) String reason,
-            @RequestParam Long userId) {
-        
+    public ResponseEntity<ApplicationResponse<PaymentResponse>> processRefund(@RequestBody PaymentRefundRequest paymentRefund) {
+
+
+        // Assign variables from the request object
+        Long paymentId = paymentRefund.getPaymentId();
+        BigDecimal refundAmount = paymentRefund.getRefundAmount();
+        String reason = paymentRefund.getReason();
+        Long userId = paymentRefund.getUserId();
+
         ApiLogger.info("Processing refund for payment: " + paymentId + ", amount: " + refundAmount);
         
         ApplicationResponse<PaymentResponse> response = paymentService.processRefund(
@@ -176,6 +184,62 @@ public class PaymentController {
             return ResponseEntity.status(response.getError().getStatus()).body(response);
         }
     }
+
+//    @PostMapping("/webhooks/events")
+//    public ResponseEntity<String> handleStripeWebhook(
+//            @RequestBody String payload,
+//            @RequestHeader("Stripe-Signature") String signature) {
+//
+//        Timer.Sample timerSample = monitoringService.startTimer();
+//
+//        ApiLogger.info("Received Stripe webhook");
+//
+//        // Log webhook received
+//        PaymentAuditLogger.logWebhookReceived("stripe", payload.length());
+//
+//        try {
+//            ApplicationResponse<String> response = paymentService.handleWebhook("stripe", payload, signature);
+//
+//            if (response.isSuccess()) {
+//                PaymentAuditLogger.logWebhookProcessed("stripe", "success");
+//
+//                // Record monitoring metrics
+//                monitoringService.stopWebhookTimer(timerSample, "stripe", "success");
+//                monitoringService.recordWebhookEvent("stripe", "success", true);
+//
+//                return ResponseEntity.ok("Webhook processed successfully");
+//            } else {
+//                PaymentAuditLogger.logWebhookProcessed("stripe", "failed: " + response.getError().getMessage());
+//                ApiLogger.error("Webhook processing failed: " + response.getError().getMessage());
+//
+//                // Record monitoring metrics
+//                monitoringService.stopWebhookTimer(timerSample, "stripe", "failed");
+//                monitoringService.recordWebhookEvent("stripe", "failed", false);
+//
+//                return ResponseEntity.badRequest().body("Webhook processing failed");
+//            }
+//
+//        } catch (Exception e) {
+//            PaymentAuditLogger.logWebhookProcessed("stripe", "error: " + e.getMessage());
+//            ApiLogger.error("Error processing Stripe webhook", e);
+//
+//            // Record monitoring metrics
+//            monitoringService.stopWebhookTimer(timerSample, "stripe", "error");
+//            monitoringService.recordWebhookEvent("stripe", "error", false);
+//
+//            return ResponseEntity.internalServerError().body("Internal server error");
+//        }
+//    }
+//
+//    public ResponseEntity<String> webhookRateLimitFallback(
+//            String payload, String signature, Exception ex) {
+//        ApiLogger.warn("Webhook rate limit exceeded");
+//
+//        // Record rate limit hit
+//        monitoringService.recordRateLimitHit("webhook", "stripe");
+//
+//        return ResponseEntity.status(429).body("Webhook rate limit exceeded. Please try again later.");
+//    }
     
     // Rate limiting fallback methods
     

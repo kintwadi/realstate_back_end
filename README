@@ -13,3 +13,5 @@ SETUP KEYSTORE ENV VARIABLES IN YOUR workspace.xml or your OS
         <env name="RDS_PASSWORD" value="postgres" />
 
  </envs>
+
+ stripe listen --forward-to http://localhost:8080/imovel/api/webhooks/events

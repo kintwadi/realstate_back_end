@@ -19,6 +19,7 @@ public class PaymentResponse {
     private PaymentMethod method;
     private PaymentStatus status;
     private String gatewayPaymentId;
+    private String clientSecret;
     private String description;
     private String failureReason;
     private LocalDateTime createdAt;
@@ -29,7 +30,7 @@ public class PaymentResponse {
     
     public PaymentResponse(Long id, Long userId, BigDecimal amount, String currency, 
                           Long quantity, String customerName, PaymentGateway gateway, 
-                          PaymentMethod method, PaymentStatus status, String gatewayPaymentId,
+                          PaymentMethod method, PaymentStatus status, String gatewayPaymentId, String clientSecret,
                           String description, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.userId = userId;
@@ -41,6 +42,7 @@ public class PaymentResponse {
         this.method = method;
         this.status = status;
         this.gatewayPaymentId = gatewayPaymentId;
+        this.clientSecret= clientSecret;
         this.description = description;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -157,5 +159,13 @@ public class PaymentResponse {
     
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getClientSecret() {
+        return clientSecret;
+    }
+
+    public void setClientSecret(String clientSecret) {
+        this.clientSecret = clientSecret;
     }
 }

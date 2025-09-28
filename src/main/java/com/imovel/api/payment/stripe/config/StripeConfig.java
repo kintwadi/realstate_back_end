@@ -17,17 +17,17 @@ import jakarta.annotation.PostConstruct;
 @ConfigurationProperties(prefix = "stripe")
 public class StripeConfig {
 
-    @Value("${stripe.secret.key}")
+    //@Value("${stripe.secret.key}")
     private String secretKey;
 
-    @Value("${stripe.public.key}")
+    //@Value("${stripe.public.key}")
     private String publicKey;
 
-    @Value("${stripe.webhook.secret:}")
+    //@Value("${stripe.webhook.secret}")
     private String webhookSecret;
 
-    @Value("${stripe.api.version:2023-10-16}")
-    private String apiVersion;
+    //@Value("${stripe.api.version}")
+    private String apiVersion = "2025-08-27.basil";
 
     /**
      * Initialize Stripe SDK with configuration
@@ -38,7 +38,6 @@ public class StripeConfig {
         
         // Set Stripe API key
         Stripe.apiKey = secretKey;
-        
         ApiLogger.info("StripeConfig", "Stripe SDK initialized successfully with API version: " + apiVersion);
     }
 
@@ -109,13 +108,20 @@ public class StripeConfig {
         return publicKey.substring(0, 7) + "***" + publicKey.substring(publicKey.length() - 4);
     }
 
-    @Override
-    public String toString() {
-        return "StripeConfig{" +
-                "secretKey='" + getMaskedSecretKey() + '\'' +
-                ", publicKey='" + getMaskedPublicKey() + '\'' +
-                ", webhookSecret='" + (StringUtils.hasText(webhookSecret) ? "SET" : "NOT_SET") + '\'' +
-                ", apiVersion='" + apiVersion + '\'' +
-                '}';
+    public void setSecretKey(String secretKey) {
+        this.secretKey = secretKey;
     }
+
+    public void setPublicKey(String publicKey) {
+        this.publicKey = publicKey;
+    }
+
+    public void setWebhookSecret(String webhookSecret) {
+        this.webhookSecret = webhookSecret;
+    }
+
+    public void setApiVersion(String apiVersion) {
+        this.apiVersion = apiVersion;
+    }
+
 }

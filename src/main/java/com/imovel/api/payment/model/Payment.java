@@ -47,6 +47,10 @@ public class Payment {
     
     @Column(name = "gateway_payment_id")
     private String gatewayPaymentId;
+
+    @Column(name = "clientSecret")
+    private String clientSecret;
+
     
     @Column(name = "gateway_customer_id")
     private String gatewayCustomerId;
@@ -210,5 +214,13 @@ public class Payment {
     
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getClientSecret() {
+        return clientSecret;
+    }
+
+    public void setClientSecret(String clientSecret) {
+        this.clientSecret = clientSecret;
     }
 }

@@ -11,6 +11,8 @@ public class PaymentRequest {
     @NotBlank(message = "Customer name is required")
     @Size(max = 100, message = "Customer name must not exceed 100 characters")
     private String name;
+    @NotBlank(message = "Customer id is required")
+    private Long userId;
     
     @NotNull(message = "Amount is required")
     @DecimalMin(value = "0.01", message = "Amount must be greater than 0")
@@ -109,5 +111,13 @@ public class PaymentRequest {
     
     public PaymentMethod getMethodEnum() {
         return PaymentMethod.fromString(this.method);
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 }

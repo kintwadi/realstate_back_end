@@ -1,4 +1,4 @@
-package com.imovel.api.payment.stripe.controller;
+package com.imovel.api.payment.controller;
 
 import com.imovel.api.logger.ApiLogger;
 import com.imovel.api.payment.audit.PaymentAuditLogger;
@@ -12,14 +12,12 @@ import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.micrometer.core.instrument.Timer;
 
 @RestController
-@RequestMapping("/api/webhooks/stripe")
-@CrossOrigin(origins = "*")
+@RequestMapping("/api/webhooks")
 public class StripeWebhookController {
     
     private final PaymentService paymentService;
     private final PaymentMonitoringService monitoringService;
-    // ApiLogger is a utility class with static methods, no instantiation needed
-    
+
     @Autowired
     public StripeWebhookController(PaymentService paymentService, PaymentMonitoringService monitoringService) {
         this.paymentService = paymentService;
