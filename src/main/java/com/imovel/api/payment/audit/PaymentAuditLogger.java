@@ -2,8 +2,7 @@ package com.imovel.api.payment.audit;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.imovel.api.logger.ApiLogger;
 import org.slf4j.MDC;
 
 import java.math.BigDecimal;
@@ -15,13 +14,19 @@ import java.util.Map;
 /**
  * Specialized audit logger for payment events and transactions.
  * Provides structured logging with consistent format for audit trails.
+ * Uses ApiLogger for consistent logging across the application.
  */
 public final class PaymentAuditLogger {
     
-    private static final Logger auditLogger = LoggerFactory.getLogger("PAYMENT_AUDIT");
+    private static final String AUDIT_LOGGER_TYPE = "PAYMENT_AUDIT";
     private static final ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule());
     private static final DateTimeFormatter TIMESTAMP_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+    
+    static {
+        // Configure ApiLogger to use the payment audit logger type
+        ApiLogger.setLoggerType(AUDIT_LOGGER_TYPE);
+    }
     
     private PaymentAuditLogger() {}
     
@@ -289,10 +294,11 @@ public final class PaymentAuditLogger {
     private static void logAuditEvent(Map<String, Object> auditData) {
         try {
             String jsonLog = objectMapper.writeValueAsString(auditData);
-            auditLogger.info(jsonLog);
+            // Use ApiLogger for consistent logging with context support
+            ApiLogger.info("PaymentAudit", jsonLog);
         } catch (Exception e) {
             // Fallback to simple logging if JSON serialization fails
-            auditLogger.error("Failed to serialize audit data: {}", auditData, e);
+            ApiLogger.error("PaymentAudit", "Failed to serialize audit data", e, auditData);
         }
     }
 }
