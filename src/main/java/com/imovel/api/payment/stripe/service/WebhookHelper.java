@@ -136,127 +136,127 @@ public class WebhookHelper {
         }
     }
     // Alternative method using Jackson for JSON processing
-    public void handlePaymentIntentSucceededAlternative(Event event) {
-        try {
-            ApiLogger.info("=== Starting alternative PaymentIntent handler (Jackson) ===");
-
-            // Get the event data
-            EventDataObjectDeserializer dataDeserializer = event.getDataObjectDeserializer();
-
-            // Check if deserialization failed
-            if (dataDeserializer.getObject().isEmpty()) {
-                ApiLogger.warn("Deserialization failed, attempting manual extraction with Jackson");
-
-                // Extract using Jackson
-                String paymentIntentId = extractPaymentIntentIdWithJackson(event);
-                if (paymentIntentId != null) {
-                    ApiLogger.info("Found PaymentIntent ID with Jackson: " + paymentIntentId);
-                    updatePaymentStatus(paymentIntentId, PaymentStatus.SUCCEEDED, null);
-                } else {
-                    ApiLogger.error("Could not extract PaymentIntent ID with Jackson");
-                }
-            } else {
-                // Normal deserialization worked
-                PaymentIntent paymentIntent = (PaymentIntent) dataDeserializer.getObject().get();
-                ApiLogger.info("PaymentIntent found: " + paymentIntent.getId());
-                updatePaymentStatus(paymentIntent.getId(), PaymentStatus.SUCCEEDED, null);
-            }
-
-        } catch (Exception e) {
-            ApiLogger.error("Error in alternative PaymentIntent handler", e);
-        }
-    }
+//    public void handlePaymentIntentSucceededAlternative(Event event) {
+//        try {
+//            ApiLogger.info("=== Starting alternative PaymentIntent handler (Jackson) ===");
+//
+//            // Get the event data
+//            EventDataObjectDeserializer dataDeserializer = event.getDataObjectDeserializer();
+//
+//            // Check if deserialization failed
+//            if (dataDeserializer.getObject().isEmpty()) {
+//                ApiLogger.warn("Deserialization failed, attempting manual extraction with Jackson");
+//
+//                // Extract using Jackson
+//                String paymentIntentId = extractPaymentIntentIdWithJackson(event);
+//                if (paymentIntentId != null) {
+//                    ApiLogger.info("Found PaymentIntent ID with Jackson: " + paymentIntentId);
+//                    updatePaymentStatus(paymentIntentId, PaymentStatus.SUCCEEDED, null);
+//                } else {
+//                    ApiLogger.error("Could not extract PaymentIntent ID with Jackson");
+//                }
+//            } else {
+//                // Normal deserialization worked
+//                PaymentIntent paymentIntent = (PaymentIntent) dataDeserializer.getObject().get();
+//                ApiLogger.info("PaymentIntent found: " + paymentIntent.getId());
+//                updatePaymentStatus(paymentIntent.getId(), PaymentStatus.SUCCEEDED, null);
+//            }
+//
+//        } catch (Exception e) {
+//            ApiLogger.error("Error in alternative PaymentIntent handler", e);
+//        }
+//    }
     // Simplified method using Jackson
-    public void handlePaymentIntentSucceededSimplified(Event event) {
-        try {
+//    public void handlePaymentIntentSucceededSimplified(Event event) {
+//        try {
+//
+//            ApiLogger.info("=== Starting simplified PaymentIntent handler (Jackson) ===");
+//
+//            String paymentIntentId = null;
+//
+//            // First try: Direct deserialization
+//            PaymentIntent paymentIntent = (PaymentIntent) event.getDataObjectDeserializer().getObject().orElse(null);
+//            if (paymentIntent != null)
+//            {
+//                paymentIntentId = paymentIntent.getId();
+//            } else {
+//                // Fallback: Extract using Jackson
+//                paymentIntentId = extractPaymentIntentIdWithJackson(event);
+//
+//                // If still null, try one more approach with Jackson
+//                if (paymentIntentId == null)
+//                {
+//                    paymentIntentId = extractPaymentIntentIdFromRawJson(event);
+//                }
+//            }
+//
+//            if (paymentIntentId != null) {
+//                ApiLogger.info("Processing PaymentIntent: " + paymentIntentId);
+//                updatePaymentStatus(paymentIntentId, PaymentStatus.SUCCEEDED, null);
+//            } else {
+//                ApiLogger.error("Unable to determine PaymentIntent ID from event: " + event.getId());
+//                logRawEventDataWithJackson(event);
+//            }
+//
+//        } catch (Exception e) {
+//            ApiLogger.error("Error in simplified PaymentIntent handler", e);
+//        }
+//    }
+//
+//    private String extractPaymentIntentIdFromRawJson(Event event) {
+//        try {
+//            String rawJsonOptional = event.getDataObjectDeserializer().getRawJson();
+//
+//            if (rawJsonOptional != null) {
+//                String rawJson = rawJsonOptional;
+//                JsonNode jsonNode = objectMapper.readTree(rawJson);
+//                // Extract ID from the object
+//                JsonNode idNode = jsonNode.path("id");
+//                if (!idNode.isMissingNode() && idNode.isTextual()) {
+//                    return idNode.asText();
+//                }
+//            }
+//        } catch (Exception e) {
+//            ApiLogger.error("Error extracting PaymentIntent ID from raw JSON", e);
+//        }
+//        return null;
+//    }
 
-            ApiLogger.info("=== Starting simplified PaymentIntent handler (Jackson) ===");
-
-            String paymentIntentId = null;
-
-            // First try: Direct deserialization
-            PaymentIntent paymentIntent = (PaymentIntent) event.getDataObjectDeserializer().getObject().orElse(null);
-            if (paymentIntent != null)
-            {
-                paymentIntentId = paymentIntent.getId();
-            } else {
-                // Fallback: Extract using Jackson
-                paymentIntentId = extractPaymentIntentIdWithJackson(event);
-
-                // If still null, try one more approach with Jackson
-                if (paymentIntentId == null)
-                {
-                    paymentIntentId = extractPaymentIntentIdFromRawJson(event);
-                }
-            }
-
-            if (paymentIntentId != null) {
-                ApiLogger.info("Processing PaymentIntent: " + paymentIntentId);
-                updatePaymentStatus(paymentIntentId, PaymentStatus.SUCCEEDED, null);
-            } else {
-                ApiLogger.error("Unable to determine PaymentIntent ID from event: " + event.getId());
-                logRawEventDataWithJackson(event);
-            }
-
-        } catch (Exception e) {
-            ApiLogger.error("Error in simplified PaymentIntent handler", e);
-        }
-    }
-
-    private String extractPaymentIntentIdFromRawJson(Event event) {
-        try {
-            String rawJsonOptional = event.getDataObjectDeserializer().getRawJson();
-
-            if (rawJsonOptional != null) {
-                String rawJson = rawJsonOptional;
-                JsonNode jsonNode = objectMapper.readTree(rawJson);
-                // Extract ID from the object
-                JsonNode idNode = jsonNode.path("id");
-                if (!idNode.isMissingNode() && idNode.isTextual()) {
-                    return idNode.asText();
-                }
-            }
-        } catch (Exception e) {
-            ApiLogger.error("Error extracting PaymentIntent ID from raw JSON", e);
-        }
-        return null;
-    }
-
-    // Method to handle webhook with full Jackson parsing
-    public void handlePaymentIntentWithFullJackson(Event event) {
-        try {
-            ApiLogger.info("=== Starting full Jackson PaymentIntent handler ===");
-            // Parse the entire event with Jackson
-            String eventJson = event.toJson();
-            JsonNode rootNode = objectMapper.readTree(eventJson);
-
-            // Extract all relevant information
-            String eventId = rootNode.path("id").asText();
-            String eventType = rootNode.path("type").asText();
-
-            JsonNode dataNode = rootNode.path("data");
-            JsonNode objectNode = dataNode.path("object");
-
-            String paymentIntentId = objectNode.path("id").asText();
-            String status = objectNode.path("status").asText();
-            String amount = objectNode.path("amount").asText();
-            String currency = objectNode.path("currency").asText();
-
-            ApiLogger.info("Parsed with Jackson - ID: " + paymentIntentId +
-                    ", Status: " + status +
-                    ", Amount: " + amount +
-                    ", Currency: " + currency);
-
-            if (paymentIntentId != null && !paymentIntentId.isEmpty()) {
-                updatePaymentStatus(paymentIntentId, PaymentStatus.SUCCEEDED, null);
-            } else {
-                ApiLogger.error("PaymentIntent ID is empty in Jackson parsing");
-            }
-
-        } catch (Exception e) {
-            ApiLogger.error("Error in full Jackson PaymentIntent handler", e);
-        }
-    }
+//    // Method to handle webhook with full Jackson parsing
+//    public void handlePaymentIntentWithFullJackson(Event event) {
+//        try {
+//            ApiLogger.info("=== Starting full Jackson PaymentIntent handler ===");
+//            // Parse the entire event with Jackson
+//            String eventJson = event.toJson();
+//            JsonNode rootNode = objectMapper.readTree(eventJson);
+//
+//            // Extract all relevant information
+//            String eventId = rootNode.path("id").asText();
+//            String eventType = rootNode.path("type").asText();
+//
+//            JsonNode dataNode = rootNode.path("data");
+//            JsonNode objectNode = dataNode.path("object");
+//
+//            String paymentIntentId = objectNode.path("id").asText();
+//            String status = objectNode.path("status").asText();
+//            String amount = objectNode.path("amount").asText();
+//            String currency = objectNode.path("currency").asText();
+//
+//            ApiLogger.info("Parsed with Jackson - ID: " + paymentIntentId +
+//                    ", Status: " + status +
+//                    ", Amount: " + amount +
+//                    ", Currency: " + currency);
+//
+//            if (paymentIntentId != null && !paymentIntentId.isEmpty()) {
+//                updatePaymentStatus(paymentIntentId, PaymentStatus.SUCCEEDED, null);
+//            } else {
+//                ApiLogger.error("PaymentIntent ID is empty in Jackson parsing");
+//            }
+//
+//        } catch (Exception e) {
+//            ApiLogger.error("Error in full Jackson PaymentIntent handler", e);
+//        }
+//    }
 
     private void updatePaymentStatus(String paymentIntentId, PaymentStatus status, String errorMessage) {
         try {
