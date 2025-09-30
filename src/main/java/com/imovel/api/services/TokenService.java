@@ -3,6 +3,7 @@ package com.imovel.api.services;
 import com.imovel.api.error.ApiCode;
 import com.imovel.api.exception.AuthenticationException;
 import com.imovel.api.exception.TokenRefreshException;
+import com.imovel.api.logger.ApiLogger;
 import com.imovel.api.model.RefreshToken;
 import com.imovel.api.model.User;
 import com.imovel.api.repository.RefreshTokenRepository;
@@ -61,6 +62,7 @@ public class TokenService {
     public ApplicationResponse<Token> login(UserLoginRequest loginRequest, HttpServletRequest request) {
 
 
+        ApiLogger.info("TokenService.login: initialization");
         try {
             Optional<User> optionalUser = authService.findByEmail(loginRequest.getEmail());
             if(!optionalUser.isPresent()){

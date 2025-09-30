@@ -56,6 +56,6 @@ public class PaymentAuditInterceptor implements HandlerInterceptor {
         String uri = request.getRequestURI();
         return uri.contains("/api/payments") || 
                uri.contains("/api/webhooks") ||
-               uri.contains("/stripe");
+               uri.contains("/events");
     }
 }
