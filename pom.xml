@@ -201,12 +201,6 @@
             </exclusions>
         </dependency>
 
-        <!-- Add Log4j2 -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-log4j2</artifactId>
-        </dependency>
-
         <!-- For JSON layout if needed -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>

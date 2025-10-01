@@ -124,4 +124,24 @@ public class StripeConfig {
         this.apiVersion = apiVersion;
     }
 
+    @Override
+    public String toString() {
+        return "StripeConfig{" +
+                "secretKey='" + getMaskedSecretKey() + '\'' +
+                ", publicKey='" + getMaskedPublicKey() + '\'' +
+                ", webhookSecret='" + getMaskedWebhookSecret() + '\'' +
+                ", apiVersion='" + apiVersion + '\'' +
+                '}';
+    }
+
+    /**
+     * Get masked webhook secret for logging (security)
+     */
+    private String getMaskedWebhookSecret() {
+        if (!StringUtils.hasText(webhookSecret)) {
+            return "NOT_SET";
+        }
+        return webhookSecret.substring(0, 6) + "***" + webhookSecret.substring(webhookSecret.length() - 4);
+    }
+
 }

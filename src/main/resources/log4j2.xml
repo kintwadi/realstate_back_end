@@ -2,7 +2,7 @@
 <Configuration status="WARN" monitorInterval="30">
     <Properties>
         <Property name="log.directory">./logs</Property>
-        <Property name="isThreadContextMapInheritable">false</Property>
+        <Property name="isThreadContextMapInheritable">true</Property>
         <Property name="AsyncLogger.RingBufferSize">262144</Property>
         <Property name="AsyncAppender.RingBufferSize">262144</Property>
         <Property name="log4j2.contextSelector">org.apache.logging.log4j.core.async.AsyncLoggerContextSelector</Property>
@@ -19,7 +19,7 @@
         <RollingFile name="File"
                      fileName="${log.directory}/application.log"
                      filePattern="${log.directory}/application-%d{yyyy-MM-dd}-%i.log.gz"
-                     immediateFlush="true"
+                     immediateFlush="false"
                      append="true">
             <JsonTemplateLayout eventTemplateUri="classpath:LoggerLayout.json"/>
             <Policies>
@@ -29,22 +29,41 @@
             <DefaultRolloverStrategy max="30"/>
         </RollingFile>
 
-        <!-- Async Appender for both Console and File -->
-        <Async name="AsyncAppender" bufferSize="262144">
+        <!-- Separate Async Appenders to prevent circular references -->
+        <Async name="AsyncConsole" bufferSize="262144" includeLocation="false">
             <AppenderRef ref="Console"/>
+        </Async>
+        
+        <Async name="AsyncFile" bufferSize="262144" includeLocation="false">
             <AppenderRef ref="File"/>
         </Async>
     </Appenders>
 
     <Loggers>
-        <!-- Your specific logger -->
-        <AsyncLogger name="com.imovel.api.logger" level="info" includeLocation="true">
-            <AppenderRef ref="AsyncAppender"/>
-        </AsyncLogger>
+        <!-- Payment Audit Logger - separate from main logger to prevent loops -->
+        <Logger name="PAYMENT_AUDIT" level="info" additivity="false">
+            <AppenderRef ref="AsyncFile"/>
+        </Logger>
+        
+        <!-- Application Logger - prevent circular reference -->
+        <Logger name="com.imovel.api" level="info" additivity="false">
+            <AppenderRef ref="AsyncConsole"/>
+            <AppenderRef ref="AsyncFile"/>
+        </Logger>
+        
+        <!-- Stripe and external libraries -->
+        <Logger name="com.stripe" level="warn" additivity="false">
+            <AppenderRef ref="AsyncFile"/>
+        </Logger>
+        
+        <!-- Spring Framework -->
+        <Logger name="org.springframework" level="warn" additivity="false">
+            <AppenderRef ref="AsyncConsole"/>
+        </Logger>
 
-        <!-- Root Logger -->
-        <Root level="debug" includeLocation="true">
-            <AppenderRef ref="AsyncAppender"/>
+        <!-- Root Logger - simplified to prevent loops -->
+        <Root level="info" includeLocation="false">
+            <AppenderRef ref="AsyncConsole"/>
         </Root>
     </Loggers>
 </Configuration>
