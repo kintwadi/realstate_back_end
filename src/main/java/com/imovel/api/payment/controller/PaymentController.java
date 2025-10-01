@@ -1,14 +1,12 @@
 package com.imovel.api.payment.controller;
 
 import com.imovel.api.logger.ApiLogger;
-import com.imovel.api.payment.audit.PaymentAuditLogger;
 import com.imovel.api.payment.dto.PaymentRefundRequest;
 import com.imovel.api.payment.dto.PaymentRequest;
 import com.imovel.api.payment.dto.PaymentResponse;
 import com.imovel.api.payment.monitoring.PaymentMonitoringService;
 import com.imovel.api.payment.service.PaymentService;
 import com.imovel.api.response.ApplicationResponse;
-import io.micrometer.core.instrument.Timer;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.imovel.api.pagination.Pagination;
 import com.imovel.api.pagination.PaginationResult;
@@ -22,13 +20,11 @@ import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/payments")
-//@CrossOrigin(origins = "*")
 public class PaymentController {
     
     private final PaymentService paymentService;
     private final PaymentMonitoringService monitoringService;
-    // ApiLogger is a utility class with static methods, no instantiation needed
-    
+
     @Autowired
     public PaymentController(PaymentService paymentService,PaymentMonitoringService monitoringService) {
         this.paymentService = paymentService;

@@ -6,6 +6,7 @@ import com.imovel.api.logger.ApiLogger;
 import com.imovel.api.payment.audit.PaymentAuditLogger;
 import com.imovel.api.payment.dto.PaymentRequest;
 import com.imovel.api.payment.monitoring.PaymentMonitoringService;
+import com.imovel.api.session.SessionManager;
 import io.micrometer.core.instrument.Timer;
 import com.imovel.api.payment.dto.PaymentResponse;
 import com.imovel.api.payment.factory.PaymentGatewayFactory;
@@ -37,18 +38,27 @@ public class PaymentServiceImpl implements PaymentService {
     private final PaymentRepository paymentRepository;
     private final PaymentGatewayFactory paymentGatewayFactory;
     private final PaymentMonitoringService monitoringService;
-    // ApiLogger is a utility class with static methods, no instantiation needed
-    
+
+    private final SessionManager sessionManager;
+
     @PersistenceContext
     private EntityManager entityManager;
     
     @Autowired
     public PaymentServiceImpl(PaymentRepository paymentRepository,
                              PaymentGatewayFactory paymentGatewayFactory,
-                             PaymentMonitoringService monitoringService) {
+                             PaymentMonitoringService monitoringService,
+                              SessionManager sessionManager) {
         this.paymentRepository = paymentRepository;
         this.paymentGatewayFactory = paymentGatewayFactory;
         this.monitoringService = monitoringService;
+        this.sessionManager = sessionManager;
+
+    }
+
+    private void checkAuth(){
+
+
     }
     
     @Override

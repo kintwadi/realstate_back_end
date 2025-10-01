@@ -12,6 +12,7 @@ import com.imovel.api.response.ApplicationResponse;
 import com.imovel.api.security.token.JWTProvider;
 import com.imovel.api.security.token.Token;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -310,4 +311,5 @@ public class TokenService {
     public String getClaim(final String name, String token){
         return jwtProvider.getClaim(name,token);
     }
+
 }
