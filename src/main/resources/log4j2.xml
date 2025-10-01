@@ -1,67 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="WARN" monitorInterval="30">
-	<Properties>
-		<Property name="log.directory">logs</Property>
-		<!-- Disable inheritable ThreadContext (better for async) because AsyncLogger
-			takes care of it -->
-		<Property name="isThreadContextMapInheritable">false</Property>
-		<!-- Async logger queue size -->
-		<Property name="AsyncLogger.RingBufferSize">262144</Property>
-		<!-- Async appender queue size -->
-		<Property name="AsyncAppender.RingBufferSize">262144</Property>
+    <Properties>
+        <Property name="log.directory">./logs</Property>
+        <Property name="isThreadContextMapInheritable">false</Property>
+        <Property name="AsyncLogger.RingBufferSize">262144</Property>
+        <Property name="AsyncAppender.RingBufferSize">262144</Property>
+        <Property name="log4j2.contextSelector">org.apache.logging.log4j.core.async.AsyncLoggerContextSelector</Property>
+        <Property name="exceptionPattern">$${exception:json:stackTrace.stringified=true:cause.stringified=true}</Property>
+    </Properties>
 
-		<!-- Configure async logging to preserve context -->
-		<Property name="log4j2.contextSelector">org.apache.logging.log4j.core.async.AsyncLoggerContextSelector
-		</Property>
-		<Property name="exceptionPattern">$${exception:json:stackTrace.stringified=true:cause.stringified=true}
-		</Property>
+    <Appenders>
+        <!-- Console Appender -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <JsonTemplateLayout eventTemplateUri="classpath:LoggerLayout.json"/>
+        </Console>
 
+        <!-- File Appender -->
+        <RollingFile name="File"
+                     fileName="${log.directory}/application.log"
+                     filePattern="${log.directory}/application-%d{yyyy-MM-dd}-%i.log.gz"
+                     immediateFlush="true"
+                     append="true">
+            <JsonTemplateLayout eventTemplateUri="classpath:LoggerLayout.json"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="30"/>
+        </RollingFile>
 
+        <!-- Async Appender for both Console and File -->
+        <Async name="AsyncAppender" bufferSize="262144">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="File"/>
+        </Async>
+    </Appenders>
 
-	</Properties>
+    <Loggers>
+        <!-- Your specific logger -->
+        <AsyncLogger name="com.imovel.api.logger" level="info" includeLocation="true">
+            <AppenderRef ref="AsyncAppender"/>
+        </AsyncLogger>
 
-	<Appenders>
-		<!-- Console Appender with JSON Layout -->
-		<Console name="Console" target="SYSTEM_OUT">
-			<JsonTemplateLayout
-					eventTemplateUri="classpath:LoggerLayout.json">
-
-			</JsonTemplateLayout>
-
-		</Console>
-
-		<!-- Async Appender Wrapper -->
-		<Async name="AsyncAppender" bufferSize="262144">
-			<AppenderRef ref="Console" />
-		</Async>
-
-		<!-- File Appender -->
-		<RollingFile name="File"
-					 fileName="${log.directory}/application.log"
-					 filePattern="${log.directory}/application-%d{yyyy-MM-dd}-%i.log">
-			<JsonTemplateLayout
-					eventTemplateUri="classpath:LoggerLayout.json">
-			</JsonTemplateLayout>
-			<Policies>
-				<TimeBasedTriggeringPolicy interval="1"
-										   modulate="true" />
-				<SizeBasedTriggeringPolicy size="100 MB" />
-			</Policies>
-			<DefaultRolloverStrategy max="30" />
-		</RollingFile>
-	</Appenders>
-	<Loggers>
-
-		<AsyncLogger name="com.imovel.api.logger" level="info"
-					 includeLocation="true">
-			<AppenderRef ref="AsyncAppender" />
-			<AppenderRef ref="File" />
-		</AsyncLogger>
-
-		<!-- Root Logger -->
-		<Root level="debug" includeLocation="true">
-			<AppenderRef ref="AsyncAppender" />
-			<AppenderRef ref="File" />
-		</Root>
-	</Loggers>
+        <!-- Root Logger -->
+        <Root level="debug" includeLocation="true">
+            <AppenderRef ref="AsyncAppender"/>
+        </Root>
+    </Loggers>
 </Configuration>
