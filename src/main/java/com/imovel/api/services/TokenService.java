@@ -3,6 +3,7 @@ package com.imovel.api.services;
 import com.imovel.api.error.ApiCode;
 import com.imovel.api.exception.AuthenticationException;
 import com.imovel.api.exception.TokenRefreshException;
+import com.imovel.api.logger.ApiLogger;
 import com.imovel.api.model.RefreshToken;
 import com.imovel.api.model.User;
 import com.imovel.api.repository.RefreshTokenRepository;
@@ -11,6 +12,7 @@ import com.imovel.api.response.ApplicationResponse;
 import com.imovel.api.security.token.JWTProvider;
 import com.imovel.api.security.token.Token;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -61,6 +63,7 @@ public class TokenService {
     public ApplicationResponse<Token> login(UserLoginRequest loginRequest, HttpServletRequest request) {
 
 
+        ApiLogger.info("TokenService.login: initialization");
         try {
             Optional<User> optionalUser = authService.findByEmail(loginRequest.getEmail());
             if(!optionalUser.isPresent()){
@@ -308,4 +311,5 @@ public class TokenService {
     public String getClaim(final String name, String token){
         return jwtProvider.getClaim(name,token);
     }
+
 }

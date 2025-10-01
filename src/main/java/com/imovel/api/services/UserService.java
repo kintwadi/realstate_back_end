@@ -11,6 +11,7 @@ import com.imovel.api.request.SocialLinkDto;
 import com.imovel.api.request.UserUpdateRequest;
 import com.imovel.api.response.ApplicationResponse;
 import com.imovel.api.response.UserResponse;
+import com.imovel.api.session.SessionManager;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,18 +30,22 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final TokenService tokenService;
+    private final SessionManager sessionManager;
 
     /**
      * Constructor for UserService with dependency injection.
      *
      * @param userRepository Repository for user data access operations
      * @param tokenService   Service for token handling and validation
+     * @param sessionManager   current user session manager
      */
     @Autowired
     public UserService(UserRepository userRepository,
-                       TokenService tokenService) {
+                       TokenService tokenService,
+                       SessionManager sessionManager) {
         this.userRepository = userRepository;
         this.tokenService = tokenService;
+        this.sessionManager = sessionManager;
     }
 
     /**
@@ -64,7 +69,7 @@ public class UserService {
     public ApplicationResponse<UserResponse> getCurrentUserProfile(HttpSession session) {
         try {
             // Get user ID from session and retrieve the complete user entity
-            User currentUser = getCurrentAuthenticatedUser(getUserId(session));
+            User currentUser = sessionManager.getCurrentAuthenticatedUser(session);
 
             // Log successful retrieval of user profile
             ApiLogger.info("UserService.getCurrentUserProfile", "Retrieved authenticated user" + currentUser.getName());
@@ -87,23 +92,6 @@ public class UserService {
     }
 
     /**
-     * Extracts the user ID from the HTTP session token.
-     *
-     * @param session HTTP session containing the authentication token
-     * @return The user ID extracted from the token
-     */
-    private int getUserId(HttpSession session) {
-        // Retrieve token from session attributes
-        String token = (String) session.getAttribute("token");
-
-        // Extract user ID claim from the token using token service
-        String id = tokenService.getClaim("userId", token);
-
-        // Parse the user ID string to integer and return
-        return Integer.parseInt(id);
-    }
-
-    /**
      * Retrieves all users from the system.
      * Requires the requesting user to be authenticated.
      *
@@ -113,7 +101,7 @@ public class UserService {
     public ApplicationResponse<List<UserResponse>> getAllUsers(final HttpSession session) {
         try {
             // Verify the requesting user is authenticated
-            final int userId = getUserId(session);
+            final long userId = sessionManager.getCurrentUser(session).getUserId();
             User currentUser = getCurrentAuthenticatedUser(userId);
 
             // Check if current user exists (additional validation)
@@ -153,7 +141,7 @@ public class UserService {
     public ApplicationResponse<UserResponse> updateCurrentUser(final UserUpdateRequest userRequest,
                                                                final HttpSession session) {
         try {
-            final int userId = getUserId(session);
+            final Long userId = sessionManager.getCurrentUser(session).getUserId();
             User currentUser = getCurrentAuthenticatedUser(userId);
 
             if (userRequest.getName() != null) {
@@ -223,7 +211,7 @@ public class UserService {
     public ApplicationResponse<UserResponse> deleteCurrentUser(final HttpSession session) {
         try {
             // Get user ID from session and retrieve the user entity
-            final int userId = getUserId(session);
+            final long userId = sessionManager.getCurrentUser(session).getUserId();
             User currentUser = getCurrentAuthenticatedUser(userId);
 
             // Delete the user entity from the database

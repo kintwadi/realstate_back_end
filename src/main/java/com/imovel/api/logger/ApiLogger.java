@@ -191,4 +191,59 @@ public final class ApiLogger {
             MDC.clear();
         }
     }
+
+    // Warn Methods
+    public static void warn(String message) {
+        try {
+            getContext().forEach(MDC::put);
+            logger.warn(message);
+        } finally {
+            MDC.clear();
+        }
+    }
+
+    public static void warn(String location, String message) {
+        try {
+            getContext().forEach(MDC::put);
+            logger.warn(SIMPLE_FORMAT, location, message);
+        } finally {
+            MDC.clear();
+        }
+    }
+
+    public static void warn(String message, Object response) {
+        try {
+            getContext().forEach(MDC::put);
+            logger.warn(SIMPLE_FORMAT, message, response);
+        } finally {
+            MDC.clear();
+        }
+    }
+
+    public static void warn(String location, String message, Object response) {
+        try {
+            getContext().forEach(MDC::put);
+            logger.warn(COMPLETE_FORMAT, location, message, response);
+        } finally {
+            MDC.clear();
+        }
+    }
+
+    public static void warn(String message, Throwable throwable) {
+        try {
+            getContext().forEach(MDC::put);
+            logger.warn(message, throwable);
+        } finally {
+            MDC.clear();
+        }
+    }
+
+    public static void warn(String location, String message, Throwable throwable) {
+        try {
+            getContext().forEach(MDC::put);
+            logger.warn(SIMPLE_FORMAT, location, message, throwable);
+        } finally {
+            MDC.clear();
+        }
+    }
 }
