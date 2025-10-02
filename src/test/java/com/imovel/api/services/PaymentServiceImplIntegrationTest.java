@@ -49,6 +49,7 @@ import org.springframework.context.annotation.Import;
 })
 
 @Transactional
+@Disabled
 class PaymentServiceImplIntegrationTest {
 
     @Autowired

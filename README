@@ -15,3 +15,7 @@ SETUP KEYSTORE ENV VARIABLES IN YOUR workspace.xml or your OS
  </envs>
 
  stripe listen --forward-to http://localhost:8080/imovel/api/webhooks/events
+
+ stripe listen --forward-to  http://imovel.eu-central-1.elasticbeanstalk.com/imovel/api/webhooks/events
+
+

@@ -4,12 +4,10 @@ import com.imovel.api.model.User;
 import com.imovel.api.repository.UserRepository;
 import com.imovel.api.services.TokenService;
 import jakarta.servlet.http.HttpSession;
-import org.springframework.stereotype.Component;
-import org.springframework.web.context.annotation.RequestScope;
+import org.springframework.stereotype.Service;
 
 
-@Component
-@RequestScope
+@Service
 public class SessionManager {
     
     private final TokenService tokenService;

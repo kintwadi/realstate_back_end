@@ -1,5 +1,7 @@
 package com.imovel.api.payment.controller;
 
+import com.imovel.api.error.ApiCode;
+import com.imovel.api.error.ErrorCode;
 import com.imovel.api.logger.ApiLogger;
 import com.imovel.api.payment.dto.PaymentRefundRequest;
 import com.imovel.api.payment.dto.PaymentRequest;
@@ -7,6 +9,9 @@ import com.imovel.api.payment.dto.PaymentResponse;
 import com.imovel.api.payment.monitoring.PaymentMonitoringService;
 import com.imovel.api.payment.service.PaymentService;
 import com.imovel.api.response.ApplicationResponse;
+import com.imovel.api.session.CurrentUser;
+import com.imovel.api.session.SessionManager;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.imovel.api.pagination.Pagination;
 import com.imovel.api.pagination.PaginationResult;
@@ -17,58 +22,188 @@ import org.springframework.web.bind.annotation.*;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/payments")
 public class PaymentController {
-    
+
     private final PaymentService paymentService;
     private final PaymentMonitoringService monitoringService;
+    private final SessionManager sessionManager;
 
     @Autowired
-    public PaymentController(PaymentService paymentService,PaymentMonitoringService monitoringService) {
+    public PaymentController(PaymentService paymentService, PaymentMonitoringService monitoringService,
+                             SessionManager sessionManager) {
         this.paymentService = paymentService;
         this.monitoringService = monitoringService;
+        this.sessionManager = sessionManager;
     }
-    
+
+
+    private ResponseEntity<?> verifyAuthentication(HttpSession session, Long requestedUserId) {
+        try {
+            ApiLogger.info("🔐 Verifying authentication for user: " + requestedUserId);
+
+            // Check if session exists
+            if (session == null) {
+                ApiLogger.warn("🚫 No HTTP session found");
+                return createErrorResponse(ApiCode.INVALID_TOKEN.getCode(),
+                        "Authentication required: No active session",
+                        HttpStatus.UNAUTHORIZED);
+            }
+
+            ApiLogger.info("🔑 Session ID: " + session.getId());
+
+            // Debug session contents
+            try {
+                java.util.Enumeration<String> attributeNames = session.getAttributeNames();
+                ApiLogger.info("📦 Session attributes:");
+                boolean hasAttributes = false;
+                while (attributeNames.hasMoreElements()) {
+                    hasAttributes = true;
+                    String attrName = attributeNames.nextElement();
+                    Object attrValue = session.getAttribute(attrName);
+                    ApiLogger.info("   - " + attrName + ": " +
+                            (attrValue != null ? attrValue.getClass().getSimpleName() : "null"));
+                }
+                if (!hasAttributes) {
+                    ApiLogger.info("   (no attributes found)");
+                }
+            } catch (Exception e) {
+                ApiLogger.error("❌ Error reading session attributes: " + e.getMessage());
+            }
+
+            // Get current user from session
+            ApiLogger.info("👤 Getting current user from session...");
+            CurrentUser currentUser;
+            try {
+                currentUser = sessionManager.getCurrentUser(session);
+                ApiLogger.info("👤 Current user: " + (currentUser != null ?
+                        "User[id=" + currentUser.getUserId() + ", username=" + currentUser.getUserName() + "]" : "null"));
+            } catch (Exception e) {
+                ApiLogger.error("💥 ERROR getting current user: " + e.getMessage(), e);
+                return createErrorResponse(ApiCode.INVALID_TOKEN.getCode(),
+                        "Authentication error: " + e.getMessage(),
+                        HttpStatus.UNAUTHORIZED);
+            }
+
+            if (currentUser == null) {
+                ApiLogger.warn("🚫 No authenticated user found in session");
+                return createErrorResponse(ApiCode.INVALID_TOKEN.getCode(),
+                        "Authentication required: Please login again",
+                        HttpStatus.UNAUTHORIZED);
+            }
+
+            // Validate that the authenticated user matches the requested user
+            if (!currentUser.getUserId().equals(requestedUserId)) {
+                ApiLogger.warn("🚫 Access denied: Authenticated user " + currentUser.getUserId() +
+                        " trying to access data for user " + requestedUserId);
+                return createErrorResponse(ApiCode.ACCESS_DENIED.getCode(),
+                        "Access denied: You can only access your own payment data",
+                        HttpStatus.FORBIDDEN);
+            }
+
+            ApiLogger.info("✅ Authentication verified successfully for user: " + currentUser.getUserId());
+            return null; // Return null if authentication is successful
+
+        } catch (Exception e) {
+            ApiLogger.error("💥 Unexpected error during authentication: " + e.getMessage(), e);
+            return createErrorResponse(ApiCode.SYSTEM_ERROR.getCode(),
+                    "Authentication validation failed",
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Extract user ID from different parameter types
+     */
+    private Long extractUserIdFromParameters(Object... parameters) {
+        for (Object param : parameters) {
+            // Check for direct Long userId
+            if (param instanceof Long) {
+                ApiLogger.info("🎯 Found user ID in Long parameter: " + param);
+                return (Long) param;
+            }
+            // Check for PaymentRequest
+            if (param instanceof PaymentRequest) {
+                Long userId = ((PaymentRequest) param).getUserId();
+                ApiLogger.info("🎯 Found user ID in PaymentRequest: " + userId);
+                return userId;
+            }
+            // Check for PaymentRefundRequest
+            if (param instanceof PaymentRefundRequest) {
+                Long userId = ((PaymentRefundRequest) param).getUserId();
+                ApiLogger.info("🎯 Found user ID in PaymentRefundRequest: " + userId);
+                return userId;
+            }
+        }
+        ApiLogger.warn("🔍 No user ID found in parameters");
+        return null;
+    }
+
+    /**
+     * Create error response
+     */
+    private ResponseEntity<ApplicationResponse<?>> createErrorResponse(int code, String message, HttpStatus status) {
+        ErrorCode errorCode = new ErrorCode(code, message, status);
+        ApplicationResponse<?> response = ApplicationResponse.error(errorCode);
+        ApiLogger.info("📤 Returning error response: " + status.value() + " - " + message);
+        return ResponseEntity.status(status).body(response);
+    }
+
     /**
      * Process a new payment
      */
     @PostMapping("/process")
     @RateLimiter(name = "paymentProcessing", fallbackMethod = "paymentRateLimitFallback")
     public ResponseEntity<ApplicationResponse<PaymentResponse>> processPayment(
-             @RequestBody PaymentRequest paymentRequest) {
-        
+            @RequestBody PaymentRequest paymentRequest, HttpSession session) {
+
+        // Authentication check - added this line
+        ResponseEntity<?> authResponse = verifyAuthentication(session, paymentRequest.getUserId());
+        if (authResponse != null) {
+            return (ResponseEntity<ApplicationResponse<PaymentResponse>>) authResponse;
+        }
+
         ApiLogger.info("Processing payment request for user: " + paymentRequest.getUserId());
-        
+
         ApplicationResponse<PaymentResponse> response = paymentService.processPayment(paymentRequest, paymentRequest.getUserId());
-        
+
         if (response.isSuccess()) {
             return ResponseEntity.ok(response);
         } else {
             return ResponseEntity.status(response.getError().getStatus()).body(response);
         }
     }
-    
+
     /**
      * Get payment by ID
      */
     @GetMapping("/{paymentId}")
     public ResponseEntity<ApplicationResponse<PaymentResponse>> getPaymentById(
             @PathVariable Long paymentId,
-            @RequestParam Long userId) {
-        
+            @RequestParam Long userId, HttpSession session) {
+
+        // Authentication check - added this line
+        ResponseEntity<?> authResponse = verifyAuthentication(session, userId);
+        if (authResponse != null) {
+            return (ResponseEntity<ApplicationResponse<PaymentResponse>>) authResponse;
+        }
+
         ApiLogger.info("Retrieving payment by ID: " + paymentId + " for user: " + userId);
-        
+
         ApplicationResponse<PaymentResponse> response = paymentService.getPaymentById(paymentId, userId);
-        
+
         if (response.isSuccess()) {
             return ResponseEntity.ok(response);
         } else {
             return ResponseEntity.status(response.getError().getStatus()).body(response);
         }
     }
-    
+
     /**
      * Get user's payment history with pagination
      */
@@ -78,30 +213,41 @@ public class PaymentController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy,
-            @RequestParam(defaultValue = "desc") String sortDirection) {
-        
+            @RequestParam(defaultValue = "desc") String sortDirection, HttpSession session) {
+
+        // Authentication check - added this line
+        ResponseEntity<?> authResponse = verifyAuthentication(session, userId);
+        if (authResponse != null) {
+            return (ResponseEntity<ApplicationResponse<PaginationResult<PaymentResponse>>>) authResponse;
+        }
+
         ApiLogger.info("Retrieving payments for user: " + userId);
-        
+
         Pagination pagination = new Pagination();
         pagination.setPageNumber(page);
         pagination.setPageSize(size);
-        
+
         ApplicationResponse<PaginationResult<PaymentResponse>> response = paymentService.getUserPayments(userId, pagination, sortBy, sortDirection);
-        
+
         if (response.isSuccess()) {
             return ResponseEntity.ok(response);
         } else {
             return ResponseEntity.status(response.getError().getStatus()).body(response);
         }
     }
-    
+
     /**
      * Process a refund
      */
     @PostMapping("/refund")
     @RateLimiter(name = "paymentRefund", fallbackMethod = "refundRateLimitFallback")
-    public ResponseEntity<ApplicationResponse<PaymentResponse>> processRefund(@RequestBody PaymentRefundRequest paymentRefund) {
+    public ResponseEntity<ApplicationResponse<PaymentResponse>> processRefund(@RequestBody PaymentRefundRequest paymentRefund, HttpSession session) {
 
+        // Authentication check - added this line
+        ResponseEntity<?> authResponse = verifyAuthentication(session, paymentRefund.getUserId());
+        if (authResponse != null) {
+            return (ResponseEntity<ApplicationResponse<PaymentResponse>>) authResponse;
+        }
 
         // Assign variables from the request object
         Long paymentId = paymentRefund.getPaymentId();
@@ -110,70 +256,10 @@ public class PaymentController {
         Long userId = paymentRefund.getUserId();
 
         ApiLogger.info("Processing refund for payment: " + paymentId + ", amount: " + refundAmount);
-        
+
         ApplicationResponse<PaymentResponse> response = paymentService.processRefund(
-            paymentId, refundAmount, reason, userId);
-        
-        if (response.isSuccess()) {
-            return ResponseEntity.ok(response);
-        } else {
-            return ResponseEntity.status(response.getError().getStatus()).body(response);
-        }
-    }
-    
-    /**
-     * Cancel a payment
-     */
-    @PostMapping("/{paymentId}/cancel")
-    public ResponseEntity<ApplicationResponse<PaymentResponse>> cancelPayment(
-            @PathVariable Long paymentId,
-            @RequestParam Long userId) {
-        
-        ApiLogger.info("Cancelling payment: " + paymentId + " for user: " + userId);
-        
-        ApplicationResponse<PaymentResponse> response = paymentService.cancelPayment(paymentId, userId);
-        
-        if (response.isSuccess()) {
-            return ResponseEntity.ok(response);
-        } else {
-            return ResponseEntity.status(response.getError().getStatus()).body(response);
-        }
-    }
-    
-    /**
-     * Verify payment status with gateway
-     */
-    @PostMapping("/{paymentId}/verify")
-    @RateLimiter(name = "paymentVerification", fallbackMethod = "verificationRateLimitFallback")
-    public ResponseEntity<ApplicationResponse<PaymentResponse>> verifyPaymentStatus(
-            @PathVariable Long paymentId,
-            @RequestParam Long userId) {
-        
-        ApiLogger.info("Verifying payment status for payment: " + paymentId + " for user: " + userId);
-        
-        ApplicationResponse<PaymentResponse> response = paymentService.verifyPaymentStatus(paymentId, userId);
-        
-        if (response.isSuccess()) {
-            return ResponseEntity.ok(response);
-        } else {
-            return ResponseEntity.status(response.getError().getStatus()).body(response);
-        }
-    }
-    
-    /**
-     * Get payment statistics for a user within a date range
-     */
-    @GetMapping("/statistics/{userId}")
-    public ResponseEntity<ApplicationResponse<PaymentService.PaymentStatistics>> getPaymentStatistics(
-            @PathVariable Long userId,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
-        
-        ApiLogger.info("Retrieving payment statistics for user: " + userId);
-        
-        ApplicationResponse<PaymentService.PaymentStatistics> response = 
-            paymentService.getPaymentStatistics(userId, startDate, endDate);
-        
+                paymentId, refundAmount, reason, userId);
+
         if (response.isSuccess()) {
             return ResponseEntity.ok(response);
         } else {
@@ -181,85 +267,128 @@ public class PaymentController {
         }
     }
 
-//    @PostMapping("/webhooks/events")
-//    public ResponseEntity<String> handleStripeWebhook(
-//            @RequestBody String payload,
-//            @RequestHeader("Stripe-Signature") String signature) {
-//
-//        Timer.Sample timerSample = monitoringService.startTimer();
-//
-//        ApiLogger.info("Received Stripe webhook");
-//
-//        // Log webhook received
-//        PaymentAuditLogger.logWebhookReceived("stripe", payload.length());
-//
-//        try {
-//            ApplicationResponse<String> response = paymentService.handleWebhook("stripe", payload, signature);
-//
-//            if (response.isSuccess()) {
-//                PaymentAuditLogger.logWebhookProcessed("stripe", "success");
-//
-//                // Record monitoring metrics
-//                monitoringService.stopWebhookTimer(timerSample, "stripe", "success");
-//                monitoringService.recordWebhookEvent("stripe", "success", true);
-//
-//                return ResponseEntity.ok("Webhook processed successfully");
-//            } else {
-//                PaymentAuditLogger.logWebhookProcessed("stripe", "failed: " + response.getError().getMessage());
-//                ApiLogger.error("Webhook processing failed: " + response.getError().getMessage());
-//
-//                // Record monitoring metrics
-//                monitoringService.stopWebhookTimer(timerSample, "stripe", "failed");
-//                monitoringService.recordWebhookEvent("stripe", "failed", false);
-//
-//                return ResponseEntity.badRequest().body("Webhook processing failed");
-//            }
-//
-//        } catch (Exception e) {
-//            PaymentAuditLogger.logWebhookProcessed("stripe", "error: " + e.getMessage());
-//            ApiLogger.error("Error processing Stripe webhook", e);
-//
-//            // Record monitoring metrics
-//            monitoringService.stopWebhookTimer(timerSample, "stripe", "error");
-//            monitoringService.recordWebhookEvent("stripe", "error", false);
-//
-//            return ResponseEntity.internalServerError().body("Internal server error");
-//        }
-//    }
-//
-//    public ResponseEntity<String> webhookRateLimitFallback(
-//            String payload, String signature, Exception ex) {
-//        ApiLogger.warn("Webhook rate limit exceeded");
-//
-//        // Record rate limit hit
-//        monitoringService.recordRateLimitHit("webhook", "stripe");
-//
-//        return ResponseEntity.status(429).body("Webhook rate limit exceeded. Please try again later.");
-//    }
-    
-    // Rate limiting fallback methods
-    
-    public ResponseEntity<ApplicationResponse<PaymentResponse>> paymentRateLimitFallback(
-            PaymentRequest paymentRequest, Long userId, Exception ex) {
-        ApiLogger.warn("Payment processing rate limit exceeded for user: " + userId);
-        ApplicationResponse<PaymentResponse> response = ApplicationResponse.error(
-            429L, "Payment processing rate limit exceeded. Please try again later.", HttpStatus.TOO_MANY_REQUESTS);
-        return ResponseEntity.status(429).body(response);
+    /**
+     * Cancel a payment
+     */
+    @PostMapping("/{paymentId}/cancel")
+    public ResponseEntity<ApplicationResponse<PaymentResponse>> cancelPayment(
+            @PathVariable Long paymentId,
+            @RequestParam Long userId, HttpSession session) {
+
+        // Authentication check - added this line
+        ResponseEntity<?> authResponse = verifyAuthentication(session, userId);
+        if (authResponse != null) {
+            return (ResponseEntity<ApplicationResponse<PaymentResponse>>) authResponse;
+        }
+
+        ApiLogger.info("Cancelling payment: " + paymentId + " for user: " + userId);
+
+        ApplicationResponse<PaymentResponse> response = paymentService.cancelPayment(paymentId, userId);
+
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.status(response.getError().getStatus()).body(response);
+        }
     }
-    
-    public ResponseEntity<ApplicationResponse<PaymentResponse>> refundRateLimitFallback(
-            Long paymentId, BigDecimal refundAmount, String reason, Long userId, Exception ex) {
-        ApiLogger.warn("Refund processing rate limit exceeded for user: " + userId);
-        ApplicationResponse<PaymentResponse> response = ApplicationResponse.error(
-            429L, "Refund processing rate limit exceeded. Please try again later.", HttpStatus.TOO_MANY_REQUESTS);
-        return ResponseEntity.status(429).body(response);
+
+    /**
+     * Verify payment status with gateway
+     */
+    @PostMapping("/{paymentId}/verify")
+    @RateLimiter(name = "paymentVerification", fallbackMethod = "verificationRateLimitFallback")
+    public ResponseEntity<ApplicationResponse<PaymentResponse>> verifyPaymentStatus(
+            @PathVariable Long paymentId,
+            @RequestParam Long userId, HttpSession session) {
+
+        // Authentication check - added this line
+        ResponseEntity<?> authResponse = verifyAuthentication(session, userId);
+        if (authResponse != null) {
+            return (ResponseEntity<ApplicationResponse<PaymentResponse>>) authResponse;
+        }
+
+        ApiLogger.info("Verifying payment status for payment: " + paymentId + " for user: " + userId);
+
+        ApplicationResponse<PaymentResponse> response = paymentService.verifyPaymentStatus(paymentId, userId);
+
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.status(response.getError().getStatus()).body(response);
+        }
     }
-    
-    public ResponseEntity<ApplicationResponse<PaymentResponse>> verificationRateLimitFallback(
-            Long paymentId, Long userId, Exception ex) {
-        ApiLogger.warn("Payment verification rate limit exceeded for user: " + userId);
-        ApplicationResponse<PaymentResponse> response = ApplicationResponse.error(
-            429L, "Payment verification rate limit exceeded. Please try again later.", HttpStatus.TOO_MANY_REQUESTS);
-        return ResponseEntity.status(429).body(response);
+
+    /**
+     * Get payment statistics for a user within a date range
+     */
+    @GetMapping("/statistics/{userId}")
+    public ResponseEntity<ApplicationResponse<PaymentService.PaymentStatistics>> getPaymentStatistics(
+            @PathVariable Long userId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate, HttpSession session) {
+
+        // Authentication check - added this line
+        ResponseEntity<?> authResponse = verifyAuthentication(session, userId);
+        if (authResponse != null) {
+            return (ResponseEntity<ApplicationResponse<PaymentService.PaymentStatistics>>) authResponse;
+        }
+
+        ApiLogger.info("Retrieving payment statistics for user: " + userId);
+
+        ApplicationResponse<PaymentService.PaymentStatistics> response =
+                paymentService.getPaymentStatistics(userId, startDate, endDate);
+
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.status(response.getError().getStatus()).body(response);
+        }
+    }
+
+    // ... existing webhook and fallback methods remain unchanged ...
+
+    /**
+     * DEBUG ENDPOINT: Test session and authentication
+     */
+    @GetMapping("/debug-session")
+    public ResponseEntity<Map<String, Object>> debugSession(HttpSession session) {
+        Map<String, Object> debugInfo = new HashMap<>();
+
+        try {
+            debugInfo.put("sessionId", session != null ? session.getId() : "null");
+            debugInfo.put("sessionCreated", session != null ? new Date(session.getCreationTime()) : "null");
+
+            if (session != null) {
+                Map<String, String> attributes = new HashMap<>();
+                java.util.Enumeration<String> attributeNames = session.getAttributeNames();
+                while (attributeNames.hasMoreElements()) {
+                    String attrName = attributeNames.nextElement();
+                    Object attrValue = session.getAttribute(attrName);
+                    attributes.put(attrName, attrValue != null ? attrValue.getClass().getSimpleName() : "null");
+                }
+                debugInfo.put("sessionAttributes", attributes);
+            }
+
+            // Try to get current user
+            try {
+                CurrentUser currentUser = sessionManager.getCurrentUser(session);
+                if (currentUser != null) {
+                    Map<String, Object> userInfo = new HashMap<>();
+                    userInfo.put("userId", currentUser.getUserId());
+                    userInfo.put("username", currentUser.getUserName());
+                    debugInfo.put("currentUser", userInfo);
+                } else {
+                    debugInfo.put("currentUser", "null");
+                }
+            } catch (Exception e) {
+                debugInfo.put("currentUserError", e.getMessage());
+            }
+
+            return ResponseEntity.ok(debugInfo);
+
+        } catch (Exception e) {
+            debugInfo.put("error", e.getMessage());
+            return ResponseEntity.status(500).body(debugInfo);
+        }
     }
 }
