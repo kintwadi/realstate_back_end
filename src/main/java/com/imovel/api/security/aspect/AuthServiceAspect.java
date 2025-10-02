@@ -1,6 +1,7 @@
 package com.imovel.api.security.aspect;
 
 import com.imovel.api.error.ApiCode;
+import com.imovel.api.error.ErrorCode;
 import com.imovel.api.model.AuthDetails;
 import com.imovel.api.model.User;
 import com.imovel.api.request.PasswordChangeRequest;
@@ -17,6 +18,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -109,9 +111,8 @@ public class AuthServiceAspect {
         Optional<User> optionalUser = authService.findByEmail(email);
 
         if (!optionalUser.isPresent() || !verifyUserPassword(optionalUser.get().getId(), password)) {
-
-            return AspectErrorResponse.createErrorResponse(ApiCode.INVALID_CREDENTIALS.getMessage(), ApiCode.PASSWORD_RESET_FAILED.getCode(), HttpStatus.BAD_REQUEST);
-
+            ErrorCode errorCode = new ErrorCode(ApiCode.PASSWORD_RESET_FAILED.getCode(), ApiCode.INVALID_CREDENTIALS.getMessage(), HttpStatus.BAD_REQUEST);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApplicationResponse.error(errorCode));
         }
 
         return joinPoint.proceed();
@@ -131,13 +132,13 @@ public class AuthServiceAspect {
         final Optional<User> optionalUser = authService.findByEmail(passwordChangeRequest.getEmail());
 
         if (!optionalUser.isPresent()) {
-            return AspectErrorResponse.createErrorResponse(ApiCode.PASSWORD_RESET_FAILED.getMessage(), ApiCode.PASSWORD_RESET_FAILED.getCode(), HttpStatus.BAD_REQUEST);
-
+            ErrorCode errorCode = new ErrorCode(ApiCode.PASSWORD_RESET_FAILED.getCode(), ApiCode.PASSWORD_RESET_FAILED.getMessage(), HttpStatus.BAD_REQUEST);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApplicationResponse.error(errorCode));
         }
 
         if (!isPasswordValid(optionalUser.get().getId(), passwordChangeRequest.getOldPassword())) {
-            return AspectErrorResponse.createErrorResponse(ApiCode.PASSWORD_RESET_FAILED.getMessage(), ApiCode.PASSWORD_RESET_FAILED.getCode(), HttpStatus.BAD_REQUEST);
-
+            ErrorCode errorCode = new ErrorCode(ApiCode.PASSWORD_RESET_FAILED.getCode(), ApiCode.PASSWORD_RESET_FAILED.getMessage(), HttpStatus.BAD_REQUEST);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApplicationResponse.error(errorCode));
         }
 
         // Update authentication details

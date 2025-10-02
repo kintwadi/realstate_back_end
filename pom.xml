@@ -56,6 +56,17 @@
             <version>42.7.7</version>
             <scope>runtime</scope>
         </dependency>
+        <dependency>
+            <groupId>org.xerial</groupId>
+            <artifactId>sqlite-jdbc</artifactId>
+            <version>3.44.1.0</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-community-dialects</artifactId>
+            <version>6.2.5.Final</version>
+        </dependency>
 
         <!-- JWT -->
         <dependency>
@@ -182,11 +193,11 @@
             <scope>test</scope>
         </dependency>
         
-        <!-- H2 Database for testing -->
+        <!-- H2 Database for testing and development -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <scope>test</scope>
+            <scope>runtime</scope>
         </dependency>
 
         <!-- Remove default Spring Boot logging -->

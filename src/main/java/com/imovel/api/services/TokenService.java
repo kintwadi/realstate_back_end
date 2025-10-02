@@ -33,6 +33,7 @@ public class TokenService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final ConfigurationService configurationService;
     private final AuthService authService;
+    private boolean jwtInitialized = false;
 
     @Autowired
     public TokenService(JWTProvider jwtProvider,
@@ -42,7 +43,27 @@ public class TokenService {
         this.refreshTokenRepository = refreshTokenRepository;
         this.configurationService = configurationService;
         this.authService = authService;
-        this.jwtProvider.initialize();
+        // JWT initialization is now handled lazily to avoid startup timing issues
+    }
+
+    /**
+     * Lazy initialization of JWT components to ensure Spring context is fully loaded
+     */
+    private void ensureJwtInitialized() {
+        if (!jwtInitialized) {
+            synchronized (this) {
+                if (!jwtInitialized) {
+                    try {
+                        configurationService.setDefaultConfigurations();
+                        jwtProvider.initialize();
+                        jwtInitialized = true;
+                    } catch (Exception e) {
+                        ApiLogger.error("TokenService", "Failed to initialize JWT components: " + e.getMessage(), e);
+                        throw new RuntimeException("JWT initialization failed", e);
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -167,6 +188,7 @@ public class TokenService {
      * @return Generated token pair
      */
     private Token generateTokensForUser(User user) {
+        ensureJwtInitialized();
         jwtProvider.addClaim("userId", user.getId().toString());
         jwtProvider.addClaim("username", user.getName());
         jwtProvider.addClaim("role", user.getRole().getRoleName());
@@ -181,6 +203,7 @@ public class TokenService {
      * @param request HTTP request for device information
      */
     private void saveRefreshToken(String tokenValue, User user, Instant creationTime, HttpServletRequest request) {
+        ensureJwtInitialized();
         RefreshToken refreshToken = new RefreshToken();
         refreshToken.setToken(tokenValue);
         refreshToken.setUser(user);
@@ -209,6 +232,7 @@ public class TokenService {
      * @throws TokenRefreshException if token is invalid
      */
     private void validateRefreshToken(String refreshToken) {
+        ensureJwtInitialized();
         if (!jwtProvider.validateRefreshToken(refreshToken)) {
             throw new TokenRefreshException(ApiCode.INVALID_REFRESH_TOKEN.getCode(),
                     ApiCode.INVALID_REFRESH_TOKEN.getMessage(),
@@ -309,6 +333,7 @@ public class TokenService {
     }
 
     public String getClaim(final String name, String token){
+        ensureJwtInitialized();
         return jwtProvider.getClaim(name,token);
     }
 

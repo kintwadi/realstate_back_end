@@ -42,7 +42,7 @@ public class AuthController {
         this.jwtProvider = jwtProcessor;
         this.tokenService = tokenService;
         this.forgotPasswordService = forgotPasswordService;
-        this.jwtProvider.initialize();
+        // this.jwtProvider.initialize(); // Commented out - will be initialized by AuthenticationFilter
     }
 
     /**

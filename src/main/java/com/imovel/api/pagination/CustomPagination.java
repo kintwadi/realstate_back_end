@@ -21,6 +21,8 @@ public class CustomPagination {
         this.propertyRepository = propertyRepository;
     }
 
+    // Temporarily commented out to test EntityManager issue
+    /*
     @Transactional(readOnly = true)
     public PaginationResult<Property> getProperties(Pagination pagination) {
         // Create query
@@ -50,10 +52,19 @@ public class CustomPagination {
                 properties
         );
     }
+    */
+    
+    public List<Property> getProperties(Pagination pagination, String sortBy, String sortDirection) {
+        TypedQuery<Property> query = entityManager.createQuery(
+            "SELECT p FROM Property p ORDER BY p." + sortBy + " " + sortDirection, Property.class);
+        query.setFirstResult((pagination.getPageNumber() - 1) * pagination.getPageSize());
+        query.setMaxResults(pagination.getPageSize());
+        return query.getResultList();
+    }
 
     @Transactional(readOnly = true)
     public PaginationResult<Property> getPropertiesWithFilter(Pagination pagination, Property filter) {
-        // Build query string
+        // Build dynamic query based on filter
         String queryStr = "SELECT p FROM Property p WHERE " +
                 "(:type IS NULL OR p.type = :type) AND " +
                 "(:category IS NULL OR p.category = :category) AND " +
