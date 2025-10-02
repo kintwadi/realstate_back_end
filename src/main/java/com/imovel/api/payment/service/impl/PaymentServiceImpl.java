@@ -39,7 +39,6 @@ public class PaymentServiceImpl implements PaymentService {
     private final PaymentGatewayFactory paymentGatewayFactory;
     private final PaymentMonitoringService monitoringService;
 
-    private final SessionManager sessionManager;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -47,12 +46,11 @@ public class PaymentServiceImpl implements PaymentService {
     @Autowired
     public PaymentServiceImpl(PaymentRepository paymentRepository,
                              PaymentGatewayFactory paymentGatewayFactory,
-                             PaymentMonitoringService monitoringService,
-                              SessionManager sessionManager) {
+                             PaymentMonitoringService monitoringService) {
         this.paymentRepository = paymentRepository;
         this.paymentGatewayFactory = paymentGatewayFactory;
         this.monitoringService = monitoringService;
-        this.sessionManager = sessionManager;
+
 
     }
 
