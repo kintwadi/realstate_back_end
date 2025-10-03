@@ -283,6 +283,90 @@
                     </dependency>
                 </dependencies>
             </plugin>
+
+            <!-- Environment Setup Plugin -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>setup-environment-windows</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>cmd</executable>
+                            <arguments>
+                                <argument>/c</argument>
+                                <argument>setup.bat</argument>
+                            </arguments>
+                            <workingDirectory>${project.basedir}</workingDirectory>
+                            <skip>${skipWindowsSetup}</skip>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>setup-environment-unix</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>bash</executable>
+                            <arguments>
+                                <argument>setup.sh</argument>
+                            </arguments>
+                            <workingDirectory>${project.basedir}</workingDirectory>
+                            <skip>${skipUnixSetup}</skip>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <!-- Windows Profile -->
+        <profile>
+            <id>windows</id>
+            <activation>
+                <os>
+                    <family>windows</family>
+                </os>
+            </activation>
+            <properties>
+                <skipWindowsSetup>false</skipWindowsSetup>
+                <skipUnixSetup>true</skipUnixSetup>
+            </properties>
+        </profile>
+        
+        <!-- Unix/Linux Profile -->
+        <profile>
+            <id>unix</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                </os>
+            </activation>
+            <properties>
+                <skipWindowsSetup>true</skipWindowsSetup>
+                <skipUnixSetup>false</skipUnixSetup>
+            </properties>
+        </profile>
+        
+        <!-- Mac Profile -->
+        <profile>
+            <id>mac</id>
+            <activation>
+                <os>
+                    <family>mac</family>
+                </os>
+            </activation>
+            <properties>
+                <skipWindowsSetup>true</skipWindowsSetup>
+                <skipUnixSetup>false</skipUnixSetup>
+            </properties>
+        </profile>
+    </profiles>
 </project>
