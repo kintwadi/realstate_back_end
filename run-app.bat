@@ -1,9 +1,11 @@
-@echo off
-echo Starting Imovel API with SQLite profile...
-echo.
+
 
 REM Set up environment variables
 call setup.bat
+
+@echo off
+echo Starting Imovel API with %SPRING_PROFILES_ACTIVE% profile...
+echo.
 
 echo.
 echo Running application...

@@ -12,7 +12,7 @@ public class OpenApiConfig {
         return new OpenAPI()
                 .info(new Info()
                         .title("Imovel API")
-                        .version("1.0")
+                        .version("1.0.0")
                         .description("API for real state listing and booking"));
     }
 }

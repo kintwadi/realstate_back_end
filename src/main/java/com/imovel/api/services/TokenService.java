@@ -125,7 +125,6 @@ public class TokenService {
         } catch (Exception ex) {
             ApiLogger.error("TokenService.login", "Login failed with exception", 
                 Map.of("exception", ex.getClass().getSimpleName(), "message", ex.getMessage()));
-            ex.printStackTrace();
             return ApplicationResponse.error(ApiCode.AUTHENTICATION_FAILED.getCode(), ApiCode.AUTHENTICATION_FAILED.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }

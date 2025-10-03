@@ -69,6 +69,7 @@ public class SubscriptionService {
                     "Processing payment for new subscription",
                     "User: " + userId + ", Amount: " + amount);
 
+            // to be removed... Payment module should handle this
             ApplicationResponse<Boolean> paymentResponse = paymentService.processPayment(
                     userId, amount, "New subscription - " + plan.getName()
             );
