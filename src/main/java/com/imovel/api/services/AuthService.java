@@ -20,7 +20,7 @@ import com.imovel.api.security.token.JWTProvider;
 import com.imovel.api.util.Util;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -125,6 +125,7 @@ public class AuthService {
      * @param email The email to search for
      * @return StandardResponse containing the user if found
      */
+    @Transactional(readOnly = true)
     public Optional<User> findByEmail(final String email) {
         ApiLogger.debug("AuthService.findByEmail", "Looking for user by email", email);
         Optional<User> user = userRepository.findByEmail(email);

@@ -3,6 +3,7 @@ package com.imovel.api.security.aspect;
 import com.imovel.api.error.ApiCode;
 import com.imovel.api.error.ErrorCode;
 import com.imovel.api.exception.ApiException;
+import com.imovel.api.logger.ApiLogger;
 import com.imovel.api.response.ApplicationResponse;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -41,25 +42,25 @@ public class ExceptionHandlingAspect {
 
         } catch (ApiException ex) {
             // Handle known application-specific exceptions
+            ApiLogger.error("ExceptionHandlingAspect", "ApiException caught: " + ex.getMessage(), ex);
             ErrorCode errorCode = new ErrorCode(
                     ex.getErrorCode().getCode(),
                     ex.getErrorCode().getMessage(),
                     ex.getErrorCode().getStatus()
             );
 
-            return ResponseEntity.status(ex.getErrorCode().getStatus())
-                    .body(ApplicationResponse.error(errorCode));
+            return ApplicationResponse.error(errorCode);
 
         } catch (Exception ex) {
             // Handle all other unexpected exceptions
+            ApiLogger.error("ExceptionHandlingAspect", "Unexpected exception caught in " + joinPoint.getSignature().toShortString() + ": " + ex.getClass().getSimpleName() + " - " + ex.getMessage(), ex);
             ErrorCode errorCode = new ErrorCode(
                     ApiCode.SYSTEM_ERROR.getCode(),
                     ex.getLocalizedMessage(),
                     HttpStatus.INTERNAL_SERVER_ERROR
             );
 
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApplicationResponse.error(errorCode));
+            return ApplicationResponse.error(errorCode);
         }
     }
 }

@@ -44,6 +44,7 @@ public final class JWTProvider {
      */
     public void initialize() {
         claims = new HashMap<>();
+        issuer = "imovel-api"; // Set the issuer for JWT tokens
         accessTokenExpirationMs = Long.valueOf(configurationService.findByConfigKey(ACCESS_EXPIRATION_MS)
                 .get().getConfigValue());
         refreshTokenExpirationMs = Long.valueOf(configurationService.findByConfigKey(REFRESH_EXPIRATION_MS)

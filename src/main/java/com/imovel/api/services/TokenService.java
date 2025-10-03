@@ -5,6 +5,7 @@ import com.imovel.api.exception.AuthenticationException;
 import com.imovel.api.exception.TokenRefreshException;
 import com.imovel.api.logger.ApiLogger;
 import com.imovel.api.model.RefreshToken;
+
 import com.imovel.api.model.User;
 import com.imovel.api.repository.RefreshTokenRepository;
 import com.imovel.api.request.UserLoginRequest;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -38,7 +40,8 @@ public class TokenService {
     @Autowired
     public TokenService(JWTProvider jwtProvider,
                         RefreshTokenRepository refreshTokenRepository,
-                        ConfigurationService configurationService, AuthService authService) {
+                        ConfigurationService configurationService, 
+                        AuthService authService) {
         this.jwtProvider = jwtProvider;
         this.refreshTokenRepository = refreshTokenRepository;
         this.configurationService = configurationService;
@@ -86,26 +89,43 @@ public class TokenService {
 
         ApiLogger.info("TokenService.login: initialization");
         try {
+            ApiLogger.debug("TokenService.login", "Looking up user by email", Map.of("email", loginRequest.getEmail()));
             Optional<User> optionalUser = authService.findByEmail(loginRequest.getEmail());
             if(!optionalUser.isPresent()){
-               return  ApplicationResponse.error(ApiCode.AUTHENTICATION_FAILED.getCode(), ApiCode.REQUIRED_FIELD_MISSING.getMessage(), ApiCode.AUTHENTICATION_FAILED.getHttpStatus());
+               ApiLogger.debug("TokenService.login", "User not found", Map.of("email", loginRequest.getEmail()));
+               return  ApplicationResponse.error(ApiCode.AUTHENTICATION_FAILED.getCode(), ApiCode.AUTHENTICATION_FAILED.getMessage(), ApiCode.AUTHENTICATION_FAILED.getHttpStatus());
             }
+            ApiLogger.debug("TokenService.login", "User found", Map.of("userId", optionalUser.get().getId()));
+            
             // enforce password check...
-            if(!authService.verifyUserCredentials(optionalUser.get().getId(), loginRequest.getPassword()).isSuccess()){
-
+            ApiLogger.debug("TokenService.login", "About to verify password for user", Map.of("userId", optionalUser.get().getId()));
+            ApplicationResponse<Boolean> verificationResult = authService.verifyUserCredentials(optionalUser.get().getId(), loginRequest.getPassword());
+            ApiLogger.debug("TokenService.login", "Password verification result", Map.of("isSuccess", verificationResult.isSuccess(), "data", verificationResult.getData()));
+            
+            if(!verificationResult.isSuccess() || !Boolean.TRUE.equals(verificationResult.getData())){
+                ApiLogger.debug("TokenService.login", "Password verification failed", Map.of("isSuccess", verificationResult.isSuccess(), "data", verificationResult.getData(), "error", verificationResult.getError()));
                 return  ApplicationResponse.error(ApiCode.INVALID_CREDENTIALS.getCode(), ApiCode.INVALID_CREDENTIALS.getMessage(), ApiCode.INVALID_CREDENTIALS.getHttpStatus());
             }
+            ApiLogger.debug("TokenService.login", "Password verification successful");
+            
             enforceTokenLimits(optionalUser.get().getId());
+            ApiLogger.debug("TokenService.login", "Token limits enforced");
 
             Instant now = Instant.now();
             revokeAllUserTokens(optionalUser.get().getId(), now);
+            ApiLogger.debug("TokenService.login", "Previous tokens revoked");
 
             Token tokens = generateTokensForUser(optionalUser.get());
+            ApiLogger.debug("TokenService.login", "Tokens generated successfully");
+            
             saveRefreshToken(tokens.getRefreshToken(), optionalUser.get(), now, request);
+            ApiLogger.debug("TokenService.login", "Refresh token saved");
 
             return ApplicationResponse.success(tokens);
         } catch (Exception ex) {
-
+            ApiLogger.error("TokenService.login", "Login failed with exception", 
+                Map.of("exception", ex.getClass().getSimpleName(), "message", ex.getMessage()));
+            ex.printStackTrace();
             return ApplicationResponse.error(ApiCode.AUTHENTICATION_FAILED.getCode(), ApiCode.AUTHENTICATION_FAILED.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
@@ -189,9 +209,22 @@ public class TokenService {
      */
     private Token generateTokensForUser(User user) {
         ensureJwtInitialized();
+        ApiLogger.debug("TokenService.generateTokensForUser", "Generating tokens for user", 
+            Map.of("userId", user.getId(), "username", user.getName()));
+        
+        String roleName = "TENANT"; // Default role for users without assigned roles
+        if (user.getRole() == null) {
+            ApiLogger.warn("TokenService.generateTokensForUser", "User has no role assigned, using default TENANT role for token generation", 
+                Map.of("userId", user.getId()));
+        } else {
+            roleName = user.getRole().getRoleName();
+        }
+        
         jwtProvider.addClaim("userId", user.getId().toString());
         jwtProvider.addClaim("username", user.getName());
-        jwtProvider.addClaim("role", user.getRole().getRoleName());
+        jwtProvider.addClaim("role", roleName);
+        ApiLogger.debug("TokenService.generateTokensForUser", "Added claims to JWT", 
+            Map.of("userId", user.getId(), "role", roleName));
         return jwtProvider.generateToken();
     }
 

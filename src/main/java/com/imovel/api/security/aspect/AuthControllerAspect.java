@@ -64,7 +64,7 @@ public class AuthControllerAspect {
         // Validate request payload
         if (args.length == 0 || !(args[0] instanceof UserRegistrationRequest)) {
             ErrorCode errorCode = new ErrorCode(ApiCode.INVALID_PAYLOAD.getCode(), ApiCode.INVALID_PAYLOAD.getMessage(), HttpStatus.CONFLICT);
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(ApplicationResponse.error(errorCode));
+            return ApplicationResponse.error(errorCode);
         }
 
         UserRegistrationRequest request = (UserRegistrationRequest) args[0];
@@ -72,13 +72,13 @@ public class AuthControllerAspect {
         // Validate required fields
         if (areFieldsMissing(request.getEmail(), request.getPassword())) {
             ErrorCode errorCode = new ErrorCode(ApiCode.REQUIRED_FIELD_MISSING.getCode(), ApiCode.REQUIRED_FIELD_MISSING.getMessage(), HttpStatus.BAD_REQUEST);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApplicationResponse.error(errorCode));
+            return ApplicationResponse.error(errorCode);
         }
 
         // Validate email format
         if (Util.isEmailInvalid(request.getEmail())) {
             ErrorCode errorCode = new ErrorCode(ApiCode.INVALID_EMAIL.getCode(), ApiCode.INVALID_EMAIL.getMessage(), HttpStatus.BAD_REQUEST);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApplicationResponse.error(errorCode));
+            return ApplicationResponse.error(errorCode);
         }
 
         return joinPoint.proceed();
@@ -120,17 +120,17 @@ public class AuthControllerAspect {
         // Validate required fields
         if (areFieldsMissing(request.getEmail(), request.getOldPassword())) {
             ErrorCode errorCode = new ErrorCode(ApiCode.REQUIRED_FIELD_MISSING.getCode(), ApiCode.REQUIRED_FIELD_MISSING.getMessage(), HttpStatus.BAD_REQUEST);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApplicationResponse.error(errorCode));
+            return ApplicationResponse.error(errorCode);
         }
         // Validate required fields
         if (areFieldsMissing(request.getEmail(), request.getNewPassword())) {
             ErrorCode errorCode = new ErrorCode(ApiCode.REQUIRED_FIELD_MISSING.getCode(), ApiCode.REQUIRED_FIELD_MISSING.getMessage(), HttpStatus.BAD_REQUEST);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApplicationResponse.error(errorCode));
+            return ApplicationResponse.error(errorCode);
         }
         // Validate email format
         if (Util.isEmailInvalid(request.getEmail())) {
             ErrorCode errorCode = new ErrorCode(ApiCode.INVALID_EMAIL.getCode(), ApiCode.INVALID_EMAIL.getMessage(), HttpStatus.BAD_REQUEST);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApplicationResponse.error(errorCode));
+            return ApplicationResponse.error(errorCode);
         }
 
         return joinPoint.proceed();

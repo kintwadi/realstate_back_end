@@ -51,6 +51,12 @@
             <AppenderRef ref="AsyncFile"/>
         </Logger>
         
+        <!-- ApiLogger Debug Logger (used by AuthServiceAspect) -->
+        <Logger name="com.imovel.api.logger" level="debug" additivity="false">
+            <AppenderRef ref="AsyncConsole"/>
+            <AppenderRef ref="AsyncFile"/>
+        </Logger>
+        
         <!-- Stripe and external libraries -->
         <Logger name="com.stripe" level="warn" additivity="false">
             <AppenderRef ref="AsyncFile"/>
