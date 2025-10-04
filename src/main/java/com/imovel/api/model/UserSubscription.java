@@ -1,6 +1,8 @@
 package com.imovel.api.model;
 
 import jakarta.persistence.*;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -15,6 +17,8 @@ public class UserSubscription {
     
     @Column(name = "user_id", nullable = false)
     private Long userId;
+    private BigDecimal currentPlanCharge;
+
     
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "base_plan_id", nullable = false)
@@ -43,15 +47,21 @@ public class UserSubscription {
         this.userId = userId;
         this.basePlan = plan;
         this.currentPlan = plan;
+        this.currentPlanCharge =  new BigDecimal(0);
     }
     
     // Constructor for plan change
-    public UserSubscription(Long subscriptionId, Long userId, SubscriptionPlan basePlan, SubscriptionPlan currentPlan) {
+    public UserSubscription(Long subscriptionId,
+                            Long userId,
+                            SubscriptionPlan basePlan,
+                            SubscriptionPlan currentPlan,
+                            BigDecimal currentPlanCharge ) {
         this();
         this.subscriptionId = subscriptionId;
         this.userId = userId;
         this.basePlan = basePlan;
         this.currentPlan = currentPlan;
+        this.currentPlanCharge = currentPlanCharge;
     }
     
     // Method to update current plan (for plan changes)
@@ -101,7 +111,15 @@ public class UserSubscription {
     public SubscriptionPlan getCurrentPlan() {
         return currentPlan;
     }
-    
+
+    public BigDecimal getCurrentPlanCharge() {
+        return currentPlanCharge;
+    }
+
+    public void setCurrentPlanCharge(BigDecimal currentPlanCharge) {
+        this.currentPlanCharge = currentPlanCharge;
+    }
+
     public void setCurrentPlan(SubscriptionPlan currentPlan) {
         this.currentPlan = currentPlan;
         this.updatedAt = LocalDateTime.now();

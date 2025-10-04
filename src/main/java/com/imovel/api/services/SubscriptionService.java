@@ -289,7 +289,7 @@ public class SubscriptionService {
             }
 
             // Calculate prorated amount
-            ProrationResult proration = calculateProration(currentSub, newPlan, immediate);
+                ProrationResult proration = calculateProration(currentSub, newPlan, immediate);
 
             // Process payment if needed
             if (proration.getAmountDue().compareTo(BigDecimal.ZERO) > 0) {
@@ -314,6 +314,7 @@ public class SubscriptionService {
             if (userSubOptional.isPresent()) {
                 UserSubscription userSubscription = userSubOptional.get();
                 userSubscription.updateCurrentPlan(newPlan);
+                userSubscription.setCurrentPlanCharge(proration.getAmountDue() );
                 userSubscriptionRepository.save(userSubscription);
                 ApiLogger.info("SubscriptionService.changePlan",
                         "UserSubscription updated with new current plan", 

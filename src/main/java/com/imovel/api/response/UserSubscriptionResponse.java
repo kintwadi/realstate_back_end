@@ -2,6 +2,8 @@ package com.imovel.api.response;
 
 import com.imovel.api.model.UserSubscription;
 import com.imovel.api.model.SubscriptionPlan;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class UserSubscriptionResponse {
@@ -10,6 +12,7 @@ public class UserSubscriptionResponse {
     private Long userId;
     private SubscriptionPlanResponse basePlan;
     private SubscriptionPlanResponse currentPlan;
+    private BigDecimal currentPlanCharge;
     private boolean hasChangedPlan;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -25,6 +28,7 @@ public class UserSubscriptionResponse {
         this.basePlan = SubscriptionPlanResponse.parse(userSubscription.getBasePlan());
         this.currentPlan = SubscriptionPlanResponse.parse(userSubscription.getCurrentPlan());
         this.hasChangedPlan = userSubscription.hasChangedPlan();
+        this.currentPlanCharge = userSubscription.getCurrentPlanCharge();
         this.createdAt = userSubscription.getCreatedAt();
         this.updatedAt = userSubscription.getUpdatedAt();
     }
@@ -82,7 +86,15 @@ public class UserSubscriptionResponse {
     public void setHasChangedPlan(boolean hasChangedPlan) {
         this.hasChangedPlan = hasChangedPlan;
     }
-    
+
+    public BigDecimal getCurrentPlanCharge() {
+        return currentPlanCharge;
+    }
+
+    public void setCurrentPlanCharge(BigDecimal currentPlanCharge) {
+        this.currentPlanCharge = currentPlanCharge;
+    }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
