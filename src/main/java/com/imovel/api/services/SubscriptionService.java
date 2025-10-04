@@ -2,12 +2,15 @@ package com.imovel.api.services;
 import com.imovel.api.error.ApiCode;
 import com.imovel.api.model.Subscription;
 import com.imovel.api.model.SubscriptionPlan;
+import com.imovel.api.model.UserSubscription;
 import com.imovel.api.repository.SubscriptionPlanRepository;
 import com.imovel.api.repository.SubscriptionRepository;
+import com.imovel.api.repository.UserSubscriptionRepository;
 import com.imovel.api.response.ApplicationResponse;
 import com.imovel.api.logger.ApiLogger;
 import com.imovel.api.response.SubscriptionPlanResponse;
 import com.imovel.api.response.SubscriptionResponse;
+import com.imovel.api.response.UserSubscriptionResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,13 +27,16 @@ public class SubscriptionService {
 
     private final SubscriptionPlanRepository planRepository;
     private final SubscriptionRepository subscriptionRepository;
+    private final UserSubscriptionRepository userSubscriptionRepository;
 //    private final PaymentService paymentService;
 
     @Autowired
     public SubscriptionService(SubscriptionPlanRepository planRepository,
-                               SubscriptionRepository subscriptionRepository/*,PaymentService paymentService*/) {
+                               SubscriptionRepository subscriptionRepository,
+                               UserSubscriptionRepository userSubscriptionRepository/*,PaymentService paymentService*/) {
         this.planRepository = planRepository;
         this.subscriptionRepository = subscriptionRepository;
+        this.userSubscriptionRepository = userSubscriptionRepository;
 //        this.paymentService = paymentService;
     }
 
@@ -98,8 +104,17 @@ public class SubscriptionService {
             subscription.setStatus("active");
 
             Subscription savedSubscription = subscriptionRepository.save(subscription);
+            
+            // Create UserSubscription record with both basePlan and currentPlan set to the same plan initially
+            UserSubscription userSubscription = new UserSubscription(
+                savedSubscription.getId(), 
+                userId, 
+                plan  // Both basePlan and currentPlan are set to the same plan initially
+            );
+            userSubscriptionRepository.save(userSubscription);
+            
             ApiLogger.info("SubscriptionService.subscribeUser",
-                    "Subscription created successfully", savedSubscription);
+                    "Subscription and UserSubscription created successfully", savedSubscription);
             return ApplicationResponse.success(SubscriptionResponse.parse(savedSubscription), "Subscription created successfully");
         } catch (IllegalArgumentException e) {
             ApiLogger.error("SubscriptionService.subscribeUser",
@@ -138,6 +153,40 @@ public class SubscriptionService {
             return ApplicationResponse.error(
                     ApiCode.DATABASE_CONNECTION_ERROR.getCode(),
                     "Failed to retrieve user subscriptions: " + e.getMessage(),
+                    ApiCode.DATABASE_CONNECTION_ERROR.getHttpStatus()
+            );
+        }
+    }
+
+    // Get user's subscription with both basePlan and currentPlan information
+    public ApplicationResponse<UserSubscriptionResponse> getUserSubscriptionDetails(Long userId) {
+        try {
+            Optional<UserSubscription> userSubscriptionOptional = userSubscriptionRepository.findByUserIdWithPlans(userId);
+            if (userSubscriptionOptional.isEmpty()) {
+                ApiLogger.debug("SubscriptionService.getUserSubscriptionDetails",
+                        "No user subscription found for user", userId);
+                return ApplicationResponse.error(
+                        ApiCode.SUBSCRIPTION_NOT_FOUND.getCode(),
+                        "No subscription found for this user",
+                        ApiCode.SUBSCRIPTION_NOT_FOUND.getHttpStatus()
+                );
+            }
+            
+            UserSubscription userSubscription = userSubscriptionOptional.get();
+            UserSubscriptionResponse response = UserSubscriptionResponse.from(userSubscription);
+            
+            ApiLogger.info("SubscriptionService.getUserSubscriptionDetails",
+                    "User subscription details retrieved successfully", 
+                    "User: " + userId + ", Base: " + userSubscription.getBasePlan().getName() + 
+                    ", Current: " + userSubscription.getCurrentPlan().getName());
+            
+            return ApplicationResponse.success(response, "User subscription details retrieved successfully");
+        } catch (Exception e) {
+            ApiLogger.error("SubscriptionService.getUserSubscriptionDetails",
+                    "Failed to retrieve user subscription details", e);
+            return ApplicationResponse.error(
+                    ApiCode.DATABASE_CONNECTION_ERROR.getCode(),
+                    "Failed to retrieve user subscription details: " + e.getMessage(),
                     ApiCode.DATABASE_CONNECTION_ERROR.getHttpStatus()
             );
         }
@@ -259,6 +308,21 @@ public class SubscriptionService {
             }
 
             Subscription updatedSub = subscriptionRepository.save(currentSub);
+            
+            // Update UserSubscription with new current plan (keeping base plan unchanged)
+            Optional<UserSubscription> userSubOptional = userSubscriptionRepository.findBySubscriptionId(subscriptionId);
+            if (userSubOptional.isPresent()) {
+                UserSubscription userSubscription = userSubOptional.get();
+                userSubscription.updateCurrentPlan(newPlan);
+                userSubscriptionRepository.save(userSubscription);
+                ApiLogger.info("SubscriptionService.changePlan",
+                        "UserSubscription updated with new current plan", 
+                        "Base: " + userSubscription.getBasePlan().getName() + 
+                        ", Current: " + userSubscription.getCurrentPlan().getName());
+            } else {
+                ApiLogger.warn("SubscriptionService.changePlan",
+                        "UserSubscription not found for subscription ID", subscriptionId);
+            }
 
             String resultMessage = "Subscription plan changed successfully. " +
                     (proration.getAmountDue().compareTo(BigDecimal.ZERO) > 0 ?

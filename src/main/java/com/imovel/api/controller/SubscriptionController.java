@@ -5,6 +5,7 @@ import com.imovel.api.request.ChangePlainRequest;
 import com.imovel.api.request.SubscriptionPlainRequest;
 import com.imovel.api.response.ApplicationResponse;
 import com.imovel.api.response.SubscriptionResponse;
+import com.imovel.api.response.UserSubscriptionResponse;
 import com.imovel.api.services.SubscriptionService;
 import com.imovel.api.session.SessionManager;
 import jakarta.servlet.http.HttpSession;
@@ -49,6 +50,18 @@ public class SubscriptionController {
             return (ApplicationResponse<List<SubscriptionResponse>>)authResponse.getBody();
         }
         return subscriptionService.getUserSubscriptions(userId);
+    }
+
+    @GetMapping("/user/{userId}/details")
+    public ApplicationResponse<UserSubscriptionResponse> getUserSubscriptionDetails(@PathVariable Long userId,
+                                                                                    HttpSession session) {
+
+        // Authentication check
+        ResponseEntity<?> authResponse = sessionManager.verifyAuthentication(session, userId);
+        if (authResponse != null) {
+            return (ApplicationResponse<UserSubscriptionResponse>)authResponse.getBody();
+        }
+        return subscriptionService.getUserSubscriptionDetails(userId);
     }
 
     @PostMapping("cancel/{subscriptionId}/{userId}")

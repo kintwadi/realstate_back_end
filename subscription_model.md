@@ -64,8 +64,12 @@ graph TD
 ```mermaid
 erDiagram
     User ||--o{ Subscription : has
+    User ||--o{ UserSubscription : tracks
     SubscriptionPlan ||--o{ Subscription : defines
+    SubscriptionPlan ||--o{ UserSubscription : "base plan"
+    SubscriptionPlan ||--o{ UserSubscription : "current plan"
     Subscription ||--|| Payment : triggers
+    Subscription ||--|| UserSubscription : links
     
     User {
         Long id PK
@@ -95,6 +99,16 @@ erDiagram
         LocalDateTime startDate
         LocalDateTime endDate
         String status
+    }
+    
+    UserSubscription {
+        Long id PK
+        Long subscriptionId FK
+        Long userId FK
+        Long basePlanId FK
+        Long currentPlanId FK
+        LocalDateTime createdAt
+        LocalDateTime updatedAt
     }
     
     Payment {
@@ -174,6 +188,49 @@ public class Subscription {
     private String status;                  // "active", "canceled", "expired"
 }
 ```
+
+#### UserSubscription Entity
+```java
+@Entity
+@Table(name = "user_subscriptions")
+public class UserSubscription {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    @Column(name = "subscription_id", nullable = false)
+    private Long subscriptionId;            // Links to Subscription entity
+    
+    @Column(name = "user_id", nullable = false)
+    private Long userId;                    // User who owns this subscription
+    
+    @ManyToOne
+    @JoinColumn(name = "base_plan_id", nullable = false)
+    private SubscriptionPlan basePlan;      // Original plan user subscribed to
+    
+    @ManyToOne
+    @JoinColumn(name = "current_plan_id", nullable = false)
+    private SubscriptionPlan currentPlan;   // Current plan (after changes)
+    
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+    
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
+    
+    // Helper method to check if user has changed from their base plan
+    public boolean hasChangedPlan() {
+        return !this.basePlan.getId().equals(this.currentPlan.getId());
+    }
+}
+```
+
+**Key Features:**
+- **Base Plan Tracking**: Maintains record of the original subscription plan
+- **Current Plan Tracking**: Tracks the current active plan after any changes
+- **Plan Change Detection**: Provides method to check if user has upgraded/downgraded
+- **Audit Trail**: Timestamps for creation and updates
+- **Proration Support**: Enables proper billing calculations for plan changes
 
 ## Business Logic Flow
 
@@ -381,6 +438,7 @@ public class ProrationResult {
 |--------|----------|-------------|---------------|
 | `POST` | `/api/subscriptions/subscribe` | Create new subscription | ✅ |
 | `GET` | `/api/subscriptions/user/{userId}` | Get user's subscription | ✅ |
+| `GET` | `/api/subscriptions/user/{userId}/details` | Get user's subscription with base/current plan details | ✅ |
 | `POST` | `/api/subscriptions/{subscriptionId}/change-plan` | Change subscription plan | ✅ |
 | `POST` | `/api/subscriptions/{subscriptionId}/cancel` | Cancel subscription | ✅ |
 | `GET` | `/api/subscription-plans` | List all available plans | ❌ |
@@ -414,6 +472,47 @@ Response:
         "status": "active"
     },
     "message": "Subscription created successfully"
+}
+```
+
+#### Get User Subscription Details
+```json
+GET /api/subscriptions/user/{userId}/details
+
+Response:
+{
+    "success": true,
+    "data": {
+        "id": 789,
+        "subscriptionId": 456,
+        "userId": 123,
+        "basePlan": {
+            "id": 1,
+            "name": "Free",
+            "description": "Basic plan for individual landlords",
+            "monthlyPrice": 0.00,
+            "yearlyPrice": 0.00,
+            "listingLimit": 1,
+            "availabilityDays": 30,
+            "isFeatured": false,
+            "supportType": "limited"
+        },
+        "currentPlan": {
+            "id": 2,
+            "name": "Basic",
+            "description": "Enhanced plan for small agencies",
+            "monthlyPrice": 10.00,
+            "yearlyPrice": 100.00,
+            "listingLimit": 20,
+            "availabilityDays": 60,
+            "isFeatured": false,
+            "supportType": "business_hours"
+        },
+        "hasChangedPlan": true,
+        "createdAt": "2024-01-15T10:00:00",
+        "updatedAt": "2024-01-20T14:30:00"
+    },
+    "message": "User subscription details retrieved successfully"
 }
 ```
 
