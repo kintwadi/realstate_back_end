@@ -17,12 +17,12 @@ import java.util.Optional;
  */
 public final class KeyStoreManager {
     private static final String KEY_STORE_PATH_P12 = "tokens.p12";
-    private static final String ENV_KEYSTORE_PASS = "ENV_KEYSTORE_PASS";
+    private static final String ENV_KEYSTORE_PASS = "KEYSTORE_PASSPHRASE";
     private static final String DEFAULT_KEYSTORE_PASS = "DEFAULT_KEYSTORE_PASS";
-    private static final String ACCESS_TOKEN_ALIAS = "ENV_ACCESS_TOKEN_ALIAS";
-    private static final String ACCESS_TOKEN_PASS = "ENV_ACCESS_TOKEN_PASS";
-    private static final String REFRESH_TOKEN_ALIAS = "ENV_REFRESH_TOKEN_ALIAS";
-    private static final String REFRESH_TOKEN_PASS = "ENV_REFRESH_TOKEN_PASS";
+    private static final String ACCESS_TOKEN_ALIAS = "ACCESS_TOKEN_ALIAS";
+    private static final String ACCESS_TOKEN_PASS = "ACCESS_TOKEN_PASSWORD";
+    private static final String REFRESH_TOKEN_ALIAS = "REFRESH_TOKEN_ALIAS";
+    private static final String REFRESH_TOKEN_PASS = "REFRESH_TOKEN_PASSWORD";
 
     /**
      * Loads the keystore from a classpath resource.

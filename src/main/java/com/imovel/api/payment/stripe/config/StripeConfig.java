@@ -5,6 +5,7 @@ import com.imovel.api.logger.ApiLogger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.util.StringUtils;
 
 import jakarta.annotation.PostConstruct;
@@ -12,9 +13,11 @@ import jakarta.annotation.PostConstruct;
 /**
  * Configuration class for Stripe payment gateway
  * Manages API keys and settings securely
+ * Only active for non-SQLite profiles to avoid development issues
  */
 @Configuration
 @ConfigurationProperties(prefix = "stripe")
+@Profile("!sqlite")
 public class StripeConfig {
 
     //@Value("${stripe.secret.key}")

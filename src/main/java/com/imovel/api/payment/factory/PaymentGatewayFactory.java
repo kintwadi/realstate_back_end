@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Component
 public class PaymentGatewayFactory {
@@ -14,11 +15,11 @@ public class PaymentGatewayFactory {
     private final Map<String, PaymentGatewayInterface> gateways;
     
     @Autowired
-    public PaymentGatewayFactory(StripePaymentGateway stripePaymentGateway) {
+    public PaymentGatewayFactory(Optional<StripePaymentGateway> stripePaymentGateway) {
         this.gateways = new HashMap<>();
         
-        // Register available payment gateways
-        gateways.put("stripe", stripePaymentGateway);
+        // Register available payment gateways only if they are available
+        stripePaymentGateway.ifPresent(gateway -> gateways.put("stripe", gateway));
         // Future gateways can be added here:
         // gateways.put("paypal", paypalPaymentGateway);
         // gateways.put("square", squarePaymentGateway);

@@ -24,15 +24,15 @@ public class SubscriptionPlanService {
         this.subscriptionPlanRepository = subscriptionPlanRepository;
     }
 
-    @PostConstruct
-    public void init() {
-        try {
-            SubscriptionPlanInitializer.initializeDefaultSubscriptionPlan(subscriptionPlanRepository);
-            ApiLogger.info("SubscriptionPlanService", "Default subscription plans initialized successfully");
-        } catch (Exception e) {
-            ApiLogger.error("SubscriptionPlanService", "Failed to initialize default subscription plans", e);
-        }
-    }
+    // @PostConstruct
+    // public void init() {
+    //     try {
+    //         SubscriptionPlanInitializer.initializeDefaultSubscriptionPlan(subscriptionPlanRepository);
+    //         ApiLogger.info("SubscriptionPlanService", "Default subscription plans initialized successfully");
+    //     } catch (Exception e) {
+    //         ApiLogger.error("SubscriptionPlanService", "Failed to initialize default subscription plans", e);
+    //     }
+    // }
 
     public ApplicationResponse<SubscriptionPlanResponse> createSubscriptionPlan(SubscriptionPlan subscriptionPlan) {
         ApiLogger.info("SubscriptionPlanService.createSubscriptionPlan", "Creating new subscription plan", subscriptionPlan);

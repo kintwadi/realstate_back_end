@@ -30,6 +30,8 @@ public class AuthenticationFilter implements Filter {
             "http://127.0.0.1:300"
             // Add other allowed origins as needed
     );
+    
+    private boolean initialized = false;
 
     @Autowired
     JWTProvider jwtProcessor;
@@ -37,15 +39,14 @@ public class AuthenticationFilter implements Filter {
     private ConfigurationService configurationService;
 
     /**
-     * Initializes the filter by reading secret keys from keystore
+     * Initializes the filter by reading endpoint configurations only
+     * JWT initialization is deferred to first use to avoid Spring context timing issues
      *
      * @param filterConfig The filter configuration object.
      */
     @Override
     public void init( FilterConfig filterConfig )
     {
-        configurationService.setDefaultConfigurations();
-        jwtProcessor.initialize();
         try {
             // Load configuration using ResourceLoader
             ResourceLoader resourceLoader = new ResourceLoader();
@@ -57,6 +58,26 @@ public class AuthenticationFilter implements Filter {
         } catch (IOException ex)
         {
             System.out.println("Error loading filter configuration: "+ex.getMessage());
+        }
+    }
+    
+    /**
+     * Lazy initialization of JWT components to ensure Spring context is fully loaded
+     */
+    private void ensureInitialized() {
+        if (!initialized) {
+            synchronized (this) {
+                if (!initialized) {
+                    try {
+                        configurationService.setDefaultConfigurations();
+                        jwtProcessor.initialize();
+                        initialized = true;
+                    } catch (Exception e) {
+                        System.err.println("Failed to initialize JWT components: " + e.getMessage());
+                        throw new RuntimeException("JWT initialization failed", e);
+                    }
+                }
+            }
         }
     }
 
@@ -85,6 +106,9 @@ public class AuthenticationFilter implements Filter {
 
         // Check if path is protected
         if (isPathMatch(path, protectedEndpoints)) {
+            // Ensure JWT components are initialized before use
+            ensureInitialized();
+            
             // Validate JWT token
             String token = httpRequest.getHeader("Authorization");
             if (token == null || !token.startsWith("Bearer ")) {

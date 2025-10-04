@@ -32,22 +32,4 @@ payment:
     webhook-id: "${PAYPAL_WEBHOOK_ID:your_paypal_webhook_id_here}"
     environment: "sandbox" # sandbox or live
 
-# Database configuration for payment tables
-#spring:
-#  jpa:
-#    properties:
-#      hibernate:
-#        # Enable SQL logging for payment operations (development only)
-#        show_sql: false
-#        format_sql: true
-#    hibernate:
-#      ddl-auto: update
-
-# Logging configuration for payment module
-#logging:
-#  level:
-#    com.imovel.api.payment: DEBUG
-#    com.stripe: INFO
-#  pattern:
-#    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
-#    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

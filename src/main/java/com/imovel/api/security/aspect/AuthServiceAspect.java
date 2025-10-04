@@ -1,9 +1,12 @@
 package com.imovel.api.security.aspect;
 
 import com.imovel.api.error.ApiCode;
+import com.imovel.api.error.ErrorCode;
+import com.imovel.api.logger.ApiLogger;
 import com.imovel.api.model.AuthDetails;
 import com.imovel.api.model.User;
 import com.imovel.api.request.PasswordChangeRequest;
+import com.imovel.api.request.UserLoginRequest;
 import com.imovel.api.request.UserRegistrationRequest;
 import com.imovel.api.response.ApplicationResponse;
 import com.imovel.api.response.UserResponse;
@@ -17,6 +20,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -29,9 +33,16 @@ import java.util.Optional;
 @Component
 public class AuthServiceAspect {
 
-    private final PasswordManager passwordManager;
-    private final AuthDetailsService authDetailsService;
-    private final AuthService authService;
+    private PasswordManager passwordManager;
+    private AuthDetailsService authDetailsService;
+    private AuthService authService;
+
+    /**
+     * Default constructor for AspectJ instantiation.
+     */
+    public AuthServiceAspect() {
+        // Default constructor for AspectJ
+    }
 
     /**
      * Constructor for dependency injection.
@@ -49,7 +60,7 @@ public class AuthServiceAspect {
         this.authService = authService;
     }
 
-    @Pointcut("execution(* com.imovel.api.services.AuthService.loginUser(..))")
+    @Pointcut("execution(* com.imovel.api.services.TokenService.login(..))")
     public static void loginUser() {
         // Pointcut method - implementation will be provided by AspectJ
     }
@@ -94,27 +105,28 @@ public class AuthServiceAspect {
 
     /**
      * Around advice for user login process.
-     * Verifies user credentials before proceeding with login.
+     * Logs authentication attempts and provides debugging information.
      *
      * @param joinPoint The proceeding join point
-     * @return StandardResponse with login result if credentials are valid
+     * @return StandardResponse with login result
      * @throws Throwable if an error occurs during processing
      */
     @Around("loginUser()")
     public Object loginUser(final ProceedingJoinPoint joinPoint) throws Throwable {
         Object[] args = joinPoint.getArgs();
-        String email = (String) args[0];
-        String password = (String) args[1];
+        UserLoginRequest loginRequest = (UserLoginRequest) args[0];
+        String email = loginRequest.getEmail();
 
-        Optional<User> optionalUser = authService.findByEmail(email);
+        ApiLogger.debug("AuthServiceAspect.loginUser: Starting authentication for email: " + email);
 
-        if (!optionalUser.isPresent() || !verifyUserPassword(optionalUser.get().getId(), password)) {
-
-            return AspectErrorResponse.createErrorResponse(ApiCode.INVALID_CREDENTIALS.getMessage(), ApiCode.PASSWORD_RESET_FAILED.getCode(), HttpStatus.BAD_REQUEST);
-
+        try {
+            Object result = joinPoint.proceed();
+            ApiLogger.debug("AuthServiceAspect.loginUser: Login attempt completed for email: " + email);
+            return result;
+        } catch (Exception e) {
+            ApiLogger.error("AuthServiceAspect.loginUser: Exception during login for email: " + email + ", Exception: " + e.getMessage(), e);
+            throw e;
         }
-
-        return joinPoint.proceed();
     }
 
     /**
@@ -131,13 +143,13 @@ public class AuthServiceAspect {
         final Optional<User> optionalUser = authService.findByEmail(passwordChangeRequest.getEmail());
 
         if (!optionalUser.isPresent()) {
-            return AspectErrorResponse.createErrorResponse(ApiCode.PASSWORD_RESET_FAILED.getMessage(), ApiCode.PASSWORD_RESET_FAILED.getCode(), HttpStatus.BAD_REQUEST);
-
+            ErrorCode errorCode = new ErrorCode(ApiCode.PASSWORD_RESET_FAILED.getCode(), ApiCode.PASSWORD_RESET_FAILED.getMessage(), HttpStatus.BAD_REQUEST);
+            return ApplicationResponse.error(errorCode);
         }
 
         if (!isPasswordValid(optionalUser.get().getId(), passwordChangeRequest.getOldPassword())) {
-            return AspectErrorResponse.createErrorResponse(ApiCode.PASSWORD_RESET_FAILED.getMessage(), ApiCode.PASSWORD_RESET_FAILED.getCode(), HttpStatus.BAD_REQUEST);
-
+            ErrorCode errorCode = new ErrorCode(ApiCode.PASSWORD_RESET_FAILED.getCode(), ApiCode.PASSWORD_RESET_FAILED.getMessage(), HttpStatus.BAD_REQUEST);
+            return ApplicationResponse.error(errorCode);
         }
 
         // Update authentication details
@@ -171,12 +183,25 @@ public class AuthServiceAspect {
      * @return true if the password is valid, false otherwise
      */
     private boolean verifyUserPassword(Long userId, String password) {
+        ApiLogger.debug("AuthServiceAspect.verifyUserPassword: Verifying password for user ID: " + userId);
+        
         ApplicationResponse<AuthDetails> authDetailsResponse = authDetailsService.findByUserId(userId);
         if (!authDetailsResponse.isSuccess()) {
+            ApiLogger.debug("AuthServiceAspect.verifyUserPassword: Failed to retrieve auth details for user ID: " + userId + ", response: " + authDetailsResponse.getMessage());
             return false;
         }
+        
         AuthDetails authDetails = authDetailsResponse.getData();
-        return passwordManager.verifyPassword(password, authDetails.getHash(), authDetails.getSalt());
+        if (authDetails == null) {
+            ApiLogger.debug("AuthServiceAspect.verifyUserPassword: Auth details is null for user ID: " + userId);
+            return false;
+        }
+        
+        ApiLogger.debug("AuthServiceAspect.verifyUserPassword: Auth details found, verifying password with PasswordManager");
+        boolean result = passwordManager.verifyPassword(password, authDetails.getHash(), authDetails.getSalt());
+        ApiLogger.debug("AuthServiceAspect.verifyUserPassword: Password verification result: " + result);
+        
+        return result;
     }
 
 

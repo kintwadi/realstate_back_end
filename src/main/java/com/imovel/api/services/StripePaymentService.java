@@ -13,6 +13,7 @@ import com.stripe.model.*;
 import com.stripe.param.PaymentIntentCreateParams;
 import com.stripe.param.RefundCreateParams;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -23,6 +24,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
+@Profile("!sqlite")
+@Deprecated  // use payment module instead
 public class StripePaymentService implements PaymentService {
 
     private final SubscriptionRepository subscriptionRepository;

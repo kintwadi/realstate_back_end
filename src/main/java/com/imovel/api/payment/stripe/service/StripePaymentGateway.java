@@ -23,6 +23,7 @@ import com.stripe.param.RefundCreateParams;
 import com.stripe.param.checkout.SessionCreateParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +33,7 @@ import java.math.BigDecimal;
 import java.util.*;
 
 @Service
+@Profile("!sqlite")
 public class StripePaymentGateway implements PaymentGatewayInterface {
 
     private final PaymentRepository paymentRepository;

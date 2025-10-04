@@ -8,6 +8,7 @@ import com.imovel.api.repository.AuthDetailRepository;
 import com.imovel.api.response.ApplicationResponse;
 import com.imovel.api.security.PasswordManager;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Service layer for authentication details operations.
@@ -53,6 +54,7 @@ public class AuthDetailsService {
      * @return StandardResponse containing AuthDetails if found
      * @throws ResourceNotFoundException if no auth details found for user
      */
+    @Transactional(readOnly = true)
     public ApplicationResponse<AuthDetails> findByUserId(final long id) {
         ApiLogger.debug(SERVICE_NAME, "Finding auth details by user ID: " + id);
         return authDetailRepository.findByUserId(id)
@@ -71,6 +73,7 @@ public class AuthDetailsService {
      * @return StandardResponse with verification result
      * @throws ResourceNotFoundException if no user exists with the given ID
      */
+    @Transactional(readOnly = true)
     public ApplicationResponse<Boolean> verifyUserCredentials(final long userId, final String password) {
         ApiLogger.debug(SERVICE_NAME, "Verifying credentials for user ID: " + userId);
         AuthDetails authDetails = authDetailRepository.findByUserId(userId)

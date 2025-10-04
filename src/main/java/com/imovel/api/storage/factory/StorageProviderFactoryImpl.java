@@ -25,7 +25,7 @@ public class StorageProviderFactoryImpl implements StorageProviderFactory {
 
     @Autowired
     public StorageProviderFactoryImpl(
-            S3Client s3Client,
+            @Autowired(required = false) S3Client s3Client,
             PropertyMediaRepository propertyMediaRepository,
             @Value("${aws.s3.bucket-name}") String bucketName,
             @Value("${storage.local.path:/tmp/uploads}") String localStoragePath,
@@ -42,7 +42,12 @@ public class StorageProviderFactoryImpl implements StorageProviderFactory {
     @Override
     public StorageProvider createStorageProvider() {
         return switch (StorageType.getValue(storageType)) {
-            case S3 -> new S3StorageProvider(s3Client, bucketName);
+            case S3 -> {
+                if (s3Client == null) {
+                    throw new IllegalStateException("S3Client is not available. Ensure AWS S3 configuration is properly set up for S3 storage type.");
+                }
+                yield new S3StorageProvider(s3Client, bucketName);
+            }
             case DATABASE -> new DatabaseStorageProvider(propertyMediaRepository);
             case LOCAL -> new LocalFileStorageProvider(localStoragePath, localStorageUrl);
             default -> throw new IllegalArgumentException("Unsupported storage type: " + storageType);
