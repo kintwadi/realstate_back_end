@@ -1,12 +1,15 @@
 package com.imovel.api.controller;
 
 
+import com.imovel.api.request.ChangePlainRequest;
 import com.imovel.api.request.SubscriptionPlainRequest;
 import com.imovel.api.response.ApplicationResponse;
-import com.imovel.api.response.SubscriptionPlanResponse;
 import com.imovel.api.response.SubscriptionResponse;
 import com.imovel.api.services.SubscriptionService;
+import com.imovel.api.session.SessionManager;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,35 +18,76 @@ import java.util.List;
 @RequestMapping("/api/subscriptions")
 public class SubscriptionController {
     private final SubscriptionService subscriptionService;
+    private final SessionManager sessionManager;
 
     @Autowired
-    public SubscriptionController(SubscriptionService subscriptionService) {
+    public SubscriptionController(SubscriptionService subscriptionService,SessionManager sessionManager) {
         this.subscriptionService = subscriptionService;
+        this.sessionManager = sessionManager;
     }
 
     @PostMapping("/subscribe")
-    public ApplicationResponse<SubscriptionResponse> subscribe(@RequestBody SubscriptionPlainRequest subscriptionPlanRequest) {
+    public ApplicationResponse<SubscriptionResponse> subscribe(@RequestBody SubscriptionPlainRequest subscriptionPlanRequest, HttpSession session) {
 
+        // Authentication check
+        ResponseEntity<?> authResponse = sessionManager.verifyAuthentication(session, subscriptionPlanRequest.getUserId());
+        if (authResponse != null) {
+            return (ApplicationResponse<SubscriptionResponse>)authResponse.getBody();
+        }
         return subscriptionService.subscribeUser(subscriptionPlanRequest.getUserId(),
                                                  subscriptionPlanRequest.getPlanId(),
                                                  subscriptionPlanRequest.getBillingCycle());
     }
 
     @GetMapping("/user/{userId}")
-    public ApplicationResponse<List<SubscriptionResponse>> getUserSubscriptions(@PathVariable Long userId) {
+    public ApplicationResponse<List<SubscriptionResponse>> getUserSubscriptions(@PathVariable Long userId,
+                                                                                HttpSession session) {
+
+        // Authentication check
+        ResponseEntity<?> authResponse = sessionManager.verifyAuthentication(session, userId);
+        if (authResponse != null) {
+            return (ApplicationResponse<List<SubscriptionResponse>>)authResponse.getBody();
+        }
         return subscriptionService.getUserSubscriptions(userId);
     }
-    // NOT TESTED
-    @PostMapping("/{subscriptionId}/cancel")
-    public ApplicationResponse<SubscriptionResponse> cancelSubscription(@PathVariable Long subscriptionId) {
+
+    @PostMapping("cancel/{subscriptionId}/{userId}")
+    public ApplicationResponse<SubscriptionResponse> cancelSubscription(@PathVariable Long subscriptionId,
+                                                                        @PathVariable Long userId,
+                                                                        HttpSession session) {
+
+        // Authentication check
+        ResponseEntity<?> authResponse = sessionManager.verifyAuthentication(session, userId);
+        if (authResponse != null) {
+            return (ApplicationResponse<SubscriptionResponse>)authResponse.getBody();
+        }
         return subscriptionService.cancelSubscription(subscriptionId);
     }
 
-    @PostMapping("/{subscriptionId}/change-plan")
-    public ApplicationResponse<SubscriptionResponse> changePlan(
-            @PathVariable Long subscriptionId,
-            @RequestParam Long newPlanId,
-            @RequestParam(required = false, defaultValue = "true") boolean immediate) {
-        return subscriptionService.changePlan(subscriptionId, newPlanId, immediate);
+    @PostMapping("change-plan")
+    public ApplicationResponse<SubscriptionResponse> changePlan(@RequestBody ChangePlainRequest changePlainRequest,
+                                                                HttpSession session) {
+
+        // Authentication check
+        ResponseEntity<?> authResponse = sessionManager.verifyAuthentication(session, changePlainRequest.getUserId());
+        if (authResponse != null) {
+            return (ApplicationResponse<SubscriptionResponse>)authResponse.getBody();
+        }
+        return subscriptionService.changePlan(changePlainRequest.getSubscriptionId(),
+                                              changePlainRequest.getNewPlanId(),
+                                              changePlainRequest.isMediate());
+    }
+
+    @PostMapping("restore/{subscriptionId}/{userId}")
+    public ApplicationResponse<SubscriptionResponse> restoreSubscription(@PathVariable Long subscriptionId,
+                                                                        @PathVariable Long userId,
+                                                                        HttpSession session) {
+
+        // Authentication check
+        ResponseEntity<?> authResponse = sessionManager.verifyAuthentication(session, userId);
+        if (authResponse != null) {
+            return (ApplicationResponse<SubscriptionResponse>)authResponse.getBody();
+        }
+        return subscriptionService.restoreSubscription(subscriptionId);
     }
 }

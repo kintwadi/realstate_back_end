@@ -23,6 +23,7 @@ import java.util.Optional;
  */
 @Service
 @Profile("sqlite")
+@Deprecated  // use payment module instead
 public class SqlitePaymentServiceImpl implements PaymentService {
 
     private final SubscriptionRepository subscriptionRepository;

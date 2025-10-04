@@ -25,6 +25,7 @@ import java.util.Map;
 
 @Service
 @Profile("!sqlite")
+@Deprecated  // use payment module instead
 public class StripePaymentService implements PaymentService {
 
     private final SubscriptionRepository subscriptionRepository;
