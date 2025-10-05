@@ -9,8 +9,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * JPA Configuration class to ensure proper entity manager factory setup
  */
 @Configuration
-@EnableJpaRepositories(basePackages = {"com.imovel.api.repository", "com.imovel.api.payment.repository"})
-@EntityScan(basePackages = {"com.imovel.api.model", "com.imovel.api.payment.model"})
+@EnableJpaRepositories(basePackages = {"com.imovel.api.repository", "com.imovel.api.payment.repository", "com.imovel.api.booking.repository"})
+@EntityScan(basePackages = {"com.imovel.api.model", "com.imovel.api.payment.model", "com.imovel.api.booking.model"})
 @EnableTransactionManagement
 public class JpaConfig {
     // Spring Boot auto-configuration will handle the rest
