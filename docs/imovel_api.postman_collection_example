@@ -393,7 +393,7 @@
                                                                  ],
                                                       "body":  {
                                                                    "mode":  "raw",
-                                                                   "raw":  "{\"roleId\": {{roleId}}, \"permissionId\": {{permissionId}}}"
+                                                                   "raw":  "{}"
                                                                },
                                                       "url":  {
                                                                   "raw":  "{{baseUrl}}/api/bookings/{{bookingId}}/confirm"
@@ -733,8 +733,8 @@
                                                                  ],
                                                       "body":  {
                                                                    "mode":  "raw",
-                                                                   "raw":  "{}"
-                                                               }
+                                                                   "raw":  ""
+                                                               },
                                                       "url":  {
                                                                   "raw":  "{{baseUrl}}/api/availability/property/{{propertyId}}/block?startDate={{startDate}}&endDate={{endDate}}&reason={{reason}}"
                                                               }
@@ -1341,7 +1341,7 @@
                                                                  ],
                                                       "body":  {
                                                                    "mode":  "raw",
-                                                                   "raw":  "{\"roleId\": {{roleId}}, \"permissionId\": {{permissionId}}}"
+                                                                   "raw":  "{}"
                                                                },
                                                       "url":  {
                                                                   "raw":  "{{baseUrl}}/api/cancellation-policies/{{policyId}}"
@@ -1528,7 +1528,7 @@
                                                                  ],
                                                       "body":  {
                                                                    "mode":  "raw",
-                                                                   "raw":  ""
+                                                                   "raw":  "{}"
                                                                },
                                                       "url":  {
                                                                   "raw":  "{{baseUrl}}/api/subscriptions/cancel/{{subscriptionId}}/{{userId}}"
@@ -1552,7 +1552,7 @@
                                                       "body":  {
                                                                    "mode":  "raw",
                                                                    "raw":  "{\"userId\": {{userId}}, \"subscriptionId\": {{subscriptionId}}, \"newPlanId\": {{newPlanId}}, \"billingCycle\": \"{{billingCycle}}\", \"currency\": \"{{currency}}\", \"mediate\": true}"
-                                                               },
+                                                               }
                                                       "url":  {
                                                                   "raw":  "{{baseUrl}}/api/subscriptions/change-plan"
                                                               }
@@ -1611,7 +1611,7 @@
                                                                  ],
                                                       "body":  {
                                                                    "mode":  "raw",
-                                                                   "raw":  "{}"
+                                                                   "raw":  "{\"name\": \"Pro\", \"price\": 49.99, \"currency\": \"USD\", \"billingCycle\": \"MONTHLY\", \"maxProperties\": 50, \"features\": [\"Advanced analytics\", \"Priority support\"], \"description\": \"Pro plan for agencies\"}"
                                                                },
                                                       "url":  {
                                                                   "raw":  "{{baseUrl}}/api/subscription-plans/{{id}}"
@@ -1672,8 +1672,8 @@
                                                                  ],
                                                       "body":  {
                                                                    "mode":  "raw",
-                                                                   "raw":  "{\"roleName\": \"{{roleName}}\", \"description\": \"{{roleDescription}}\"}"
-                                                               },
+                                                                   "raw":  "{\"roleName\": \"MANAGER\", \"description\": \"Manager role with elevated privileges\"}"
+                                                               }
                                                       "url":  {
                                                                   "raw":  "{{baseUrl}}/api/roles/{{id}}"
                                                               }
@@ -1776,7 +1776,7 @@
                                                                  ],
                                                       "body":  {
                                                                    "mode":  "raw",
-                                                                   "raw":  "{}"
+                                                                   "raw":  "{\"roleId\": {{roleId}}, \"permissionId\": {{permissionId}}}"
                                                                },
                                                       "url":  {
                                                                   "raw":  "{{baseUrl}}/api/role-permissions/assign"
@@ -1799,7 +1799,7 @@
                                                                  ],
                                                       "body":  {
                                                                    "mode":  "raw",
-                                                                   "raw":  ""
+                                                                   "raw":  "{}"
                                                                },
                                                       "url":  {
                                                                   "raw":  "{{baseUrl}}/api/role-permissions/assign-by-name?roleName={{roleName}}&permissionName={{permissionName}}"
@@ -1898,7 +1898,7 @@
                                                                  ],
                                                       "body":  {
                                                                    "mode":  "raw",
-                                                                   "raw":  "{}"
+                                                                   "raw":  "{\"roleId\": {{roleId}}, \"permissionId\": {{permissionId}}}"
                                                                },
                                                       "url":  {
                                                                   "raw":  "{{baseUrl}}/api/role-permissions/update"
@@ -1958,8 +1958,16 @@
                                                                      {
                                                                          "key":  "Authorization",
                                                                          "value":  "Bearer {{accessToken}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
                                                                      }
                                                                  ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\"id\": {{userId}}, \"email\": \"{{userEmail}}\", \"name\": \"{{userName}}\"}"
+                                                               },
                                                       "url":  {
                                                                   "raw":  "{{baseUrl}}/api/role-permissions/user-permissions"
                                                               }

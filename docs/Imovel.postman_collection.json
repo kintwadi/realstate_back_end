@@ -1,4 +1,4 @@
-﻿{
+{
     "info":  {
                  "name":  "Imovel API Collection",
                  "_postman_id": "0c1bbf8a-2e68-4d8c-b8de-7b6fe3b4b056",
@@ -355,7 +355,7 @@
                                                                  ],
                                                       "body":  {
                                                                    "mode":  "raw",
-                                                                   "raw":  "{\n  \"checkInDate\": \"2025-11-10\",\n  \"checkOutDate\": \"2025-11-15\",\n  \"numberOfAdults\": 2,\n  \"numberOfChildren\": 1,\n  \"specialRequests\": \"Late check-in\",\n  \"status\": \"CONFIRMED\",\n  \"hostNotes\": \"Please leave key under mat\",\n  \"additionalGuests\": [\n    {\n      \"firstName\": \"Alice\",\n      \"lastName\": \"Smith\",\n      \"email\": \"alice@example.com\",\n      \"phone\": \"+155501002\",\n      \"age\": 28,\n      \"specialRequests\": \"Vegetarian\",\n      \"dietaryRestrictions\": \"No dairy\",\n      \"emergencyContactName\": \"Bob Smith\",\n      \"emergencyContactPhone\": \"+155501003\",\n      \"isPrimaryGuest\": false\n    }\n  ],\n  \"internalNotes\": \"VIP customer\"\n}"
+                                                                   "raw":  "{\n  \"checkInDate\": \"2025-11-10\",\n  \"checkOutDate\": \"2025-11-15\",\n  \"numberOfAdults\": 2,\n  \"numberOfChildren\": 1,\n  \"specialRequests\": \"Late check-in\",\n  \"status\": \"CONFIRMED\",\n  \"cancellationReason\": \"Change in travel plans\",\n  \"hostNotes\": \"Please leave key under mat\",\n  \"additionalGuests\": [\n    {\n      \"firstName\": \"Alice\",\n      \"lastName\": \"Smith\",\n      \"email\": \"alice@example.com\",\n      \"phone\": \"+155501002\",\n      \"age\": 28,\n      \"specialRequests\": \"Vegetarian\",\n      \"dietaryRestrictions\": \"No dairy\",\n      \"emergencyContactName\": \"Bob Smith\",\n      \"emergencyContactPhone\": \"+155501003\",\n      \"isPrimaryGuest\": false\n    }\n  ],\n  \"internalNotes\": \"VIP customer\"\n}"
                                                                }
                                                       "url":  {
                                                                   "raw":  "{{baseUrl}}/api/bookings/{{bookingId}}"
@@ -394,7 +394,7 @@
                                                       "body":  {
                                                                    "mode":  "raw",
                                                                    "raw":  "{}"
-                                                               },
+                                                               }
                                                       "url":  {
                                                                   "raw":  "{{baseUrl}}/api/bookings/{{bookingId}}/confirm"
                                                               }
@@ -733,8 +733,8 @@
                                                                  ],
                                                       "body":  {
                                                                    "mode":  "raw",
-                                                                   "raw":  ""
-                                                               },
+                                                                   "raw":  "{}"
+                                                               }
                                                       "url":  {
                                                                   "raw":  "{{baseUrl}}/api/availability/property/{{propertyId}}/block?startDate={{startDate}}&endDate={{endDate}}&reason={{reason}}"
                                                               }
@@ -1341,7 +1341,7 @@
                                                                  ],
                                                       "body":  {
                                                                    "mode":  "raw",
-                                                                   "raw":  "{}"
+                                                                   "raw":  "{\"roleId\": {{roleId}}, \"permissionId\": {{permissionId}}}"
                                                                },
                                                       "url":  {
                                                                   "raw":  "{{baseUrl}}/api/cancellation-policies/{{policyId}}"
@@ -1379,7 +1379,7 @@
                                                                  ],
                                                       "body":  {
                                                                    "mode":  "raw",
-                                                                   "raw":  "{}"
+                                                                   "raw":  "{\"roleId\": {{roleId}}, \"permissionId\": {{permissionId}}}"
                                                                },
                                                       "url":  {
                                                                   "raw":  "{{baseUrl}}/api/cancellation-policies/{{policyId}}/status"
@@ -1432,7 +1432,7 @@
                                                                  ],
                                                       "body":  {
                                                                    "mode":  "raw",
-                                                                   "raw":  "{}"
+                                                                   "raw":  ""
                                                                },
                                                       "url":  {
                                                                   "raw":  "{{baseUrl}}/api/cancellation-policies/validate"
@@ -1551,8 +1551,8 @@
                                                                  ],
                                                       "body":  {
                                                                    "mode":  "raw",
-                                                                   "raw":  "{\"userId\": 101, \"subscriptionId\": 555, \"newPlanId\": 4, \"billingCycle\": \"YEARLY\", \"currency\": \"USD\", \"mediate\": true}"
-                                                               },
+                                                                   "raw":  "{\"userId\": {{userId}}, \"subscriptionId\": {{subscriptionId}}, \"newPlanId\": {{newPlanId}}, \"billingCycle\": \"{{billingCycle}}\", \"currency\": \"{{currency}}\", \"mediate\": true}"
+                                                               }
                                                       "url":  {
                                                                   "raw":  "{{baseUrl}}/api/subscriptions/change-plan"
                                                               }
@@ -1672,7 +1672,7 @@
                                                                  ],
                                                       "body":  {
                                                                    "mode":  "raw",
-                                                                   "raw":  "{}"
+                                                                   "raw":  "{\"roleName\": \"{{roleName}}\", \"description\": \"{{roleDescription}}\"}"
                                                                },
                                                       "url":  {
                                                                   "raw":  "{{baseUrl}}/api/roles/{{id}}"
@@ -1725,10 +1725,10 @@
                                                                  ],
                                                       "body":  {
                                                                    "mode":  "raw",
-                                                                   "raw":  "{}"
+                                                                   "raw":  "{\"id\": {{userId}}, \"email\": \"{{userEmail}}\", \"name\": \"{{userName}}\"}"
                                                                },
                                                       "url":  {
-                                                                  "raw":  "{{baseUrl}}/api/roles/assign-to-user"
+                                                                  "raw":  "{{baseUrl}}/api/roles/assign-to-user?roleName={{roleName}}"
                                                               }
                                                   }
                                   },
@@ -1740,10 +1740,18 @@
                                                                      {
                                                                          "key":  "Authorization",
                                                                          "value":  "Bearer {{accessToken}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
                                                                      }
                                                                  ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\"id\": {{userId}}, \"email\": \"{{userEmail}}\", \"name\": \"{{userName}}\"}"
+                                                               },
                                                       "url":  {
-                                                                  "raw":  "{{baseUrl}}/api/roles/remove-from-user"
+                                                                  "raw":  "{{baseUrl}}/api/roles/remove-from-user?roleName={{roleName}}"
                                                               }
                                                   }
                                   }
@@ -1794,7 +1802,7 @@
                                                                    "raw":  "{}"
                                                                },
                                                       "url":  {
-                                                                  "raw":  "{{baseUrl}}/api/role-permissions/assign-by-name"
+                                                                  "raw":  "{{baseUrl}}/api/role-permissions/assign-by-name?roleName={{roleName}}&permissionName={{permissionName}}"
                                                               }
                                                   }
                                   },
@@ -1806,8 +1814,16 @@
                                                                      {
                                                                          "key":  "Authorization",
                                                                          "value":  "Bearer {{accessToken}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
                                                                      }
                                                                  ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\"roleId\": {{roleId}}, \"permissionId\": {{permissionId}}}"
+                                                               },
                                                       "url":  {
                                                                   "raw":  "{{baseUrl}}/api/role-permissions/remove"
                                                               }
@@ -1851,8 +1867,16 @@
                                                                      {
                                                                          "key":  "Authorization",
                                                                          "value":  "Bearer {{accessToken}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
                                                                      }
                                                                  ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\"roleId\": {{roleId}}, \"permissionId\": {{permissionId}}}"
+                                                               },
                                                       "url":  {
                                                                   "raw":  "{{baseUrl}}/api/role-permissions/check"
                                                               }
@@ -1934,8 +1958,16 @@
                                                                      {
                                                                          "key":  "Authorization",
                                                                          "value":  "Bearer {{accessToken}}"
+                                                                     },
+                                                                     {
+                                                                         "key":  "Content-Type",
+                                                                         "value":  "application/json"
                                                                      }
                                                                  ],
+                                                      "body":  {
+                                                                   "mode":  "raw",
+                                                                   "raw":  "{\"id\": {{userId}}, \"email\": \"{{userEmail}}\", \"name\": \"{{userName}}\"}"
+                                                               },
                                                       "url":  {
                                                                   "raw":  "{{baseUrl}}/api/role-permissions/user-permissions"
                                                               }
