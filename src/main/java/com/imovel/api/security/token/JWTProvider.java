@@ -51,16 +51,23 @@ public final class JWTProvider {
                 .get().getConfigValue());
 
         KeyStoreManager keyStoreManager = new KeyStoreManager();
-        accessTokenAlgorithm = Algorithm.HMAC256(
-                keyStoreManager.retrieveAccessTokenKey()
-                        .orElseThrow(() -> new IllegalStateException("Access token key not available"))
-                        .getEncoded()
-        );
-        refreshTokenAlgorithm = Algorithm.HMAC256(
-                keyStoreManager.retrieveRefreshTokenKey()
-                        .orElseThrow(() -> new IllegalStateException("Refresh token key not available"))
-                        .getEncoded()
-        );
+        // Try keystore-based keys first
+        var accessKeyOpt = keyStoreManager.retrieveAccessTokenKey();
+        var refreshKeyOpt = keyStoreManager.retrieveRefreshTokenKey();
+        if (accessKeyOpt.isPresent() && refreshKeyOpt.isPresent()) {
+            accessTokenAlgorithm = Algorithm.HMAC256(accessKeyOpt.get().getEncoded());
+            refreshTokenAlgorithm = Algorithm.HMAC256(refreshKeyOpt.get().getEncoded());
+        } else {
+            // Fallback to environment-provided HMAC secrets for development/testing
+            String accessSecret = System.getenv("ACCESS_TOKEN_SECRET");
+            String refreshSecret = System.getenv("REFRESH_TOKEN_SECRET");
+            if (accessSecret != null && refreshSecret != null) {
+                accessTokenAlgorithm = Algorithm.HMAC256(accessSecret);
+                refreshTokenAlgorithm = Algorithm.HMAC256(refreshSecret);
+            } else {
+                throw new IllegalStateException("Access/Refresh token secrets not available: keystore and env fallback missing");
+            }
+        }
     }
 
     /* ========== Token Generation Methods ========== */
@@ -204,7 +211,7 @@ public final class JWTProvider {
      * @param value Claim value
      */
     public void addClaim(final String key, final String value) {
-        this.claims.putIfAbsent(key, value);
+        this.claims.put(key, value);
     }
 
     /* ========== Getters and Setters ========== */
