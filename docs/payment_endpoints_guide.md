@@ -321,6 +321,20 @@ public enum PaymentMethod {
 }
 ```
 
+
+### External payment ( confirm )
+** Endpoint:** ` POST https://api.stripe.com/v1/payment_intents/{gatewayPaymentId}/confirm?payment_method=pm_card_visa`
+
+**Description:** confirm payment by directly invoking stripe payment.
+**Path Parameters:**
+- `gatewayPaymentId` (String): The payment ID
+
+**Query Parameters:**
+- `payment_method` (String): payment method for testing use `pm_card_visa`
+
+**Response:**
+   ref: stripe doc
+
 ### 2. Get Payment by ID
 
 **Endpoint:** `GET /api/payments/{paymentId}?userId={userId}`
