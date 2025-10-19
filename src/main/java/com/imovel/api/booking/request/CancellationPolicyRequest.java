@@ -7,27 +7,11 @@ import java.math.BigDecimal;
 
 public class CancellationPolicyRequest {
 
-    @NotNull(message = "Property ID is required")
     private Long propertyId;
-
-    @NotNull(message = "Policy type is required")
     private CancellationPolicyType policyType;
-
-    @NotNull(message = "Refund percentage is required")
-    @DecimalMin(value = "0.00", message = "Refund percentage cannot be negative")
-    @DecimalMax(value = "100.00", message = "Refund percentage cannot exceed 100%")
-    @Digits(integer = 3, fraction = 2, message = "Invalid refund percentage format")
     private BigDecimal refundPercentage;
-
-    @NotNull(message = "Days before check-in is required")
-    @Min(value = 0, message = "Days before check-in cannot be negative")
-    @Max(value = 365, message = "Days before check-in cannot exceed 365 days")
     private Integer daysBeforeCheckIn;
-
-    @Size(max = 1000, message = "Description must not exceed 1000 characters")
     private String description;
-
-    @NotNull(message = "Active status is required")
     private Boolean isActive;
 
     // Constructors

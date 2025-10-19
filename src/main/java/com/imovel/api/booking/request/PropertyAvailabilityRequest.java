@@ -7,37 +7,17 @@ import java.time.LocalDate;
 
 public class PropertyAvailabilityRequest {
 
-    @NotNull(message = "Property ID is required")
+
     private Long propertyId;
-
-    @NotNull(message = "Date is required")
     private LocalDate date;
-
-    @NotNull(message = "Availability status is required")
     private Boolean isAvailable;
-
-    @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than 0")
-    @Digits(integer = 10, fraction = 2, message = "Price must have at most 10 integer digits and 2 decimal places")
     private BigDecimal price;
-
-    @Min(value = 1, message = "Minimum stay must be at least 1 day")
-    @Max(value = 365, message = "Minimum stay cannot exceed 365 days")
     private Integer minStay;
-
-    @Min(value = 1, message = "Maximum stay must be at least 1 day")
-    @Max(value = 365, message = "Maximum stay cannot exceed 365 days")
     private Integer maxStay;
-
-    @Size(max = 200, message = "Blocked reason cannot exceed 200 characters")
     private String blockedReason;
-
     private Boolean isInstantBook;
-
     private Boolean checkInAllowed;
-
     private Boolean checkOutAllowed;
-
-    @Size(max = 500, message = "Notes cannot exceed 500 characters")
     private String notes;
 
     // Constructors

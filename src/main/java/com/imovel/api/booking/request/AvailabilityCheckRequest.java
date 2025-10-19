@@ -6,25 +6,11 @@ import java.time.LocalDate;
 
 public class AvailabilityCheckRequest {
 
-    @NotNull(message = "Property ID is required")
     private Long propertyId;
-
-    @NotNull(message = "Check-in date is required")
-    @FutureOrPresent(message = "Check-in date must be today or in the future")
     private LocalDate checkInDate;
-
-    @NotNull(message = "Check-out date is required")
-    @Future(message = "Check-out date must be in the future")
     private LocalDate checkOutDate;
-
-    @Min(value = 1, message = "Number of adults must be at least 1")
-    @Max(value = 20, message = "Number of adults cannot exceed 20")
     private Integer numberOfAdults;
-
-    @Min(value = 0, message = "Number of children cannot be negative")
-    @Max(value = 10, message = "Number of children cannot exceed 10")
     private Integer numberOfChildren;
-
     private Boolean instantBookOnly = false;
 
     // Constructors

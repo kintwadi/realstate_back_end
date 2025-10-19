@@ -23,36 +23,36 @@ public class CancellationPolicy {
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "property_id", nullable = false)
+    @JoinColumn(name = "property_id")
     private Property property;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "policy_type", nullable = false)
+    @Column(name = "policy_type")
     private CancellationPolicyType policyType;
 
     @NotNull
     @Min(0)
     @Max(100)
-    @Column(name = "refund_percentage", nullable = false, precision = 5, scale = 2)
+    @Column(name = "refund_percentage")
     private BigDecimal refundPercentage;
 
     @NotNull
     @Min(0)
-    @Column(name = "days_before_checkin", nullable = false)
+    @Column(name = "days_before_checkin")
     private Integer daysBeforeCheckin;
 
-    @Column(name = "description", length = 1000)
+    @Column(name = "description")
     private String description;
 
-    @Column(name = "is_active", nullable = false)
+    @Column(name = "is_active")
     private Boolean isActive = true;
 
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     // Constructors

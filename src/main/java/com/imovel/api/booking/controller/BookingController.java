@@ -82,7 +82,7 @@ public class BookingController {
      */
     @PostMapping
     public ResponseEntity<ApplicationResponse<BookingResponse>> createBooking(
-            @Valid @RequestBody BookingCreateRequest bookingRequest,
+            @RequestBody BookingCreateRequest bookingRequest,
             HttpSession session) {
         final String TAG = "createBooking";
         ApiLogger.info(buildLogTag(TAG), "Received request to create booking for property: " + bookingRequest.getPropertyId());
