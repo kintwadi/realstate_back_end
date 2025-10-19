@@ -5,41 +5,15 @@ import jakarta.validation.constraints.*;
 public class BookingGuestRequest {
 
     private Long bookingId;
-
-    @NotBlank(message = "Guest first name is required")
-    @Size(max = 50, message = "First name cannot exceed 50 characters")
     private String firstName;
-
-    @NotBlank(message = "Guest last name is required")
-    @Size(max = 50, message = "Last name cannot exceed 50 characters")
     private String lastName;
-
-    @NotBlank(message = "Guest full name is required")
-    @Size(max = 100, message = "Full name cannot exceed 100 characters")
     private String fullName;
-
-    @NotBlank(message = "Guest email is required")
-    @Email(message = "Please provide a valid email address")
-    @Size(max = 100, message = "Email cannot exceed 100 characters")
     private String email;
-
-    @Size(max = 20, message = "Phone number cannot exceed 20 characters")
     private String phone;
-
-    @Min(value = 0, message = "Age cannot be negative")
-    @Max(value = 120, message = "Age cannot exceed 120")
     private Integer age;
-
-    @Size(max = 500, message = "Special requests cannot exceed 500 characters")
     private String specialRequests;
-
-    @Size(max = 300, message = "Dietary restrictions cannot exceed 300 characters")
     private String dietaryRestrictions;
-
-    @Size(max = 100, message = "Emergency contact name cannot exceed 100 characters")
     private String emergencyContactName;
-
-    @Size(max = 20, message = "Emergency contact phone cannot exceed 20 characters")
     private String emergencyContactPhone;
 
     private Boolean isPrimaryGuest = false;

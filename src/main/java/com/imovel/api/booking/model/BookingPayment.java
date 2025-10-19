@@ -22,55 +22,55 @@ public class BookingPayment {
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "booking_id", nullable = false)
+    @JoinColumn(name = "booking_id")
     private Booking booking;
 
     @NotNull
     @Positive
-    @Column(name = "amount", nullable = false, precision = 19, scale = 4)
+    @Column(name = "amount")
     private BigDecimal amount;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "payment_type", nullable = false)
+    @Column(name = "payment_type")
     private PaymentType paymentType;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "payment_status", nullable = false)
+    @Column(name = "payment_status")
     private PaymentStatus paymentStatus = PaymentStatus.PENDING;
 
-    @Column(name = "payment_method", length = 50)
+    @Column(name = "payment_method")
     private String paymentMethod;
 
-    @Column(name = "transaction_id", length = 255)
+    @Column(name = "transaction_id")
     private String transactionId;
 
-    @Column(name = "gateway_payment_id", length = 255)
+    @Column(name = "gateway_payment_id")
     private String gatewayPaymentId;
 
     @Column(name = "payment_date")
     private LocalDateTime paymentDate;
 
-    @Column(name = "refund_amount", precision = 19, scale = 4)
+    @Column(name = "refund_amount")
     private BigDecimal refundAmount = BigDecimal.ZERO;
 
     @Column(name = "refund_date")
     private LocalDateTime refundDate;
 
-    @Column(name = "refund_reason", length = 500)
+    @Column(name = "refund_reason")
     private String refundReason;
 
-    @Column(name = "failure_reason", length = 500)
+    @Column(name = "failure_reason")
     private String failureReason;
 
-    @Column(name = "notes", length = 1000)
+    @Column(name = "notes")
     private String notes;
 
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     // Constructors

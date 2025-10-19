@@ -24,56 +24,47 @@ public class Booking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "property_id", nullable = false)
+    @JoinColumn(name = "property_id")
     private Property property;
 
-    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "guest_id", nullable = false)
+    @JoinColumn(name = "guest_id")
     private User guest;
 
-    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "host_id", nullable = false)
+    @JoinColumn(name = "host_id")
     private User host;
 
-    @NotNull
-    @Column(name = "check_in_date", nullable = false)
+    @Column(name = "check_in_date")
     private LocalDate checkInDate;
 
-    @NotNull
-    @Column(name = "check_out_date", nullable = false)
+    @Column(name = "check_out_date")
     private LocalDate checkOutDate;
 
-    @NotNull
-    @Positive
-    @Column(name = "total_nights", nullable = false)
-    private Integer totalNights;
+    @Column(name = "total_nights")
+    private Integer totalNights; // calculated from checkInDate and checkOutDate
 
-    @NotNull
-    @Column(name = "base_amount", nullable = false, precision = 19, scale = 4)
-    private BigDecimal baseAmount;
+    @Column(name = "base_amount")
+    private BigDecimal baseAmount = BigDecimal.ZERO;
 
-    @Column(name = "cleaning_fee", precision = 19, scale = 4)
+    @Column(name = "cleaning_fee")
     private BigDecimal cleaningFee = BigDecimal.ZERO;
 
-    @Column(name = "service_fee", precision = 19, scale = 4)
+    @Column(name = "service_fee")
     private BigDecimal serviceFee = BigDecimal.ZERO;
 
-    @Column(name = "tax_amount", precision = 19, scale = 4)
+    @Column(name = "tax_amount")
     private BigDecimal taxAmount = BigDecimal.ZERO;
 
-    @NotNull
-    @Column(name = "total_amount", nullable = false, precision = 19, scale = 4)
+    @Column(name = "total_amount")
     private BigDecimal totalAmount;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
+    @Column(name = "status")
     private BookingStatus status = BookingStatus.PENDING;
 
-    @Column(name = "guest_count", nullable = false)
+    @Column(name = "guest_count")
     private Integer guestCount = 1;
 
     @Column(name = "number_of_adults")
@@ -82,10 +73,10 @@ public class Booking {
     @Column(name = "number_of_children")
     private Integer numberOfChildren = 0;
 
-    @Column(name = "special_requests", length = 1000)
+    @Column(name = "special_requests")
     private String specialRequests;
 
-    @Column(name = "cancellation_reason", length = 500)
+    @Column(name = "cancellation_reason")
     private String cancellationReason;
 
     @Column(name = "cancelled_at")
@@ -100,16 +91,16 @@ public class Booking {
     @Column(name = "check_out_time")
     private LocalDateTime checkOutTime;
 
-    @Column(name = "confirmation_code", length = 20, unique = true)
+    @Column(name = "confirmation_code")
     private String confirmationCode;
 
-    @Column(name = "nightly_rate", precision = 19, scale = 4)
+    @Column(name = "nightly_rate")
     private BigDecimal nightlyRate;
 
-    @Column(name = "notes", length = 1000)
+    @Column(name = "notes")
     private String notes;
 
-    @Column(name = "host_notes", length = 1000)
+    @Column(name = "host_notes")
     private String hostNotes;
 
     @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -119,11 +110,11 @@ public class Booking {
     private List<BookingGuest> additionalGuests = new ArrayList<>();
 
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     // Constructors

@@ -28,6 +28,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -45,7 +46,6 @@ public class BookingService {
     private final PropertyRepository propertyRepository;
     private final UserRepository userRepository;
     private final PropertyAvailabilityService availabilityService;
-    private final BookingPaymentService paymentService;
     private final CancellationPolicyService cancellationPolicyService;
     private final SessionManager sessionManager;
 
@@ -56,14 +56,12 @@ public class BookingService {
                          PropertyRepository propertyRepository,
                          UserRepository userRepository,
                          PropertyAvailabilityService availabilityService,
-                         BookingPaymentService paymentService,
                          CancellationPolicyService cancellationPolicyService,
                          SessionManager sessionManager) {
         this.bookingRepository = bookingRepository;
         this.propertyRepository = propertyRepository;
         this.userRepository = userRepository;
         this.availabilityService = availabilityService;
-        this.paymentService = paymentService;
         this.cancellationPolicyService = cancellationPolicyService;
         this.sessionManager = sessionManager;
     }
@@ -118,6 +116,8 @@ public class BookingService {
                     ApiCode.VALIDATION_ERROR.getHttpStatus());
             }
 
+            Long totalNights = ChronoUnit.DAYS.between(request.getCheckInDate(), request.getCheckOutDate());
+
             // Create booking entity
             Booking booking = new Booking();
             booking.setProperty(property);
@@ -128,6 +128,7 @@ public class BookingService {
             booking.setNumberOfAdults(request.getNumberOfAdults());
             booking.setNumberOfChildren(request.getNumberOfChildren());
             booking.setSpecialRequests(request.getSpecialRequests());
+            booking.setTotalNights(totalNights.intValue());
             booking.setNotes(request.getNotes());
             booking.setConfirmationCode(generateConfirmationCode());
 
@@ -146,6 +147,7 @@ public class BookingService {
 
             // Save booking
             booking = bookingRepository.save(booking);
+
 
             // Create guest records
             if (request.getAdditionalGuests() != null && !request.getAdditionalGuests().isEmpty()) {
@@ -197,6 +199,9 @@ public class BookingService {
             // Update fields if provided
             if (request.getCheckInDate() != null) {
                 booking.setCheckInDate(request.getCheckInDate());
+            }
+            if (request.getTotalNights() != 0) {
+                booking.setTotalNights(request.getTotalNights());
             }
             if (request.getCheckOutDate() != null) {
                 booking.setCheckOutDate(request.getCheckOutDate());
@@ -265,15 +270,6 @@ public class BookingService {
 
             if (booking.getStatus() == BookingStatus.COMPLETED) {
                 return ApplicationResponse.error(ApiCode.VALIDATION_ERROR.getCode(), "Cannot cancel completed booking", ApiCode.VALIDATION_ERROR.getHttpStatus());
-            }
-
-            // Calculate refund if applicable
-            ApplicationResponse<BigDecimal> refundResponse = 
-                cancellationPolicyService.calculateRefund(booking, LocalDate.now());
-
-            if (refundResponse.isSuccess() && refundResponse.getData().compareTo(BigDecimal.ZERO) > 0) {
-                // Process refund
-                paymentService.processRefund(booking, refundResponse.getData(), reason);
             }
 
             // Update booking status

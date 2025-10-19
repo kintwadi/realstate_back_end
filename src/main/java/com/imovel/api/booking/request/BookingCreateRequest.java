@@ -9,44 +9,25 @@ import java.util.List;
 
 public class BookingCreateRequest {
 
-    @NotNull(message = "Property ID is required")
+
     private Long propertyId;
-
-    @NotNull(message = "Guest ID is required")
     private Long guestId;
-
-    @NotNull(message = "Check-in date is required")
-    @Future(message = "Check-in date must be in the future")
     private LocalDate checkInDate;
-
-    @NotNull(message = "Check-out date is required")
-    @Future(message = "Check-out date must be in the future")
     private LocalDate checkOutDate;
-
-    @Min(value = 1, message = "Number of adults must be at least 1")
-    @Max(value = 20, message = "Number of adults cannot exceed 20")
     private Integer numberOfAdults;
-
-    @Min(value = 0, message = "Number of children cannot be negative")
-    @Max(value = 10, message = "Number of children cannot exceed 10")
     private Integer numberOfChildren;
-
-    @Size(max = 1000, message = "Special requests cannot exceed 1000 characters")
     private String specialRequests;
 
-    @Valid
     private List<BookingGuestRequest> additionalGuests;
 
     private BigDecimal expectedTotalAmount;
 
-    @Size(max = 50, message = "Promo code cannot exceed 50 characters")
     private String promoCode;
 
     private Boolean agreeToTerms;
 
     private Boolean agreeToPrivacyPolicy;
 
-    @Size(max = 500, message = "Notes cannot exceed 500 characters")
     private String notes;
 
     // Constructors

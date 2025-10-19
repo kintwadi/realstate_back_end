@@ -23,18 +23,18 @@ public class PropertyAvailability {
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "property_id", nullable = false)
+    @JoinColumn(name = "property_id")
     private Property property;
 
     @NotNull
-    @Column(name = "date", nullable = false)
+    @Column(name = "date")
     private LocalDate date;
 
     @NotNull
-    @Column(name = "is_available", nullable = false)
+    @Column(name = "is_available")
     private Boolean isAvailable = true;
 
-    @Column(name = "price", precision = 19, scale = 4)
+    @Column(name = "price")
     private BigDecimal price;
 
     @PositiveOrZero
@@ -45,27 +45,27 @@ public class PropertyAvailability {
     @Column(name = "max_stay")
     private Integer maxStay = 365;
 
-    @Column(name = "blocked_reason", length = 255)
+    @Column(name = "blocked_reason")
     private String blockedReason;
 
-    @Column(name = "is_instant_book", nullable = false)
+    @Column(name = "is_instant_book")
     private Boolean isInstantBook = false;
 
-    @Column(name = "check_in_allowed", nullable = false)
+    @Column(name = "check_in_allowed")
     private Boolean checkInAllowed = true;
 
-    @Column(name = "check_out_allowed", nullable = false)
+    @Column(name = "check_out_allowed")
     private Boolean checkOutAllowed = true;
 
-    @Column(name = "notes", length = 500)
+    @Column(name = "notes")
     private String notes;
 
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     // Constructors

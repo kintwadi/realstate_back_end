@@ -10,32 +10,15 @@ import java.util.List;
 public class BookingUpdateRequest {
 
     private LocalDate checkInDate;
-
     private LocalDate checkOutDate;
-
-    @Min(value = 1, message = "Number of adults must be at least 1")
-    @Max(value = 20, message = "Number of adults cannot exceed 20")
     private Integer numberOfAdults;
-
-    @Min(value = 0, message = "Number of children cannot be negative")
-    @Max(value = 10, message = "Number of children cannot exceed 10")
     private Integer numberOfChildren;
-
-    @Size(max = 1000, message = "Special requests cannot exceed 1000 characters")
     private String specialRequests;
-
+    private int totalNights;
     private BookingStatus status;
-
-    @Size(max = 500, message = "Cancellation reason cannot exceed 500 characters")
     private String cancellationReason;
-
-    @Size(max = 500, message = "Host notes cannot exceed 500 characters")
     private String hostNotes;
-
-    @Valid
     private List<BookingGuestRequest> additionalGuests;
-
-    @Size(max = 500, message = "Internal notes cannot exceed 500 characters")
     private String internalNotes;
 
     // Constructors
@@ -108,6 +91,14 @@ public class BookingUpdateRequest {
 
     public List<BookingGuestRequest> getAdditionalGuests() {
         return additionalGuests;
+    }
+
+    public int getTotalNights() {
+        return totalNights;
+    }
+
+    public void setTotalNights(int totalNights) {
+        this.totalNights = totalNights;
     }
 
     public void setAdditionalGuests(List<BookingGuestRequest> additionalGuests) {

@@ -20,44 +20,44 @@ public class BookingGuest {
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "booking_id", nullable = false)
+    @JoinColumn(name = "booking_id")
     private Booking booking;
 
     @NotBlank
-    @Column(name = "full_name", nullable = false, length = 255)
+    @Column(name = "full_name")
     private String fullName;
 
     @Email
-    @Column(name = "email", length = 255)
+    @Column(name = "email")
     private String email;
 
-    @Column(name = "phone", length = 20)
+    @Column(name = "phone")
     private String phone;
 
     @Column(name = "age")
     private Integer age;
 
-    @Column(name = "special_requests", length = 1000)
+    @Column(name = "special_requests")
     private String specialRequests;
 
-    @Column(name = "dietary_restrictions", length = 500)
+    @Column(name = "dietary_restrictions")
     private String dietaryRestrictions;
 
-    @Column(name = "emergency_contact_name", length = 255)
+    @Column(name = "emergency_contact_name")
     private String emergencyContactName;
 
-    @Column(name = "emergency_contact_phone", length = 20)
+    @Column(name = "emergency_contact_phone")
     private String emergencyContactPhone;
 
-    @Column(name = "is_primary_guest", nullable = false)
+    @Column(name = "is_primary_guest")
     private Boolean isPrimaryGuest = false;
 
     @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     // Constructors
