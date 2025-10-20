@@ -27,6 +27,7 @@ public class DatabaseStorageProvider implements StorageProvider {
         media.setType(file.getContentType());
         media.setSize(file.getSize());
         media.setUrl(fileName);
+        media.setRawData(file.getBytes());
         media.setUploadDate(Instant.now());
         media.setDescription(metadata.get("description"));
         media.setPropertyId(metadata.get("property-id") != null ? 

@@ -1,8 +1,10 @@
 package com.imovel.api.response;
 
 import com.imovel.api.model.PropertyMedia;
+import com.imovel.api.util.Util;
 
 import java.time.Instant;
+import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,6 +20,7 @@ public class PropertyMediaResponse {
     private Instant uploadDate;
     private String description;
     private Long propertyId;
+    private String  rawData;
 
     // Constructors
     public PropertyMediaResponse() {
@@ -25,7 +28,7 @@ public class PropertyMediaResponse {
 
     public PropertyMediaResponse(String id, String name, String type, long size, String url, 
                                int width, int height, String format, Instant uploadDate, 
-                               String description, Long propertyId) {
+                               String description, Long propertyId, String rawData) {
         this.id = id;
         this.name = name;
         this.type = type;
@@ -37,6 +40,7 @@ public class PropertyMediaResponse {
         this.uploadDate = uploadDate;
         this.description = description;
         this.propertyId = propertyId;
+        this.rawData = rawData;
     }
 
 
@@ -58,7 +62,9 @@ public class PropertyMediaResponse {
             propertyMedia.getFormat(),
             propertyMedia.getUploadDate(),
             propertyMedia.getDescription(),
-            propertyMedia.getPropertyId()
+            propertyMedia.getPropertyId(),
+                Util.convertBytesToBase64WithMime(propertyMedia.getRawData(),propertyMedia.getType())
+
         );
     }
 
@@ -102,6 +108,18 @@ public class PropertyMediaResponse {
     }
 
     public void setSize(long size) {
+        this.size = size;
+    }
+
+    public String getRawData() {
+        return rawData;
+    }
+
+    public void setRawData(String rawData) {
+        this.rawData = rawData;
+    }
+
+    public void setSize(Long size) {
         this.size = size;
     }
 
@@ -160,4 +178,6 @@ public class PropertyMediaResponse {
     public void setPropertyId(Long propertyId) {
         this.propertyId = propertyId;
     }
+
+
 }

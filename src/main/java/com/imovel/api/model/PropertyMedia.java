@@ -20,6 +20,8 @@ public class PropertyMedia {
     private Instant uploadDate;
     private String description;
     private Long propertyId; // logical relation with property
+    @Lob
+    private byte[] rawData; // only used when selected  DatabaseStorageProvider
 
     // Constructors
     public PropertyMedia() {
@@ -122,5 +124,13 @@ public class PropertyMedia {
 
     public void setPropertyId(Long propertyId) {
         this.propertyId = propertyId;
+    }
+    
+    public byte[] getRawData() {
+        return rawData;
+    }
+
+    public void setRawData(byte[] rawData) {
+        this.rawData = rawData;
     }
 }

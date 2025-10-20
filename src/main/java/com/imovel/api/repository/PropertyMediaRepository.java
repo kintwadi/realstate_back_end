@@ -2,8 +2,6 @@ package com.imovel.api.repository;
 
 import com.imovel.api.model.PropertyMedia;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -14,6 +12,7 @@ public interface PropertyMediaRepository extends JpaRepository<PropertyMedia, St
 
     List<PropertyMedia> findAllByPropertyId(Long propertyId);
     Optional<PropertyMedia> findByName(String name);
+    Optional<PropertyMedia> findByIdAndPropertyId(String id, Long propertyId);
     void deleteByName(String fileName);
     List<PropertyMedia> findAllByNameStartingWith(String prefix);
 }
