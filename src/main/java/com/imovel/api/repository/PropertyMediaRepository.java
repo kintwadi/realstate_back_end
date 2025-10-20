@@ -12,6 +12,7 @@ public interface PropertyMediaRepository extends JpaRepository<PropertyMedia, St
 
     List<PropertyMedia> findAllByPropertyId(Long propertyId);
     Optional<PropertyMedia> findByName(String name);
+    Optional<PropertyMedia> findByIdAndPropertyId(String id, Long propertyId);
     void deleteByName(String fileName);
     List<PropertyMedia> findAllByNameStartingWith(String prefix);
 }

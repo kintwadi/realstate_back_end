@@ -53,5 +53,9 @@ public class StorageProviderFactoryImpl implements StorageProviderFactory {
             default -> throw new IllegalArgumentException("Unsupported storage type: " + storageType);
         };
     }
+
+    public String getStorageType() {
+        return storageType;
+    }
 }
 

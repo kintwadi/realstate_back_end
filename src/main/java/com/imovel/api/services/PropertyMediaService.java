@@ -10,7 +10,11 @@ import com.imovel.api.storage.MediaMetadata;
 import com.imovel.api.storage.StorageProvider;
 import com.imovel.api.storage.StorageProviderFactory;
 import com.imovel.api.logger.ApiLogger;
+import com.imovel.api.storage.StorageType;
+import com.imovel.api.util.Util;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,9 +25,13 @@ import java.util.stream.Collectors;
 
 @Service
 public class PropertyMediaService {
+
+
     private final StorageProviderFactory storageProviderFactory;
     private final PropertyMediaRepository propertyMediaRepository;
 
+    @Value("${storage.type.provider}")
+    private String storageType;
     @Autowired
     public PropertyMediaService(StorageProviderFactory storageProviderFactory,
                                 PropertyMediaRepository propertyMediaRepository) {
@@ -71,8 +79,7 @@ public class PropertyMediaService {
             media.setWidth(0); // Set default or extract from file if possible
             media.setHeight(0); // Set default or extract from file if possible
             media.setFormat(fileExtension.replace(".", ""));
-            propertyMediaRepository.save(media);
-
+            media.setRawData(file.getBytes());
             PropertyMediaResponse response = new PropertyMediaResponse(
                     media.getId(),
                     media.getName(),
@@ -84,7 +91,8 @@ public class PropertyMediaService {
                     media.getFormat(),
                     media.getUploadDate(),
                     media.getDescription(),
-                    media.getPropertyId()
+                    media.getPropertyId(),
+                    Util.convertBytesToBase64WithMime(media.getRawData(),media.getType())
             );
 
             ApiLogger.info("PropertyMediaService.upload", "File uploaded successfully", response);
@@ -97,10 +105,11 @@ public class PropertyMediaService {
         }
     }
 
+    @Transactional
     public ApplicationResponse<List<PropertyMediaResponse>> getAll(Long propertyId) {
         try {
             List<PropertyMedia> propertyMediaList = propertyMediaRepository.findAllByPropertyId(propertyId);
-            if (!propertyMediaList.isEmpty()) {
+            if (!propertyMediaList.isEmpty() && StorageType.DATABASE.name().equals(storageType)) {
                 List<PropertyMediaResponse> responses = propertyMediaList.stream()
                         .map(media -> new PropertyMediaResponse(
                                 media.getId(),
@@ -113,7 +122,8 @@ public class PropertyMediaService {
                                 media.getFormat(),
                                 media.getUploadDate(),
                                 media.getDescription(),
-                                media.getPropertyId()
+                                media.getPropertyId(),
+                                Util.convertBytesToBase64WithMime(media.getRawData(),media.getType())
                         ))
                         .collect(Collectors.toList());
 
@@ -139,7 +149,7 @@ public class PropertyMediaService {
                                     "",
                                     metadata.getUploadDate(),
                                     metadata.getDescription(),
-                                    metadata.getPropertyId()
+                                    metadata.getPropertyId(),""
                             );
                         } catch (IOException e) {
                             ApiLogger.error("PropertyMediaService.getAll", "Failed to get metadata for file", fileName);
@@ -155,7 +165,7 @@ public class PropertyMediaService {
                                     "",
                                     Instant.now(),
                                     "",
-                                    propertyId
+                                    propertyId,""
                             );
                         }
                     })
@@ -170,10 +180,11 @@ public class PropertyMediaService {
         }
     }
 
-    public ApplicationResponse<PropertyMediaResponse> getByName(String name) {
+    @Transactional
+    public ApplicationResponse<PropertyMediaResponse> getPropertyMedia(Long propertyId, String id) {
         try {
-            Optional<PropertyMedia> propertyMediaOptional = propertyMediaRepository.findByName(name);
-            if (propertyMediaOptional.isPresent()) {
+            Optional<PropertyMedia> propertyMediaOptional = propertyMediaRepository.findByIdAndPropertyId(id,propertyId);
+            if (propertyMediaOptional.isPresent() && StorageType.DATABASE.name().equals(storageType) )  {
                 PropertyMedia media = propertyMediaOptional.get();
                 PropertyMediaResponse response = new PropertyMediaResponse(
                         media.getId(),
@@ -186,7 +197,8 @@ public class PropertyMediaService {
                         media.getFormat(),
                         media.getUploadDate(),
                         media.getDescription(),
-                        media.getPropertyId()
+                        media.getPropertyId(),
+                        Util.convertBytesToBase64WithMime(media.getRawData(),media.getType())
                 );
 
                 ApiLogger.info("PropertyMediaService.getByName", "Retrieved media from database", response);
@@ -194,7 +206,7 @@ public class PropertyMediaService {
             }
 
             StorageProvider storageProvider = storageProviderFactory.createStorageProvider();
-            MediaMetadata metadata = storageProvider.getFileMetadata(name);
+            MediaMetadata metadata = storageProvider.getFileMetadata(id);
 
             PropertyMediaResponse response = new PropertyMediaResponse(
                     UUID.randomUUID().toString(),
@@ -207,29 +219,30 @@ public class PropertyMediaService {
                     "",
                     metadata.getUploadDate(),
                     metadata.getDescription(),
-                    metadata.getPropertyId()
+                    metadata.getPropertyId(),""
             );
 
             ApiLogger.info("PropertyMediaService.getByName", "Retrieved media from storage", response);
             return ApplicationResponse.success(response);
         } catch (Exception e) {
-            ApiLogger.error("PropertyMediaService.getByName", "Media not found", name);
+            ApiLogger.error("PropertyMediaService.getByName", "Media not found", id);
             return errorResponse(ApiCode.RESOURCE_NOT_FOUND,
                     "Media not found: " + e.getMessage());
         }
     }
 
-    public ApplicationResponse<PropertyMediaResponse> delete(String name) {
+    @Transactional
+    public ApplicationResponse<PropertyMediaResponse> delete(Long propertyId,String id) {
         try {
-            Optional<PropertyMedia> mediaOptional = propertyMediaRepository.findByName(name);
+            Optional<PropertyMedia> mediaOptional = propertyMediaRepository.findByIdAndPropertyId(id,propertyId);
             if (mediaOptional.isEmpty()) {
-                ApiLogger.error("PropertyMediaService.delete", "Media not found in database", name);
+                ApiLogger.error("PropertyMediaService.delete", "Media not found in database", id);
                 return errorResponse(ApiCode.RESOURCE_NOT_FOUND, "Media not found in database");
             }
 
             PropertyMedia media = mediaOptional.get();
             StorageProvider storageProvider = storageProviderFactory.createStorageProvider();
-            storageProvider.deleteFile(name);
+            storageProvider.deleteFile(id);
 
             propertyMediaRepository.delete(media);
 
@@ -244,13 +257,14 @@ public class PropertyMediaService {
                     media.getFormat(),
                     media.getUploadDate(),
                     media.getDescription(),
-                    media.getPropertyId()
+                    media.getPropertyId(),
+                    Util.convertBytesToBase64WithMime(media.getRawData(),media.getType())
             );
 
             ApiLogger.info("PropertyMediaService.delete", "Media deleted successfully", response);
             return ApplicationResponse.success(response, "Media deleted successfully");
         } catch (Exception e) {
-            ApiLogger.error("PropertyMediaService.delete", "Failed to delete media: "+name, e);
+            ApiLogger.error("PropertyMediaService.delete", "Failed to delete media: "+id, e);
             return errorResponse(ApiCode.SYSTEM_ERROR,
                     "Failed to delete media: " + e.getMessage());
         }
