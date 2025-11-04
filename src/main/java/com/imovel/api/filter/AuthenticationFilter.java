@@ -1,5 +1,6 @@
 package com.imovel.api.filter;
 
+import com.imovel.api.logger.ApiLogger;
 import com.imovel.api.security.token.JWTProvider;
 import com.imovel.api.services.ConfigurationService;
 import com.imovel.api.util.ResourceLoader;
@@ -57,7 +58,7 @@ public class AuthenticationFilter implements Filter {
 
         } catch (IOException ex)
         {
-            System.out.println("Error loading filter configuration: "+ex.getMessage());
+            ApiLogger.debug("JWTProvider.init", "Error loading filter configuration", ex.getMessage());
         }
     }
     
