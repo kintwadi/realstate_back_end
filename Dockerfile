@@ -27,8 +27,8 @@ WORKDIR /app
 # Copy the built JAR from the build stage
 COPY --from=build /app/target/imovel-api-*.jar /app/app.jar
 
-# Use port 8080 externally
-EXPOSE 8080
+# Use port 8082 externally
+EXPOSE 8082
 
 # Entrypoint - activates both 'default' and 'docker' profiles by default
 ENTRYPOINT ["sh", "-c", "java -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE:-default,docker} -jar /app/app.jar"]
