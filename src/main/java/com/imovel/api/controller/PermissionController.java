@@ -39,8 +39,8 @@ public class PermissionController {
         return permissionService.findAll();
     }
 
-    @PostMapping("/initialize")
-    public ApplicationResponse<List<PermissionResponse>> initializeDefaultPermissions() {
-        return permissionService.initializeDefaultPermissions();
-    }
+//    @PostMapping("/initialize")
+//    public ApplicationResponse<List<PermissionResponse>> initializeDefaultPermissions() {
+//        return permissionService.initializeDefaultPermissions();
+//    }
 }
