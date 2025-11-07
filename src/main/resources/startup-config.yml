@@ -1,0 +1,82 @@
+startup-config:
+  default-config:
+    ACCESS_EXPIRATION_MS: "900000"
+    REFRESH_EXPIRATION_MS: "604800000"
+    MAX_REFRESH_TOKEN_PER_USER: "5"
+    REFRESH_CLEAN_UP_INTERVAL: "86400000"
+
+  subscription-plan-config:
+    plans:
+      - name: "Free"
+        description: "Basic listing with limited features"
+        monthly-price: 0
+        yearly-price: 0
+        listing-limit: 1
+        availability-days: 90
+        featured: false
+        support-type: "limited"
+      - name: "Basic"
+        description: "More listings with extended availability"
+        monthly-price: 49
+        yearly-price: 530
+        listing-limit: 20
+        availability-days: 190
+        featured: false
+        support-type: "limited"
+      - name: "Extended"
+        description: "Unlimited listings with longer availability"
+        monthly-price: 109
+        yearly-price: 1100
+        listing-limit: null
+        availability-days: 220
+        featured: false
+        support-type: "limited"
+      - name: "Premium"
+        description: "Full features with priority support"
+        monthly-price: 149
+        yearly-price: 1430
+        listing-limit: null
+        availability-days: null
+        featured: true
+        support-type: "24/7"
+
+  permission-config:
+    permissions:
+      - name: "property:create"
+        description: "Create new property listings"
+      - name: "property:read"
+        description: "View property listings"
+      - name: "property:update"
+        description: "Update property listings"
+      - name: "property:delete"
+        description: "Delete property listings"
+      - name: "property:deactivate"
+        description: "Deactivate property listings"
+      - name: "property:manage_all"
+        description: "Manage all properties in the system"
+      - name: "user:create"
+        description: "Create new user accounts"
+      - name: "user:read"
+        description: "View user accounts"
+      - name: "user:update"
+        description: "Update user accounts"
+      - name: "user:delete"
+        description: "Delete user accounts"
+      - name: "user:deactivate"
+        description: "Deactivate user accounts"
+      - name: "financial:read"
+        description: "View financial transactions"
+      - name: "financial:report"
+        description: "Generate financial reports"
+      - name: "system:configure"
+        description: "Configure system settings"
+      - name: "agent:approve"
+        description: "Approve agent registrations"
+      - name: "dispute:resolve"
+        description: "Resolve disputes"
+      - name: "tenant:application"
+        description: "Submit rental applications"
+      - name: "tenant:wishlist"
+        description: "Manage wishlist"
+      - name: "tenant:compare"
+        description: "Compare properties"

@@ -18,4 +18,14 @@ SETUP KEYSTORE ENV VARIABLES IN YOUR workspace.xml or your OS
 
  stripe listen --forward-to  http://imovel.eu-central-1.elasticbeanstalk.com/imovel/api/webhooks/events
 
+# Use defaults (build: kintwadi/imovel-api:v1.0.0, push: kintwadi/imovel_api_dev:latest)
+docker_run.bat
 
+# Custom build tag and push tag
+.\docker_run.bat --build-tag v2.1.0 --push-tag staging
+
+# Custom repository and port
+docker_run.bat --push-repo mycompany/imovel-api-dev -p 8085
+
+# All custom options
+.\docker_run.bat --build-name kintwadi/imovel-api --build-tag v1.5.0 --push-repo kintwadi/imovel_api_dev --push-tag production -p 9090 -n my-container
