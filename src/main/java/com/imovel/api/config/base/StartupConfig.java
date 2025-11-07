@@ -58,7 +58,7 @@ public class StartupConfig {
     }
 
     private void createConfigIfNotExists(String key, String value) {
-        if (!configurationRepository.existsByKey(key)) {
+        if (!configurationRepository.existsByConfigKey(key)) {
             Configuration config = new Configuration(key, value);
             configurationRepository.save(config);
             ApiLogger.info("Created default configuration: {} = {}", key, value);

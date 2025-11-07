@@ -8,8 +8,6 @@ import java.util.Optional;
 
 @Repository
 public interface ConfigurationRepository extends JpaRepository<Configuration, Long> {
-
-    boolean existsByKey(String key);
     Optional<Configuration> findByConfigKey(String key);
     boolean existsByConfigKey(String key);
 

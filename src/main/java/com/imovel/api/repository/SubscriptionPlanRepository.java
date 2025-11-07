@@ -13,5 +13,5 @@ public interface SubscriptionPlanRepository extends JpaRepository<SubscriptionPl
 
     // Optional: Additional useful methods
     Optional<SubscriptionPlan> findByName(String name);
-    List<SubscriptionPlan> findByFeaturedTrue();
+    List<SubscriptionPlan> findByIsFeaturedTrue();
 }
