@@ -50,7 +50,6 @@ public class AuthController {
         this.tokenService = tokenService;
         this.authDetailsService = authDetailsService;
         this.forgotPasswordService = forgotPasswordService;
-        // this.jwtProvider.initialize(); // Commented out - will be initialized by AuthenticationFilter
     }
 
     /**
