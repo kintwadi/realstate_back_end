@@ -11,5 +11,6 @@ public interface ConfigurationRepository extends JpaRepository<Configuration, Lo
 
     boolean existsByKey(String key);
     Optional<Configuration> findByConfigKey(String key);
+    boolean existsByConfigKey(String key);
 
 }

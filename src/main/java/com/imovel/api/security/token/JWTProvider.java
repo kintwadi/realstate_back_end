@@ -6,6 +6,7 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.Claim;
+import com.imovel.api.logger.ApiLogger;
 import com.imovel.api.security.keystore.KeyStoreManager;
 import com.imovel.api.services.ConfigurationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,12 +29,12 @@ public final class JWTProvider {
     private static final String ACCESS_EXPIRATION_MS = "ACCESS_EXPIRATION_MS";
     private static final String REFRESH_EXPIRATION_MS = "REFRESH_EXPIRATION_MS";
     // Configuration fields
-    private String issuer;
+    private String issuer  = "imovel-api";
     private Algorithm accessTokenAlgorithm;
     private Algorithm refreshTokenAlgorithm;
     private long accessTokenExpirationMs;
     private long refreshTokenExpirationMs;
-    private Map<String, String> claims;
+    private Map<String, String> claims= new HashMap<>();
 
     @Autowired
     private ConfigurationService configurationService;
@@ -43,12 +44,14 @@ public final class JWTProvider {
      * Must be called before using other methods.
      */
     public void initialize() {
-        claims = new HashMap<>();
-        issuer = "imovel-api"; // Set the issuer for JWT tokens
+
         accessTokenExpirationMs = Long.valueOf(configurationService.findByConfigKey(ACCESS_EXPIRATION_MS)
                 .get().getConfigValue());
         refreshTokenExpirationMs = Long.valueOf(configurationService.findByConfigKey(REFRESH_EXPIRATION_MS)
                 .get().getConfigValue());
+
+        ApiLogger.debug("JWTProvider.initialize", "Error loading accessTokenExpirationMs configuration", accessTokenExpirationMs);
+        ApiLogger.debug("JWTProvider.initialize", "Error refreshTokenExpirationMs filter configuration", refreshTokenExpirationMs);
 
         KeyStoreManager keyStoreManager = new KeyStoreManager();
         // Try keystore-based keys first

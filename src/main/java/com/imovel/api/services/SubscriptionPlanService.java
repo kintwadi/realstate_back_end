@@ -6,8 +6,6 @@ import com.imovel.api.model.SubscriptionPlan;
 import com.imovel.api.repository.SubscriptionPlanRepository;
 import com.imovel.api.response.ApplicationResponse;
 import com.imovel.api.response.SubscriptionPlanResponse;
-import com.imovel.api.util.SubscriptionPlanInitializer;
-import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,16 +21,6 @@ public class SubscriptionPlanService {
     public SubscriptionPlanService(SubscriptionPlanRepository subscriptionPlanRepository) {
         this.subscriptionPlanRepository = subscriptionPlanRepository;
     }
-
-    // @PostConstruct
-    // public void init() {
-    //     try {
-    //         SubscriptionPlanInitializer.initializeDefaultSubscriptionPlan(subscriptionPlanRepository);
-    //         ApiLogger.info("SubscriptionPlanService", "Default subscription plans initialized successfully");
-    //     } catch (Exception e) {
-    //         ApiLogger.error("SubscriptionPlanService", "Failed to initialize default subscription plans", e);
-    //     }
-    // }
 
     public ApplicationResponse<SubscriptionPlanResponse> createSubscriptionPlan(SubscriptionPlan subscriptionPlan) {
         ApiLogger.info("SubscriptionPlanService.createSubscriptionPlan", "Creating new subscription plan", subscriptionPlan);

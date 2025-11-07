@@ -1,7 +1,5 @@
 package com.imovel.api.security.keystore;
 
-import com.imovel.api.util.ResourceLoader;
-
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -17,12 +15,12 @@ import java.util.Optional;
  */
 public final class KeyStoreManager {
     private static final String KEY_STORE_PATH_P12 = "tokens.p12";
-    private static final String ENV_KEYSTORE_PASS = "KEYSTORE_PASSPHRASE";
-    private static final String DEFAULT_KEYSTORE_PASS = "DEFAULT_KEYSTORE_PASS";
+    private static final String KEYSTORE_SECRET = "KEYSTORE_SECRET";
+    private static final String DEFAULT_KEYSTORE_SECRET = "DEFAULT_KEYSTORE_SECRET";
     private static final String ACCESS_TOKEN_ALIAS = "ACCESS_TOKEN_ALIAS";
-    private static final String ACCESS_TOKEN_PASS = "ACCESS_TOKEN_PASSWORD";
+    private static final String ACCESS_TOKEN_SECRET = "ACCESS_TOKEN_SECRET";
     private static final String REFRESH_TOKEN_ALIAS = "REFRESH_TOKEN_ALIAS";
-    private static final String REFRESH_TOKEN_PASS = "REFRESH_TOKEN_PASSWORD";
+    private static final String REFRESH_TOKEN_SECRET = "REFRESH_TOKEN_SECRET";
 
     /**
      * Loads the keystore from a classpath resource.
@@ -36,7 +34,7 @@ public final class KeyStoreManager {
                 return Optional.empty();
             }
 
-            char[] password = getRequiredEnv(ENV_KEYSTORE_PASS).toCharArray();
+            char[] password = getRequiredEnv(KEYSTORE_SECRET).toCharArray();
             KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
             keyStore.load(inputStream, password);
             return Optional.of(keyStore);
@@ -58,7 +56,7 @@ public final class KeyStoreManager {
                 "lib", "security", "cacerts"
         );
 
-        char[] password = getRequiredEnv(DEFAULT_KEYSTORE_PASS).toCharArray();
+        char[] password = getRequiredEnv(DEFAULT_KEYSTORE_SECRET).toCharArray();
 
         try (FileInputStream fis = new FileInputStream(cacertsPath.toFile())) {
             KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
@@ -109,7 +107,7 @@ public final class KeyStoreManager {
     public Optional<Key> retrieveAccessTokenKey() {
         try {
             String alias = getRequiredEnv(ACCESS_TOKEN_ALIAS);
-            char[] password = getRequiredEnv(ACCESS_TOKEN_PASS).toCharArray();
+            char[] password = getRequiredEnv(ACCESS_TOKEN_SECRET).toCharArray();
             return Optional.of(loadKeyStore().getKey(alias, password));
         } catch (Exception e) {
             System.err.printf("Failed to retrieve access token key: %s%n", e.getMessage());
@@ -125,7 +123,7 @@ public final class KeyStoreManager {
     public Optional<Key> retrieveRefreshTokenKey() {
         try {
             String alias = getRequiredEnv(REFRESH_TOKEN_ALIAS);
-            char[] password = getRequiredEnv(REFRESH_TOKEN_PASS).toCharArray();
+            char[] password = getRequiredEnv(REFRESH_TOKEN_SECRET).toCharArray();
             return Optional.of(loadKeyStore().getKey(alias, password));
         } catch (Exception e) {
             System.err.printf("Failed to retrieve refresh token key: %s%n", e.getMessage());
@@ -141,6 +139,8 @@ public final class KeyStoreManager {
      * @throws IllegalStateException if the variable is not set
      */
     private String getRequiredEnv(String name) {
+
+        String env =System.getenv(name);
         return Objects.requireNonNull(
                 System.getenv(name),
                 () -> "Environment variable " + name + " is required but not set"
