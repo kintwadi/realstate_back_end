@@ -1,5 +1,7 @@
 package com.imovel.api.security.keystore;
 
+import com.imovel.api.logger.ApiLogger;
+
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -28,18 +30,19 @@ public final class KeyStoreManager {
      * @return Optional containing the loaded KeyStore, or empty if loading fails
      */
     private Optional<KeyStore> loadKeyStoreFromResource() {
+
         try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(KEY_STORE_PATH_P12)) {
             if (inputStream == null) {
-                System.err.printf("Keystore resource not found: %s%n", KEY_STORE_PATH_P12);
+                ApiLogger.error("Keystore resource not found: %s%n", KEY_STORE_PATH_P12);
                 return Optional.empty();
             }
-
             char[] password = getRequiredEnv(KEYSTORE_SECRET).toCharArray();
             KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
             keyStore.load(inputStream, password);
             return Optional.of(keyStore);
+
         } catch (Exception e) {
-            System.err.printf("Unable to load keystore from classpath: %s%n", e.getMessage());
+            ApiLogger.error("Unable to load keystore from classpath: %s%n", e.getMessage());
             return Optional.empty();
         }
     }
@@ -88,10 +91,9 @@ public final class KeyStoreManager {
                 ks.load(stream, keyStorePassword.toCharArray());
                 return ks;
             } catch (Exception e) {
-                System.err.printf(
-                        "Unable to load keystore from javax.net.ssl.keyStore: %s%n",
-                        e.getMessage()
-                );
+
+                ApiLogger.error("Unable to load keystore from javax.net.ssl.keyStore: %s%n",
+                        e.getMessage());
             }
         }
 
@@ -110,7 +112,7 @@ public final class KeyStoreManager {
             char[] password = getRequiredEnv(ACCESS_TOKEN_SECRET).toCharArray();
             return Optional.of(loadKeyStore().getKey(alias, password));
         } catch (Exception e) {
-            System.err.printf("Failed to retrieve access token key: %s%n", e.getMessage());
+            ApiLogger.error("Failed to retrieve access token key: %s%n", e.getMessage());
             return Optional.empty();
         }
     }
@@ -126,7 +128,7 @@ public final class KeyStoreManager {
             char[] password = getRequiredEnv(REFRESH_TOKEN_SECRET).toCharArray();
             return Optional.of(loadKeyStore().getKey(alias, password));
         } catch (Exception e) {
-            System.err.printf("Failed to retrieve refresh token key: %s%n", e.getMessage());
+            ApiLogger.error("Failed to retrieve refresh token key: %s%n", e.getMessage());
             return Optional.empty();
         }
     }
@@ -140,7 +142,6 @@ public final class KeyStoreManager {
      */
     private String getRequiredEnv(String name) {
 
-        String env =System.getenv(name);
         return Objects.requireNonNull(
                 System.getenv(name),
                 () -> "Environment variable " + name + " is required but not set"

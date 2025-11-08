@@ -21,7 +21,7 @@ import java.util.UUID;
 
 /**
  * Handles JWT token generation, validation, and claims extraction.
- * Provides secure management of both access and refresh tokens with separate algorithms.
+ * Provides secure management of both access and refresh tokens.p12 with separate algorithms.
  */
 @Component
 public final class JWTProvider {
@@ -49,10 +49,6 @@ public final class JWTProvider {
                 .get().getConfigValue());
         refreshTokenExpirationMs = Long.valueOf(configurationService.findByConfigKey(REFRESH_EXPIRATION_MS)
                 .get().getConfigValue());
-
-        ApiLogger.debug("JWTProvider.initialize", "Error loading accessTokenExpirationMs configuration", accessTokenExpirationMs);
-        ApiLogger.debug("JWTProvider.initialize", "Error refreshTokenExpirationMs filter configuration", refreshTokenExpirationMs);
-
         KeyStoreManager keyStoreManager = new KeyStoreManager();
         // Try keystore-based keys first
         var accessKeyOpt = keyStoreManager.retrieveAccessTokenKey();
@@ -68,7 +64,7 @@ public final class JWTProvider {
                 accessTokenAlgorithm = Algorithm.HMAC256(accessSecret);
                 refreshTokenAlgorithm = Algorithm.HMAC256(refreshSecret);
             } else {
-                throw new IllegalStateException("Access/Refresh token secrets not available: keystore and env fallback missing");
+                ApiLogger.error("Access/Refresh token secrets not available: keystore and env fallback missing");
             }
         }
     }
@@ -76,9 +72,9 @@ public final class JWTProvider {
     /* ========== Token Generation Methods ========== */
 
     /**
-     * Generates a pair of JWT tokens (access and refresh tokens) using configured claims.
+     * Generates a pair of JWT tokens.p12 (access and refresh tokens.p12) using configured claims.
      *
-     * @return Token object containing both access and refresh tokens
+     * @return Token object containing both access and refresh tokens.p12
      * @throws IllegalStateException if required configuration is not initialized
      */
     public Token generateToken() {
@@ -208,7 +204,7 @@ public final class JWTProvider {
     }
 
     /**
-     * Adds a claim to be included in generated tokens.
+     * Adds a claim to be included in generated tokens.p12.
      *
      * @param key Claim key
      * @param value Claim value

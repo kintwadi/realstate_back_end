@@ -185,7 +185,7 @@ public class AuthController {
                     HttpStatus.INTERNAL_SERVER_ERROR);
             }
             
-            return ApplicationResponse.success("Full login flow successful - tokens generated");
+            return ApplicationResponse.success("Full login flow successful - tokens.p12 generated");
             
         } catch (Exception e) {
             return ApplicationResponse.error(500, "Error: " + e.getMessage() + " - " + e.getClass().getSimpleName(), HttpStatus.INTERNAL_SERVER_ERROR);

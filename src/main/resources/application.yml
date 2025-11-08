@@ -5,6 +5,28 @@ server:
   port: ${SERVER_PORT:8082}
   servlet:
     context-path: /imovel
+  security:
+    # Protected endpoints require valid JWT token
+    protected-endpoints:
+      - /api/secure/*
+      - /api/users/*
+      - /api/users
+      - /api/admin/*
+      - /api/payments/*
+      - /api/subscriptions/*
+      - /api/subscriptions/subscribe
+      - /api/bookings/*
+      - /api/bookings
+      - /api/media/upload
+      - /api/media/remove
+    # Excluded endpoints - no JWT required
+    excluded-endpoints:
+      - /api/public/*
+      - /auth/login
+      - /api/auth/login
+      - /api/webhooks/events/*
+      - /api/media/all
+      - /api/media/find-by-id
 
 spring:
   profiles:
@@ -38,7 +60,6 @@ appli:
   name: Imovel API
 app:
   version: 1.0.0
-
 
 # AWS Configuration
 aws:

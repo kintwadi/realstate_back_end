@@ -1262,8 +1262,3 @@ function Invoke-ApiRequestWithErrorHandling {
 
 The Imovel Authentication API provides a robust, secure, and scalable authentication system with comprehensive PowerShell support. This guide covers all aspects of authentication, from basic login/logout to advanced security features like token rotation and device management.
 
-For additional support or questions, please refer to the main API documentation or contact the development team.
-
-**Last Updated:** January 15, 2024  
-**API Version:** 1.0  
-**Guide Version:** 1.0

@@ -1,22 +1,6 @@
-SETUP KEYSTORE ENV VARIABLES IN YOUR workspace.xml or your OS
-  <envs>
-        <env name="ENV_ACCESS_TOKEN_ALIAS" value="imovel_access_token_alias" />
-        <env name="ENV_ACCESS_TOKEN_PASS" value="@Imovel!432" />
-        <env name="ENV_REFRESH_TOKEN_ALIAS" value="imovel_refresh_token_alias" />
-        <env name="ENV_REFRESH_TOKEN_PASS" value="@Imovel!432" />
-        <env name="ENV_KEYSTORE_PASS" value="@Imovel!432" />
+stripe listen --forward-to http://localhost:8080/imovel/api/webhooks/events
 
-        <env name="RDS_HOSTNAME" value="imovelpostgres.clmi6esmoyzi.eu-central-1.rds.amazonaws.com" />
-        <env name="RDS_PORT" value="5432" />
-        <env name="RDS_DB_NAME" value="imovel_db" />
-        <env name="RDS_USERNAME" value="postgres" />
-        <env name="RDS_PASSWORD" value="postgres" />
-
- </envs>
-
- stripe listen --forward-to http://localhost:8080/imovel/api/webhooks/events
-
- stripe listen --forward-to  http://imovel.eu-central-1.elasticbeanstalk.com/imovel/api/webhooks/events
+stripe listen --forward-to  http://imovel.eu-central-1.elasticbeanstalk.com/imovel/api/webhooks/events
 
 # Use defaults (build: kintwadi/imovel-api:v1.0.0, push: kintwadi/imovel_api_dev:latest)
 docker_run.bat
