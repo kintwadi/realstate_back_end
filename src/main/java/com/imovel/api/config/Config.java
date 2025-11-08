@@ -14,7 +14,10 @@ public class Config {
         CorsConfiguration configuration = new CorsConfiguration();
         // Specify allowed origins (Angular dev server, production frontend URL)
         // Use "*" cautiously for development only, be specific in production
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://127.0.0.1:4200", "http://pot-frontend.s3-website.eu-north-1.amazonaws.com" ));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000",
+                "http://127.0.0.1:4200",
+                "http://pot-frontend.s3-website.eu-north-1.amazonaws.com",
+                "https://imovel-api-dev-development.onrender.com/imovel/api" ));
         // Specify allowed HTTP methods
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")); // Crucial: Include OPTIONS
         // Specify allowed headers
