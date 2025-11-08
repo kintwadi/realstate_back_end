@@ -68,7 +68,7 @@
         </Logger>
 
         <!-- Root Logger - simplified to prevent loops -->
-        <Root level="info" includeLocation="false">
+        <Root level="info" includeLocation="true">
             <AppenderRef ref="AsyncConsole"/>
         </Root>
     </Loggers>

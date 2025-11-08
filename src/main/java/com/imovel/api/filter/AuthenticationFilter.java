@@ -99,6 +99,7 @@ public class AuthenticationFilter implements Filter {
 
         String path = httpRequest.getRequestURI().substring(httpRequest.getContextPath().length());
 
+
         // Check if path is excluded
         if (isPathMatch(path, excludedEndpoints)) {
             chain.doFilter(request, response);
