@@ -18,7 +18,6 @@ src/main/resources/private_file
 .idea/
 *.iml
 *.iws
-*.xml
 *.ipr
 .vscode/
 *.swp
