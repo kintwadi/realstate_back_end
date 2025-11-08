@@ -70,12 +70,12 @@ public class TokenService {
     }
 
     /**
-     * Authenticates a user and generates new tokens
+     * Authenticates a user and generates new tokens.p12
      *
      * Steps:
-     * 1. Enforce token limits by revoking excess tokens
-     * 2. Revoke all existing active refresh tokens for the user
-     * 3. Generate new access and refresh tokens
+     * 1. Enforce token limits by revoking excess tokens.p12
+     * 2. Revoke all existing active refresh tokens.p12 for the user
+     * 3. Generate new access and refresh tokens.p12
      * 4. Save the new refresh token to database
      * 5. Return the token pair wrapped in StandardResponse
      *
@@ -113,7 +113,7 @@ public class TokenService {
 
             Instant now = Instant.now();
             revokeAllUserTokens(optionalUser.get().getId(), now);
-            ApiLogger.debug("TokenService.login", "Previous tokens revoked");
+            ApiLogger.debug("TokenService.login", "Previous tokens.p12 revoked");
 
             Token tokens = generateTokensForUser(optionalUser.get());
             ApiLogger.debug("TokenService.login", "Tokens generated successfully");
@@ -180,7 +180,7 @@ public class TokenService {
     }
 
     /**
-     * Revokes all refresh tokens for a user (logout all devices)
+     * Revokes all refresh tokens.p12 for a user (logout all devices)
      *
      * @param userId The user ID
      * @return StandardResponse indicating success or failure
@@ -191,7 +191,7 @@ public class TokenService {
     }
 
     /**
-     * Scheduled task to clean up expired refresh tokens
+     * Scheduled task to clean up expired refresh tokens.p12
      * Runs daily based on CLEANUP_INTERVAL_MS
      */
     @Scheduled(fixedRate = CLEANUP_INTERVAL_MS)
@@ -202,13 +202,13 @@ public class TokenService {
     // ============ PRIVATE HELPER METHODS ============ //
 
     /**
-     * Generates JWT tokens for the given user with appropriate claims
-     * @param user The user to generate tokens for
+     * Generates JWT tokens.p12 for the given user with appropriate claims
+     * @param user The user to generate tokens.p12 for
      * @return Generated token pair
      */
     private Token generateTokensForUser(User user) {
         ensureJwtInitialized();
-        ApiLogger.debug("TokenService.generateTokensForUser", "Generating tokens for user", 
+        ApiLogger.debug("TokenService.generateTokensForUser", "Generating tokens.p12 for user",
             Map.of("userId", user.getId(), "username", user.getName()));
         
         String roleName = "TENANT"; // Default role for users without assigned roles
@@ -295,7 +295,7 @@ public class TokenService {
     }
 
     /**
-     * Revokes all tokens for a specific user
+     * Revokes all tokens.p12 for a specific user
      * @param userId The user ID
      * @param revocationTime Time of revocation
      */
@@ -304,7 +304,7 @@ public class TokenService {
     }
 
     /**
-     * Marks previous tokens as superseded when generating new ones
+     * Marks previous tokens.p12 as superseded when generating new ones
      * @param userId The user ID
      * @param currentTokenId The ID of the current valid token
      */
@@ -323,7 +323,7 @@ public class TokenService {
     }
 
     /**
-     * Enforces maximum active tokens per user by revoking oldest tokens when limit exceeded
+     * Enforces maximum active tokens.p12 per user by revoking oldest tokens.p12 when limit exceeded
      * @param userId The user ID to check
      * @throws TokenRefreshException if token limit is exceeded
      */
@@ -340,8 +340,8 @@ public class TokenService {
     }
 
     /**
-     * Retrieves the maximum allowed refresh tokens per user from configuration
-     * @return Maximum allowed tokens
+     * Retrieves the maximum allowed refresh tokens.p12 per user from configuration
+     * @return Maximum allowed tokens.p12
      */
     private int getMaxRefreshTokensPerUser() {
         return Integer.parseInt(configurationService
@@ -350,9 +350,9 @@ public class TokenService {
                 .getConfigValue());
     }
     /**
-     * Revokes the oldest tokens for a user when they exceed the limit
+     * Revokes the oldest tokens.p12 for a user when they exceed the limit
      * @param userId The user ID
-     * @param numberOfTokensToRevoke Number of tokens to revoke
+     * @param numberOfTokensToRevoke Number of tokens.p12 to revoke
      */
     private void revokeExcessTokens(Long userId, long numberOfTokensToRevoke) {
         List<RefreshToken> oldestTokens = refreshTokenRepository

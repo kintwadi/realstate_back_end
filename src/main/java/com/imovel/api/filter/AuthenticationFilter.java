@@ -1,9 +1,9 @@
 package com.imovel.api.filter;
 
+import com.imovel.api.config.base.EndPointConfig;
 import com.imovel.api.logger.ApiLogger;
 import com.imovel.api.security.token.JWTProvider;
 import com.imovel.api.services.ConfigurationService;
-import com.imovel.api.util.ResourceLoader;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -35,6 +35,9 @@ public class AuthenticationFilter implements Filter {
     private boolean initialized = false;
 
     @Autowired
+    private EndPointConfig jwtSecurityConfig;
+
+    @Autowired
     JWTProvider jwtProcessor;
     @Autowired
     private ConfigurationService configurationService;
@@ -50,13 +53,17 @@ public class AuthenticationFilter implements Filter {
     {
         try {
             // Load configuration using ResourceLoader
-            ResourceLoader resourceLoader = new ResourceLoader();
+            //ManualResourceLoader resourceLoader = new ManualResourceLoader();
             // Get protected endpoints
-            protectedEndpoints = parseEndpoints(resourceLoader.getProperty("jwt.protected.endpoints"));
+            //protectedEndpoints = parseEndpoints(manualResourceLoader.getProperty("jwt.protected.endpoints"));
             // Get excluded endpoints
-            excludedEndpoints = parseEndpoints(resourceLoader.getProperty("jwt.excluded.endpoints"));
+            //excludedEndpoints = parseEndpoints(manualResourceLoader.getProperty("jwt.excluded.endpoints"));
 
-        } catch (IOException ex)
+            protectedEndpoints = jwtSecurityConfig.getProtectedEndpoints();
+
+            excludedEndpoints = jwtSecurityConfig.getExcludedEndpoints();
+
+        } catch (Exception ex)
         {
             ApiLogger.debug("JWTProvider.init", "Error loading filter configuration", ex.getMessage());
         }
@@ -98,7 +105,6 @@ public class AuthenticationFilter implements Filter {
         }
 
         String path = httpRequest.getRequestURI().substring(httpRequest.getContextPath().length());
-
 
         // Check if path is excluded
         if (isPathMatch(path, excludedEndpoints)) {

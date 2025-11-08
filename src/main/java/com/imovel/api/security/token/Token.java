@@ -14,7 +14,7 @@ public class Token implements Serializable {
 
     /**
      * Constructs a new Token instance with the provided access and refresh
-     * tokens.
+     * tokens.p12.
      *
      * @param accessToken The JWT access token used for authenticated requests.
      * @param refreshToken The refresh token used to obtain a new access token.

@@ -16,6 +16,7 @@ public class StartupConfigLoader {
     private SubscriptionPlanConfig subscriptionPlanConfig = new SubscriptionPlanConfig();
     private PermissionConfig permissionConfig = new PermissionConfig();
 
+
     // Getters and setters
     public Map<String, String> getDefaultConfig() {
         return defaultConfig;

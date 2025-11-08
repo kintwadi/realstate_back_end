@@ -21,7 +21,7 @@ public enum ApiCode {
     INVALID_REFRESH_TOKEN(2007, "Invalid refresh token", HttpStatus.UNAUTHORIZED),
     REFRESH_TOKEN_NOT_FOUND(2008, "Refresh token not found", HttpStatus.NOT_FOUND),
     REFRESH_TOKEN_NOT_EXPIRED(2009, "Refresh token not expired", HttpStatus.CONFLICT),
-    REFRESH_TOKEN_NOT_LIMITE_EXCEEDED(2010, "Token limit exceeded. Oldest tokens have been revoked.", HttpStatus.UNAUTHORIZED),
+    REFRESH_TOKEN_NOT_LIMITE_EXCEEDED(2010, "Token limit exceeded. Oldest tokens.p12 have been revoked.", HttpStatus.UNAUTHORIZED),
     REFRESH_TOKEN_EXPIRED(2011, "Refresh token  expired", HttpStatus.CONFLICT),
     REFRESH_TOKEN_FAILED(2012, "Refresh token  failed", HttpStatus.CONFLICT),
     // User Module Errors (2100-2199)
