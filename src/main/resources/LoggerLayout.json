@@ -18,11 +18,17 @@
 		"$resolver": "thread",
 		"field": "name"
 	},
-	"exception": {
-		"$resolver": "exception",
-		"field": "stackTrace",
-		"stringified": true
-	},
+  "location": {
+    "$resolver": "source",
+    "field": "location"
+  },
+   "exception": {
+    "$resolver": "exception",
+    "field": "stackTrace",
+    "stackTrace": {
+      "stringified": true
+    }
+  },
 	"marker": {
 		"$resolver": "mdc",
 		"key": "marker"
