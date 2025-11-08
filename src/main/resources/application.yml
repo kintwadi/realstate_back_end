@@ -1,0 +1,145 @@
+# Consolidated application configuration (from application.properties)
+# This file centralizes config while preserving current behavior.
+
+server:
+  port: ${SERVER_PORT:8082}
+  servlet:
+    context-path: /imovel
+
+spring:
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:default}
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    protocol: smtp
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+  config:
+    import: optional:classpath:endpoints.properties,optional:classpath:startup-config.yml,optional:classpath:application-payment.yml
+  jpa:
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
+        ejb:
+          use_class_enhancer: true
+
+# Application meta
+appli:
+  name: Imovel API
+app:
+  version: 1.0.0
+
+
+# AWS Configuration
+aws:
+  access-key: ${AWS_ACCESS_KEY}
+  secret-key: ${AWS_SECRET_KEY}
+  s3:
+    region: ${AWS_S3_REGION}
+    bucket-name: ${AWS_S3_BUCKET_NAME}
+
+# Storage provider (S3 by default; LOCAL for sqlite profile)
+storage:
+  type:
+    provider: ${STORAGE_TYPE_PROVIDER:S3}
+
+# API docs
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+
+# Rate Limiting
+resilience4j:
+  ratelimiter:
+    instances:
+      paymentProcessing:
+        limit-for-period: 10
+        limit-refresh-period: 60s
+        timeout-duration: 5s
+      paymentVerification:
+        limit-for-period: 20
+        limit-refresh-period: 60s
+        timeout-duration: 3s
+      paymentRefund:
+        limit-for-period: 5
+        limit-refresh-period: 60s
+        timeout-duration: 10s
+      webhook:
+        limit-for-period: 100
+        limit-refresh-period: 60s
+        timeout-duration: 1s
+
+# Monitoring and Metrics
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: never
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+  health:
+    db:
+      enabled: true
+    diskspace:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: imovel-api
+      environment: ${ENVIRONMENT:development}
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      percentiles:
+        http.server.requests: 0.5,0.95,0.99
+
+# Payment monitoring alerts
+payment:
+  monitoring:
+    alerts:
+      enabled: true
+      email:
+        enabled: true
+        recipients: ${MAIL_USERNAME}
+        from: ${MAIL_USERNAME}
+        subject: Imovel Payment System
+      thresholds:
+        failure-rate: 0.1
+        failure-count: 5
+        time-window: PT5M
+      cooldown:
+        failure-alert: PT15M
+        health-alert: PT30M
+        webhook-alert: PT10M
+        rate-limit-alert: PT5M
+
+# Profiles can be extended below if needed (default/sqlite/h2)
+---
+spring:
+  config:
+    activate:
+      on-profile: sqlite
+
+storage:
+  type:
+    provider: LOCAL
