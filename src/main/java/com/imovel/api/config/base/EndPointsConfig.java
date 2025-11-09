@@ -8,7 +8,7 @@ import java.util.List;
 
 @Configuration
 @ConfigurationProperties(prefix = "server.security")
-public class EndPointConfig {
+public class EndPointsConfig {
     
 
     private List<String> protectedEndpoints = new ArrayList<>();
@@ -16,7 +16,7 @@ public class EndPointConfig {
     private List<String> excludedEndpoints = new ArrayList<>();
     
     // Default constructor
-    public EndPointConfig() {
+    public EndPointsConfig() {
     }
     // Getters and Setters
     public List<String> getProtectedEndpoints() {

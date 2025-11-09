@@ -1,6 +1,6 @@
 package com.imovel.api.filter;
 
-import com.imovel.api.config.base.EndPointConfig;
+import com.imovel.api.config.base.EndPointsConfig;
 import com.imovel.api.logger.ApiLogger;
 import com.imovel.api.security.token.JWTProvider;
 import com.imovel.api.services.ConfigurationService;
@@ -35,7 +35,7 @@ public class AuthenticationFilter implements Filter {
     private boolean initialized = false;
 
     @Autowired
-    private EndPointConfig jwtSecurityConfig;
+    private EndPointsConfig jwtSecurityConfig;
 
     @Autowired
     JWTProvider jwtProcessor;
